@@ -40,6 +40,6 @@ public class LocalConnection {
 
 	public void join(LocalConnection other) {
 		this.other = other;
-		other.setOther(this);
+		this.other.setOther(this);
 	}
 }

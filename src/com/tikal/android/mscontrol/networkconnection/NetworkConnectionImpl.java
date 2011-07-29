@@ -23,6 +23,7 @@ import com.tikal.android.media.tx.MediaTx;
 import com.tikal.android.media.tx.VideoInfoTx;
 import com.tikal.android.mscontrol.MediaSessionConfig;
 import com.tikal.android.mscontrol.join.AudioJoinableStreamImpl;
+import com.tikal.android.mscontrol.join.JoinableStreamBase;
 import com.tikal.android.mscontrol.join.VideoJoinableStreamImpl;
 import com.tikal.media.format.MediaSpec;
 import com.tikal.media.format.PayloadSpec;
@@ -84,6 +85,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		if(mediaSessionConfig == null)
 			throw new MsControlException("Media Session Config are NULL");
 		this.mediaSessionConfig = mediaSessionConfig;
+		this.streams = new JoinableStreamBase[2];
 
 		// Process MediaConfigure and determinate media profiles
 		audioProfiles = getAudioProfiles(this.mediaSessionConfig);

@@ -8,18 +8,20 @@ import com.tikal.mscontrol.join.JoinableStream.StreamType;
 public class JoinableContainerImpl extends JoinableImpl implements
 		JoinableContainer {
 
-	protected JoinableStreamBase[] streams = new JoinableStreamBase[2];
+	protected JoinableStream[] streams;
 
 	@Override
 	public JoinableStream getJoinableStream(StreamType value)
 			throws MsControlException {
-		for (JoinableStreamBase s : streams) {
-			if (s.getType().equals(value)) {
+		if (streams == null)
+			return null;
+		
+		for (JoinableStream s : streams) {
+			if (s != null && s.getType().equals(value)) {
 				return s;
 			}
 		}
-		throw new MsControlException("Stream of type " + value
-				+ " is not supported");
+		return null;
 	}
 
 	@Override

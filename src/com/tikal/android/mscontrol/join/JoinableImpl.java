@@ -8,9 +8,6 @@ import org.apache.commons.logging.LogFactory;
 import com.tikal.mscontrol.MsControlException;
 import com.tikal.mscontrol.join.Joinable;
 
-
-
-
 public class JoinableImpl implements Joinable {
 
 	private static final Log log = LogFactory.getLog(JoinableImpl.class);
@@ -34,7 +31,8 @@ public class JoinableImpl implements Joinable {
 		Joinable[] joinees = new Joinable[connections.size()];
 
 		for (LocalConnection connection : connections) {
-			if (connection.getDirection().equals(direction)) {
+			if (connection.getDirection().equals(direction)
+					|| connection.getDirection().equals(Direction.DUPLEX)) {
 				joinees[i++] = connection.getJoinable();
 			}
 		}
@@ -43,10 +41,26 @@ public class JoinableImpl implements Joinable {
 	}
 
 	@Override
-	public void join(Direction direction, Joinable other)
-			throws MsControlException {
-		log.info("join: " + direction + " " + other);
+	public void join(Direction direction, Joinable other) throws MsControlException {
+		if (other == null)
+			throw new MsControlException("other is null.");
+		
+		// Search old join with other
+		LocalConnection connection = null;
+		for (LocalConnection conn : connections) {
+			if (conn.getJoinable().equals(other)) {
+				connection = conn;
+				break;
+			}
+		}
 
+		if (connection != null) {// Delete join to re-join
+			((JoinableImpl) connection.getOther().getJoinable()).connections.remove(connection
+					.getOther());
+			this.connections.remove(connection);
+		}
+
+		// join
 		LocalConnection connection1 = new LocalConnection(direction, other);
 
 		Direction dir2 = Direction.DUPLEX;
@@ -75,8 +89,9 @@ public class JoinableImpl implements Joinable {
 
 		if (connection == null)
 			throw new MsControlException("No connected: " + other);
-		
-		((JoinableImpl)connection.getOther().getJoinable()).connections.remove(connection.getOther());
+
+		((JoinableImpl) connection.getOther().getJoinable()).connections.remove(connection
+				.getOther());
 		this.connections.remove(connection);
 	}
 

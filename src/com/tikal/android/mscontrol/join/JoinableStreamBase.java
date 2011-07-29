@@ -5,7 +5,7 @@ import com.tikal.mscontrol.join.JoinableStream;
 
 public abstract class JoinableStreamBase extends JoinableImpl implements JoinableStream {
 
-	private com.tikal.mscontrol.join.JoinableContainer container;
+	private JoinableContainer container;
 	private StreamType type;
 	
 	protected JoinableStreamBase(JoinableContainer container, StreamType type) {
