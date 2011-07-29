@@ -22,7 +22,8 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 
 	private boolean isRecording = false;
 
-	public boolean isRecording() {
+	@Override
+	public boolean isStarted() {
 		return isRecording;
 	}
 

@@ -36,6 +36,11 @@ public class VideoRecorderComponent extends MediaComponentBase implements VideoR
 	public View getVideoSurfaceRx() {
 		return videoSurfaceRx;
 	}
+	
+	@Override
+	public boolean isStarted() {
+		return isRecording;
+	}
 
 	public VideoRecorderComponent(Parameters params) throws MsControlException {
 		if(params == null)

@@ -22,7 +22,8 @@ public class AudioPlayerComponent extends MediaComponentBase {
 
 	private AudioCapture audioCapture;
 
-	public boolean isPlaying() {
+	@Override
+	public boolean isStarted() {
 		if (audioCapture == null)
 			return false;
 		return audioCapture.isPlaying();

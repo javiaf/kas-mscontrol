@@ -31,8 +31,15 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	private int width;
 	private int height;
 	
+	
+	
 	public View getVideoSurfaceTx() {
 		return videoSurfaceTx;
+	}
+	
+	@Override
+	public boolean isStarted() {
+		return mCamera!=null;
 	}
 
 	public VideoPlayerComponent(Parameters params)

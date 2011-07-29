@@ -75,5 +75,8 @@ public interface MediaComponentAndroid extends MediaComponent {
 	 */
 	public static final Parameter DISPLAY_HEIGHT = new Parameter() {
 	};
+	
+	
+	public boolean isStarted();
 
 }
