@@ -15,8 +15,9 @@ import com.tikal.android.media.rx.VideoRx;
 import com.tikal.mscontrol.MsControlException;
 import com.tikal.mscontrol.Parameters;
 
-public class VideoRecorderComponent extends MediaComponentBase implements VideoRx {
-	
+public class VideoRecorderComponent extends MediaComponentBase implements
+		VideoRx {
+
 	private static final String LOG_TAG = "VideoRecorder";
 
 	private SurfaceView mVideoReceiveView;
@@ -36,27 +37,29 @@ public class VideoRecorderComponent extends MediaComponentBase implements VideoR
 	public View getVideoSurfaceRx() {
 		return videoSurfaceRx;
 	}
-	
+
 	@Override
 	public boolean isStarted() {
 		return isRecording;
 	}
 
 	public VideoRecorderComponent(Parameters params) throws MsControlException {
-		if(params == null)
+		if (params == null)
 			throw new MsControlException("Parameters are NULL");
-		
+
 		View surface = (View) params.get(VIEW_SURFACE);
-		if(surface == null)
-			throw new MsControlException("Params must have VideoRecorderComponent.VIEW_SURFACE param");
+		if (surface == null)
+			throw new MsControlException(
+					"Params must have VideoRecorderComponent.VIEW_SURFACE param");
 		Integer displayWidth = (Integer) params.get(DISPLAY_WIDTH);
-		if(displayWidth == null)
-			throw new MsControlException("Params must have VideoRecorderComponent.DISPLAY_WIDTH param");
+		if (displayWidth == null)
+			throw new MsControlException(
+					"Params must have VideoRecorderComponent.DISPLAY_WIDTH param");
 		Integer displayHeight = (Integer) params.get(DISPLAY_HEIGHT);
-		if(displayHeight == null)
-			throw new MsControlException("Params must have VideoRecorderComponent.DISPLAY_HEIGHT param");
-		
-		
+		if (displayHeight == null)
+			throw new MsControlException(
+					"Params must have VideoRecorderComponent.DISPLAY_HEIGHT param");
+
 		this.videoSurfaceRx = surface;
 		this.screenWidth = displayWidth;
 		this.screenHeight = displayHeight * 3 / 4;
@@ -72,23 +75,24 @@ public class VideoRecorderComponent extends MediaComponentBase implements VideoR
 	public void putVideoFrameRx(int[] rgb, int width, int height) {
 		if (!isRecording)
 			return;
-
 		if (rgb == null || rgb.length == 0)
 			return;
 
 		try {
 			if (mSurfaceReceive == null)
 				return;
+
 			canvas = mSurfaceReceive.lockCanvas(null);
 			if (canvas == null)
 				return;
 
-			Bitmap srcBitmap = Bitmap.createBitmap(rgb, width, height,
-					Bitmap.Config.ARGB_8888);
 			RectF dirty2 = new RectF(0, 0, screenWidth, screenHeight);
 
+			Bitmap srcBitmap = Bitmap.createBitmap(rgb, width, height,
+					Bitmap.Config.ARGB_8888);
+
 			canvas.drawBitmap(srcBitmap, null, dirty2, null);
-			
+
 			if (mSurfaceReceive == null)
 				return;
 			mSurfaceReceive.unlockCanvasAndPost(canvas);
