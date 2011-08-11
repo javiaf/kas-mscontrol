@@ -229,7 +229,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		this.height = videoProfile.getHeight();
 
 		mVideoView = (SurfaceView) videoSurfaceTx;
-		
+
 		final SurfaceHolder mHolder2 = mVideoView.getHolder();
 		mHolder2.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		mHolder2.addCallback(new Callback() {
@@ -285,47 +285,47 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 				}
 				parameters.setPreviewSize(width, height);
 				mCamera.setParameters(parameters);
-				
-				
-//				int result = 0;
-//				if (VERSION.SDK_INT < 9) {
-//					result = (360 + 90 - screenOrientation) % 360;
-////					mCamera.setDisplayOrientation(result);
-//
-//				} else {
-//
-//					android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
-//					android.hardware.Camera.getCameraInfo(0, info);
-//					int rotation = screenOrientation;
-//					int degrees = 0;
-//					switch (rotation) {
-//					case Surface.ROTATION_0:
-//						degrees = 0;
-//						break;
-//					case Surface.ROTATION_90:
-//						degrees = 90;
-//						break;
-//					case Surface.ROTATION_180:
-//						degrees = 180;
-//						break;
-//					case Surface.ROTATION_270:
-//						degrees = 270;
-//						break;
-//					}
-//
-//					if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-//						result = (info.orientation + degrees) % 360;
-//						result = (360 - result) % 360; // compensate the mirror
-//					} else { // back-facing
-//						result = (info.orientation - degrees + 360) % 360;
-//					}
-//					Log.d(LOG_TAG, "info.orientation = " + info.orientation
-//							+ "; Result-Orientation = " + result);
-//					mCamera.setDisplayOrientation(result);
-//
-//				}
-//				parameters.setRotation(result);
-//				mCamera.setParameters(parameters);
+
+				// int result = 0;
+				// if (VERSION.SDK_INT < 9) {
+				// result = (360 + 90 - screenOrientation) % 360;
+				// // mCamera.setDisplayOrientation(result);
+				//
+				// } else {
+				//
+				// android.hardware.Camera.CameraInfo info = new
+				// android.hardware.Camera.CameraInfo();
+				// android.hardware.Camera.getCameraInfo(0, info);
+				// int rotation = screenOrientation;
+				// int degrees = 0;
+				// switch (rotation) {
+				// case Surface.ROTATION_0:
+				// degrees = 0;
+				// break;
+				// case Surface.ROTATION_90:
+				// degrees = 90;
+				// break;
+				// case Surface.ROTATION_180:
+				// degrees = 180;
+				// break;
+				// case Surface.ROTATION_270:
+				// degrees = 270;
+				// break;
+				// }
+				//
+				// if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+				// result = (info.orientation + degrees) % 360;
+				// result = (360 - result) % 360; // compensate the mirror
+				// } else { // back-facing
+				// result = (info.orientation - degrees + 360) % 360;
+				// }
+				// Log.d(LOG_TAG, "info.orientation = " + info.orientation
+				// + "; Result-Orientation = " + result);
+				// mCamera.setDisplayOrientation(result);
+				//
+				// }
+				// parameters.setRotation(result);
+				// mCamera.setParameters(parameters);
 
 				try {
 
@@ -361,8 +361,10 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	@Override
 	public void stop() {
 		Log.d(LOG_TAG, "Stop");
-		mCamera.setPreviewCallback(null);
-		mCamera.stopPreview();
+		if (mCamera != null) {
+			mCamera.setPreviewCallback(null);
+			mCamera.stopPreview();
+		}
 	}
 
 }
