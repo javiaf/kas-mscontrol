@@ -4,6 +4,7 @@
 	<groupId>com.tikal.android</groupId>
 	<artifactId>tk-android-mscontrol</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>apklib</packaging>
 
 	<name>Android MSControl Library</name>
 	<description>MSControl implementation for Android.</description>
@@ -42,6 +43,12 @@
 			<artifactId>tk-mscontrol</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.android</groupId>
+			<artifactId>android</artifactId>
+			<version>2.3.3</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -55,6 +62,12 @@
 					<source>1.6</source>
 					<target>1.6</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+				<artifactId>maven-android-plugin</artifactId>
+				<version>3.0.0-alpha-2</version>
+				<extensions>true</extensions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
