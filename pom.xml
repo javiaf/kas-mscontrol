@@ -8,7 +8,7 @@
 
 	<name>Android MSControl Library</name>
 	<description>MSControl implementation for Android.</description>
-	<url>http://193.147.51.37/site/tk-android-mscontrol</url>
+	<url>http://repository.kurento.com/site/tk-android-mscontrol</url>
 	
 	<developers>
 		<developer>
@@ -85,7 +85,7 @@
 	<distributionManagement>
 		<site>
 			<id>maven-site</id>
-			<url>scp://193.147.51.37/var/www/site/tk-android-mscontrol/${project.version}</url>
+			<url>scp://repository.kurento.com/var/www/kurento/site/tk-android-mscontrol/${project.version}</url>
 		</site>
 	</distributionManagement>
 </project>
