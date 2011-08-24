@@ -1,22 +1,22 @@
-package com.tikal.android.mscontrol.networkconnection;
+package com.kurento.kas.mscontrol.networkconnection;
 
 import java.net.InetAddress;
 
-import com.tikal.android.mscontrol.join.JoinableContainerImpl;
-import com.tikal.media.format.SessionSpec;
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.networkconnection.NetworkConnection;
-import com.tikal.mscontrol.networkconnection.SdpPortManager;
+import com.kurento.commons.media.format.SessionSpec;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
+import com.kurento.commons.mscontrol.networkconnection.SdpPortManager;
+import com.kurento.kas.mscontrol.join.JoinableContainerImpl;
 
-public abstract class NetworkConnectionBase extends JoinableContainerImpl implements
-		NetworkConnection {
+public abstract class NetworkConnectionBase extends JoinableContainerImpl
+		implements NetworkConnection {
 
 	protected SdpPortManager sdpPortManager;
 
 	protected NetworkConnectionBase() {
 		sdpPortManager = new SdpPortManagerImpl(this);
 	}
-	
+
 	@Override
 	public SdpPortManager getSdpPortManager() throws MsControlException {
 		return sdpPortManager;

@@ -1,4 +1,4 @@
-package com.tikal.android.mscontrol.networkconnection;
+package com.kurento.kas.mscontrol.networkconnection;
 
 /**
  * ConnectionType indicate the type of network connection.

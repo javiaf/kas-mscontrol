@@ -1,12 +1,12 @@
-package com.tikal.android.mscontrol;
+package com.kurento.kas.mscontrol;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.tikal.mscontrol.Parameter;
-import com.tikal.mscontrol.Parameters;
+import com.kurento.commons.mscontrol.Parameter;
+import com.kurento.commons.mscontrol.Parameters;
 
 /**
  * 

@@ -1,7 +1,7 @@
-package com.tikal.android.mscontrol.join;
+package com.kurento.kas.mscontrol.join;
 
-import com.tikal.mscontrol.join.JoinableContainer;
-import com.tikal.mscontrol.join.JoinableStream;
+import com.kurento.commons.mscontrol.join.JoinableContainer;
+import com.kurento.commons.mscontrol.join.JoinableStream;
 
 public abstract class JoinableStreamBase extends JoinableImpl implements JoinableStream {
 

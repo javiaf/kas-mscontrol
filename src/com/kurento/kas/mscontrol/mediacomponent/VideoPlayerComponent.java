@@ -1,4 +1,4 @@
-package com.tikal.android.mscontrol.mediacomponent;
+package com.kurento.kas.mscontrol.mediacomponent;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,17 +9,16 @@ import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.os.Build.VERSION;
 import android.util.Log;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.view.View;
 
-import com.tikal.android.media.profiles.VideoProfile;
-import com.tikal.android.mscontrol.join.VideoJoinableStreamImpl;
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.Parameters;
-import com.tikal.mscontrol.join.Joinable;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.Parameters;
+import com.kurento.commons.mscontrol.join.Joinable;
+import com.kurento.kas.media.profiles.VideoProfile;
+import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
 
 public class VideoPlayerComponent extends MediaComponentBase implements
 		PreviewCallback {

@@ -1,12 +1,12 @@
-package com.tikal.android.mscontrol.networkconnection;
+package com.kurento.kas.mscontrol.networkconnection;
 
 import android.util.Log;
 
-import com.tikal.android.media.AudioCodecType;
-import com.tikal.android.media.VideoCodecType;
-import com.tikal.media.format.MediaSpec;
-import com.tikal.media.format.SessionSpec;
-import com.tikal.sdp.enums.MediaType;
+import com.kurento.commons.media.format.MediaSpec;
+import com.kurento.commons.media.format.SessionSpec;
+import com.kurento.commons.sdp.enums.MediaType;
+import com.kurento.kas.media.AudioCodecType;
+import com.kurento.kas.media.VideoCodecType;
 
 /**
  * 
@@ -55,7 +55,7 @@ public class RTPInfo {
 		return audioPayloadType;
 	}
 
-	public RTPInfo(SessionSpec se){ //throws NoSuchMediaInfoException {
+	public RTPInfo(SessionSpec se) { // throws NoSuchMediaInfoException {
 		try {
 			this.dstIp = se.getOriginAddress();
 
@@ -70,8 +70,9 @@ public class RTPInfo {
 									+ ms.getPayloadList().get(0)
 											.getEncodingName());
 					try {
-						this.audioCodecType = AudioCodecType.getCodecTypeFromName(ms.getPayloadList()
-								.get(0).getEncodingName());
+						this.audioCodecType = AudioCodecType
+								.getCodecTypeFromName(ms.getPayloadList()
+										.get(0).getEncodingName());
 					} catch (Exception e) {
 						Log.d(LOG_TAG, e.toString());
 						e.printStackTrace();
@@ -87,8 +88,9 @@ public class RTPInfo {
 									+ ms.getPayloadList().get(0)
 											.getEncodingName());
 					try {
-						this.videoCodecType = VideoCodecType.getCodecTypeFromName(ms.getPayloadList()
-								.get(0).getEncodingName());
+						this.videoCodecType = VideoCodecType
+								.getCodecTypeFromName(ms.getPayloadList()
+										.get(0).getEncodingName());
 					} catch (Exception e) {
 						Log.d(LOG_TAG, e.toString());
 						e.printStackTrace();
@@ -98,8 +100,8 @@ public class RTPInfo {
 				}
 			}
 		} catch (IndexOutOfBoundsException ioobe) {
-//			throw new NoSuchMediaInfoException(
-//					"No such media info in SessionSpec object");
+			// throw new NoSuchMediaInfoException(
+			// "No such media info in SessionSpec object");
 		}
 	}
 

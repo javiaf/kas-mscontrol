@@ -1,24 +1,24 @@
-package com.tikal.android.mscontrol;
+package com.kurento.kas.mscontrol;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
 
 import android.util.Log;
 
-import com.tikal.android.media.AudioCodecType;
-import com.tikal.android.media.VideoCodecType;
-import com.tikal.android.mscontrol.mediacomponent.AudioPlayerComponent;
-import com.tikal.android.mscontrol.mediacomponent.AudioRecorderComponent;
-import com.tikal.android.mscontrol.mediacomponent.MediaComponentAndroid;
-import com.tikal.android.mscontrol.mediacomponent.VideoPlayerComponent;
-import com.tikal.android.mscontrol.mediacomponent.VideoRecorderComponent;
-import com.tikal.android.mscontrol.networkconnection.ConnectionType;
-import com.tikal.android.mscontrol.networkconnection.NetworkConnectionImpl;
-import com.tikal.mscontrol.Configuration;
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.Parameters;
-import com.tikal.mscontrol.mediacomponent.MediaComponent;
-import com.tikal.mscontrol.networkconnection.NetworkConnection;
+import com.kurento.commons.mscontrol.Configuration;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.Parameters;
+import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
+import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
+import com.kurento.kas.media.AudioCodecType;
+import com.kurento.kas.media.VideoCodecType;
+import com.kurento.kas.mscontrol.mediacomponent.AudioPlayerComponent;
+import com.kurento.kas.mscontrol.mediacomponent.AudioRecorderComponent;
+import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
+import com.kurento.kas.mscontrol.mediacomponent.VideoPlayerComponent;
+import com.kurento.kas.mscontrol.mediacomponent.VideoRecorderComponent;
+import com.kurento.kas.mscontrol.networkconnection.ConnectionType;
+import com.kurento.kas.mscontrol.networkconnection.NetworkConnectionImpl;
 
 public class MediaSessionImpl implements MediaSessionAndroid {
 

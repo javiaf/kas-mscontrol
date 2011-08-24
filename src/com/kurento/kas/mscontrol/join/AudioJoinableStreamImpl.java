@@ -1,19 +1,19 @@
-package com.tikal.android.mscontrol.join;
+package com.kurento.kas.mscontrol.join;
 
-import com.tikal.android.media.rx.AudioRx;
-import com.tikal.android.media.tx.AudioInfoTx;
-import com.tikal.android.media.tx.MediaTx;
-import com.tikal.android.mscontrol.mediacomponent.AudioSink;
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.join.Joinable;
-import com.tikal.mscontrol.join.JoinableContainer;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.join.Joinable;
+import com.kurento.commons.mscontrol.join.JoinableContainer;
+import com.kurento.kas.media.rx.AudioRx;
+import com.kurento.kas.media.tx.AudioInfoTx;
+import com.kurento.kas.media.tx.MediaTx;
+import com.kurento.kas.mscontrol.mediacomponent.AudioSink;
 
 public class AudioJoinableStreamImpl extends JoinableStreamBase implements
 		AudioSink, AudioRx {
 
 	private AudioInfoTx audioInfo;
 
-	//TODO Use JoinEvent?
+	// TODO Use JoinEvent?
 	public AudioInfoTx getAudioInfoTx() {
 		return audioInfo;
 	}

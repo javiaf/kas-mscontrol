@@ -1,4 +1,4 @@
-package com.tikal.android.mscontrol.mediacomponent;
+package com.kurento.kas.mscontrol.mediacomponent;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -11,9 +11,9 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
-import com.tikal.android.media.rx.VideoRx;
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.Parameters;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.Parameters;
+import com.kurento.kas.media.rx.VideoRx;
 
 public class VideoRecorderComponent extends MediaComponentBase implements
 		VideoRx {

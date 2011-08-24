@@ -1,7 +1,7 @@
-package com.tikal.android.mscontrol.join;
+package com.kurento.kas.mscontrol.join;
 
-import com.tikal.mscontrol.join.Joinable;
-import com.tikal.mscontrol.join.Joinable.Direction;
+import com.kurento.commons.mscontrol.join.Joinable;
+import com.kurento.commons.mscontrol.join.Joinable.Direction;
 
 public class LocalConnection {
 

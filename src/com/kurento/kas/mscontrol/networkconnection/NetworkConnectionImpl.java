@@ -1,4 +1,4 @@
-package com.tikal.android.mscontrol.networkconnection;
+package com.kurento.kas.mscontrol.networkconnection;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -9,29 +9,29 @@ import javax.sdp.SdpException;
 
 import android.util.Log;
 
-import com.tikal.android.media.AudioCodecType;
-import com.tikal.android.media.MediaPortManager;
-import com.tikal.android.media.VideoCodecType;
-import com.tikal.android.media.profiles.AudioProfile;
-import com.tikal.android.media.profiles.MediaQuality;
-import com.tikal.android.media.profiles.VideoProfile;
-import com.tikal.android.media.rx.AudioRx;
-import com.tikal.android.media.rx.MediaRx;
-import com.tikal.android.media.rx.VideoRx;
-import com.tikal.android.media.tx.AudioInfoTx;
-import com.tikal.android.media.tx.MediaTx;
-import com.tikal.android.media.tx.VideoInfoTx;
-import com.tikal.android.mscontrol.MediaSessionConfig;
-import com.tikal.android.mscontrol.join.AudioJoinableStreamImpl;
-import com.tikal.android.mscontrol.join.JoinableStreamBase;
-import com.tikal.android.mscontrol.join.VideoJoinableStreamImpl;
-import com.tikal.media.format.MediaSpec;
-import com.tikal.media.format.PayloadSpec;
-import com.tikal.media.format.SessionSpec;
-import com.tikal.media.format.SpecTools;
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.join.JoinableStream.StreamType;
-import com.tikal.sdp.enums.MediaType;
+import com.kurento.commons.media.format.MediaSpec;
+import com.kurento.commons.media.format.PayloadSpec;
+import com.kurento.commons.media.format.SessionSpec;
+import com.kurento.commons.media.format.SpecTools;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.join.JoinableStream.StreamType;
+import com.kurento.commons.sdp.enums.MediaType;
+import com.kurento.kas.media.AudioCodecType;
+import com.kurento.kas.media.MediaPortManager;
+import com.kurento.kas.media.VideoCodecType;
+import com.kurento.kas.media.profiles.AudioProfile;
+import com.kurento.kas.media.profiles.MediaQuality;
+import com.kurento.kas.media.profiles.VideoProfile;
+import com.kurento.kas.media.rx.AudioRx;
+import com.kurento.kas.media.rx.MediaRx;
+import com.kurento.kas.media.rx.VideoRx;
+import com.kurento.kas.media.tx.AudioInfoTx;
+import com.kurento.kas.media.tx.MediaTx;
+import com.kurento.kas.media.tx.VideoInfoTx;
+import com.kurento.kas.mscontrol.MediaSessionConfig;
+import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
+import com.kurento.kas.mscontrol.join.JoinableStreamBase;
+import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
 
 /**
  * 
@@ -42,15 +42,12 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	private static final long serialVersionUID = 1L;
 	public final static String LOG_TAG = "NW";
-	
-	
+
 	private MediaSessionConfig mediaSessionConfig;
-	
 
 	private ArrayList<AudioProfile> audioProfiles;
 	private ArrayList<VideoProfile> videoProfiles;
-	
-	
+
 	private SessionSpec localSessionSpec;
 	private SessionSpec remoteSessionSpec;
 
@@ -82,7 +79,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			throws MsControlException {
 		super();
 		Log.d(LOG_TAG, "ON NEW mediaSessionConfig: " + this.mediaSessionConfig);
-		if(mediaSessionConfig == null)
+		if (mediaSessionConfig == null)
 			throw new MsControlException("Media Session Config are NULL");
 		this.mediaSessionConfig = mediaSessionConfig;
 		this.streams = new JoinableStreamBase[2];
@@ -90,7 +87,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		// Process MediaConfigure and determinate media profiles
 		audioProfiles = getAudioProfiles(this.mediaSessionConfig);
 		videoProfiles = getVideoProfiles(this.mediaSessionConfig);
-		
+
 		Log.d(LOG_TAG, "Take ports");
 		if (videoPort == -1)
 			videoPort = MediaPortManager.takeVideoLocalPort();
@@ -119,24 +116,26 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			sdpAudio = SpecTools.filterMediaByType(localSessionSpec, "audio")
 					.toString();
 
-		
 		AudioCodecType audioCodecType = rtpInfo.getAudioCodecType();
-		AudioProfile  audioProfile = AudioProfile.getAudioProfileFromAudioCodecType(audioCodecType);
+		AudioProfile audioProfile = AudioProfile
+				.getAudioProfileFromAudioCodecType(audioCodecType);
 		if (audioProfiles != null && audioProfile != null) {
 			AudioInfoTx audioInfo = new AudioInfoTx(audioProfile);
-			audioInfo.setOut( rtpInfo.getAudioRTPDir() );
-			audioInfo.setPayloadType( rtpInfo.getAudioPayloadType() );
+			audioInfo.setOut(rtpInfo.getAudioRTPDir());
+			audioInfo.setPayloadType(rtpInfo.getAudioPayloadType());
 			audioInfo.setFrameSize(MediaTx.initAudio(audioInfo));
 			if (audioInfo.getFrameSize() < 0) {
 				Log.d(LOG_TAG, "Error in initAudio");
 				MediaTx.finishAudio();
 				return;
 			}
-			this.streams[0] = new AudioJoinableStreamImpl(this, StreamType.audio, audioInfo);
+			this.streams[0] = new AudioJoinableStreamImpl(this,
+					StreamType.audio, audioInfo);
 		}
-		
+
 		VideoCodecType videoCodecType = rtpInfo.getVideoCodecType();
-		VideoProfile  videoProfile = VideoProfile.getVideoProfileFromVideoCodecType(videoCodecType);
+		VideoProfile videoProfile = VideoProfile
+				.getVideoProfileFromVideoCodecType(videoCodecType);
 		if (videoProfiles != null && videoProfile != null) {
 			VideoInfoTx videoInfo = new VideoInfoTx(videoProfile);
 			videoInfo.setOut(rtpInfo.getVideoRTPDir());
@@ -146,9 +145,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				Log.d(LOG_TAG, "Error in initVideo");
 				MediaTx.finishVideo();
 			}
-			this.streams[1] = new VideoJoinableStreamImpl(this, StreamType.video, videoProfile);
+			this.streams[1] = new VideoJoinableStreamImpl(this,
+					StreamType.video, videoProfile);
 		}
-		
+
 		if (!sdpVideo.equals(""))
 			(new VideoRxThread()).start();
 		if (!sdpAudio.equals(""))
@@ -256,7 +256,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	@Override
 	public InetAddress getLocalAddress() {
 		Log.d(LOG_TAG, "mediaSessionConfig: " + this.mediaSessionConfig);
-		Log.d(LOG_TAG, "mediaSessionConfig.getLocalAddress(): " + this.mediaSessionConfig.getLocalAddress());
+		Log.d(LOG_TAG, "mediaSessionConfig.getLocalAddress(): "
+				+ this.mediaSessionConfig.getLocalAddress());
 		return this.mediaSessionConfig.getLocalAddress();
 	}
 
@@ -267,7 +268,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			MediaRx.startAudioRx(sdpAudio, (AudioRx) streams[0]);
 		}
 	}
-	
+
 	private class VideoRxThread extends Thread {
 		@Override
 		public void run() {
@@ -275,10 +276,11 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			MediaRx.startVideoRx(sdpVideo, (VideoRx) streams[1]);
 		}
 	}
-	
 
-	private ArrayList<AudioProfile> getAudioProfiles(MediaSessionConfig mediaSessionConfig) {
-		ArrayList<AudioCodecType> audioCodecs = mediaSessionConfig.getAudioCodecs();
+	private ArrayList<AudioProfile> getAudioProfiles(
+			MediaSessionConfig mediaSessionConfig) {
+		ArrayList<AudioCodecType> audioCodecs = mediaSessionConfig
+				.getAudioCodecs();
 		if (audioCodecs == null)
 			return null;
 
@@ -286,7 +288,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		// Discard phase
 		for (AudioProfile ap : AudioProfile.values()) {
 			if (MediaQuality.HEIGH.equals(ap.getMediaQuality())
-					&& !ConnectionType.WIFI.equals(mediaSessionConfig.getConnectionType()))
+					&& !ConnectionType.WIFI.equals(mediaSessionConfig
+							.getConnectionType()))
 				continue;
 			for (AudioCodecType act : audioCodecs) {
 				if (act.equals(ap.getAudioCodecType()))
@@ -300,8 +303,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		return audioProfiles;
 	}
 
-	private ArrayList<VideoProfile> getVideoProfiles(MediaSessionConfig mediaSessionConfig) {
-		ArrayList<VideoCodecType> videoCodecs = mediaSessionConfig.getVideoCodecs();
+	private ArrayList<VideoProfile> getVideoProfiles(
+			MediaSessionConfig mediaSessionConfig) {
+		ArrayList<VideoCodecType> videoCodecs = mediaSessionConfig
+				.getVideoCodecs();
 		if (videoCodecs == null)
 			return null;
 
@@ -309,7 +314,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		// Discard phase
 		for (VideoProfile vp : VideoProfile.values()) {
 			if (MediaQuality.HEIGH.equals(vp.getMediaQuality())
-					&& !ConnectionType.WIFI.equals(mediaSessionConfig.getConnectionType()))
+					&& !ConnectionType.WIFI.equals(mediaSessionConfig
+							.getConnectionType()))
 				continue;
 			for (VideoCodecType vct : videoCodecs) {
 				if (vct.equals(vp.getVideoCodecType()))

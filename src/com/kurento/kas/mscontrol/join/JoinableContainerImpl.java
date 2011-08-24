@@ -1,9 +1,9 @@
-package com.tikal.android.mscontrol.join;
+package com.kurento.kas.mscontrol.join;
 
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.join.JoinableContainer;
-import com.tikal.mscontrol.join.JoinableStream;
-import com.tikal.mscontrol.join.JoinableStream.StreamType;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.join.JoinableContainer;
+import com.kurento.commons.mscontrol.join.JoinableStream;
+import com.kurento.commons.mscontrol.join.JoinableStream.StreamType;
 
 public class JoinableContainerImpl extends JoinableImpl implements
 		JoinableContainer {
@@ -15,7 +15,7 @@ public class JoinableContainerImpl extends JoinableImpl implements
 			throws MsControlException {
 		if (streams == null)
 			return null;
-		
+
 		for (JoinableStream s : streams) {
 			if (s != null && s.getType().equals(value)) {
 				return s;

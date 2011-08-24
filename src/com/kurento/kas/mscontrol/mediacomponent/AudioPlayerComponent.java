@@ -1,14 +1,14 @@
-package com.tikal.android.mscontrol.mediacomponent;
+package com.kurento.kas.mscontrol.mediacomponent;
 
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.tikal.android.media.tx.AudioInfoTx;
-import com.tikal.android.mscontrol.join.AudioJoinableStreamImpl;
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.join.Joinable;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.join.Joinable;
+import com.kurento.kas.media.tx.AudioInfoTx;
+import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
 
 public class AudioPlayerComponent extends MediaComponentBase {
 
@@ -62,10 +62,9 @@ public class AudioPlayerComponent extends MediaComponentBase {
 			if (j instanceof AudioJoinableStreamImpl) {
 				audioInfo = ((AudioJoinableStreamImpl) j).getAudioInfoTx();
 			}
-		if(audioInfo == null)
+		if (audioInfo == null)
 			throw new MsControlException("Cannot get audio info.");
-		
-		
+
 		this.frameSize = audioInfo.getFrameSize();
 		int frequency = audioInfo.getAudioProfile().getSampleRate();
 
@@ -77,8 +76,7 @@ public class AudioPlayerComponent extends MediaComponentBase {
 		buffer = new short[bufferSize];
 		audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, frequency,
 				channelConfiguration, audioEncoding, bufferSize);
-		
-		
+
 		audioCapture = new AudioCapture();
 		audioCapture.start();
 	}

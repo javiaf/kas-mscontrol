@@ -1,13 +1,13 @@
-package com.tikal.android.mscontrol.networkconnection;
+package com.kurento.kas.mscontrol.networkconnection;
 
 import java.util.EventObject;
 
 import javax.sdp.SessionDescription;
 
-import com.tikal.mscontrol.EventType;
-import com.tikal.mscontrol.MediaErr;
-import com.tikal.mscontrol.networkconnection.SdpPortManager;
-import com.tikal.mscontrol.networkconnection.SdpPortManagerEvent;
+import com.kurento.commons.mscontrol.EventType;
+import com.kurento.commons.mscontrol.MediaErr;
+import com.kurento.commons.mscontrol.networkconnection.SdpPortManager;
+import com.kurento.commons.mscontrol.networkconnection.SdpPortManagerEvent;
 
 public class SdpPortManagerEventImpl extends EventObject implements
 		SdpPortManagerEvent {
@@ -26,12 +26,12 @@ public class SdpPortManagerEventImpl extends EventObject implements
 		this.sdp = sdp;
 		this.error = error;
 	}
-	
+
 	@Override
 	public EventType getEventType() {
 		return eventType;
 	}
-	
+
 	@Override
 	public MediaErr getError() {
 		return error;
@@ -45,17 +45,17 @@ public class SdpPortManagerEventImpl extends EventObject implements
 		return (SdpPortManager) source;
 	}
 
-//	@Override
-//	public Qualifier getQualifier() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//
-//	@Override
-//	public Trigger getRTCTrigger() {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
+	// @Override
+	// public Qualifier getQualifier() {
+	// // TODO Auto-generated method stub
+	// return null;
+	// }
+	//
+	// @Override
+	// public Trigger getRTCTrigger() {
+	// // TODO Auto-generated method stub
+	// return null;
+	// }
 
 	@Override
 	public String getErrorText() {

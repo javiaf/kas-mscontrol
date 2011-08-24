@@ -1,12 +1,12 @@
-package com.tikal.android.mscontrol;
+package com.kurento.kas.mscontrol;
 
-import com.tikal.android.mscontrol.mediacomponent.MediaComponentAndroid;
-import com.tikal.mscontrol.Configuration;
-import com.tikal.mscontrol.MediaSession;
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.Parameter;
-import com.tikal.mscontrol.Parameters;
-import com.tikal.mscontrol.mediacomponent.MediaComponent;
+import com.kurento.commons.mscontrol.Configuration;
+import com.kurento.commons.mscontrol.MediaSession;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.Parameter;
+import com.kurento.commons.mscontrol.Parameters;
+import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
+import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
 
 /**
  * MediaSessionAndroid is an interface that extends MediaSession.<br>
@@ -115,7 +115,8 @@ public interface MediaSessionAndroid extends MediaSession {
 	 * @throws MsControlException
 	 */
 	@Override
-	public MediaComponentAndroid createMediaComponent(Configuration<MediaComponent> predefinedConfig,
-			Parameters params) throws MsControlException;
+	public MediaComponentAndroid createMediaComponent(
+			Configuration<MediaComponent> predefinedConfig, Parameters params)
+			throws MsControlException;
 
 }

@@ -1,8 +1,8 @@
-package com.tikal.android.mscontrol.mediacomponent;
+package com.kurento.kas.mscontrol.mediacomponent;
 
-import com.tikal.mscontrol.Configuration;
-import com.tikal.mscontrol.Parameter;
-import com.tikal.mscontrol.mediacomponent.MediaComponent;
+import com.kurento.commons.mscontrol.Configuration;
+import com.kurento.commons.mscontrol.Parameter;
+import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
 
 /**
  * MediaComponentAndroid is an interface that extends MediaComponent.<br>

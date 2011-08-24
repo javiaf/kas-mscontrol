@@ -1,12 +1,12 @@
-package com.tikal.android.mscontrol.join;
+package com.kurento.kas.mscontrol.join;
 
 import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.join.Joinable;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.join.Joinable;
 
 public class JoinableImpl implements Joinable {
 
@@ -41,10 +41,11 @@ public class JoinableImpl implements Joinable {
 	}
 
 	@Override
-	public void join(Direction direction, Joinable other) throws MsControlException {
+	public void join(Direction direction, Joinable other)
+			throws MsControlException {
 		if (other == null)
 			throw new MsControlException("other is null.");
-		
+
 		// Search old join with other
 		LocalConnection connection = null;
 		for (LocalConnection conn : connections) {
@@ -55,8 +56,8 @@ public class JoinableImpl implements Joinable {
 		}
 
 		if (connection != null) {// Delete join to re-join
-			((JoinableImpl) connection.getOther().getJoinable()).connections.remove(connection
-					.getOther());
+			((JoinableImpl) connection.getOther().getJoinable()).connections
+					.remove(connection.getOther());
 			this.connections.remove(connection);
 		}
 
@@ -90,8 +91,8 @@ public class JoinableImpl implements Joinable {
 		if (connection == null)
 			throw new MsControlException("No connected: " + other);
 
-		((JoinableImpl) connection.getOther().getJoinable()).connections.remove(connection
-				.getOther());
+		((JoinableImpl) connection.getOther().getJoinable()).connections
+				.remove(connection.getOther());
 		this.connections.remove(connection);
 	}
 

@@ -1,8 +1,8 @@
-package com.tikal.android.mscontrol;
+package com.kurento.kas.mscontrol;
 
-import com.tikal.android.mscontrol.networkconnection.ConnectionType;
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.Parameters;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.Parameters;
+import com.kurento.kas.mscontrol.networkconnection.ConnectionType;
 
 /**
  * This factory creates MediaSessionAndroid from a set of parameters.

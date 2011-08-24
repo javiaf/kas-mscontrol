@@ -1,4 +1,4 @@
-package com.tikal.android.mscontrol.mediacomponent;
+package com.kurento.kas.mscontrol.mediacomponent;
 
 public interface AudioSink {
 

@@ -1,19 +1,18 @@
-package com.tikal.android.mscontrol.join;
+package com.kurento.kas.mscontrol.join;
 
-import com.tikal.android.media.profiles.VideoProfile;
-import com.tikal.android.media.rx.VideoRx;
-import com.tikal.android.media.tx.MediaTx;
-import com.tikal.android.mscontrol.mediacomponent.VideoSink;
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.join.Joinable;
-import com.tikal.mscontrol.join.JoinableContainer;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.join.Joinable;
+import com.kurento.commons.mscontrol.join.JoinableContainer;
+import com.kurento.kas.media.profiles.VideoProfile;
+import com.kurento.kas.media.rx.VideoRx;
+import com.kurento.kas.media.tx.MediaTx;
+import com.kurento.kas.mscontrol.mediacomponent.VideoSink;
 
 public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		VideoSink, VideoRx {
 
 	private VideoProfile videoProfile;
 
-	
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
 	}

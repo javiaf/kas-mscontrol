@@ -1,15 +1,15 @@
-package com.tikal.android.mscontrol.mediacomponent;
+package com.kurento.kas.mscontrol.mediacomponent;
 
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.util.Log;
 
-import com.tikal.android.media.profiles.AudioProfile;
-import com.tikal.android.media.rx.AudioRx;
-import com.tikal.android.mscontrol.join.AudioJoinableStreamImpl;
-import com.tikal.mscontrol.MsControlException;
-import com.tikal.mscontrol.Parameters;
-import com.tikal.mscontrol.join.Joinable;
+import com.kurento.commons.mscontrol.MsControlException;
+import com.kurento.commons.mscontrol.Parameters;
+import com.kurento.commons.mscontrol.join.Joinable;
+import com.kurento.kas.media.profiles.AudioProfile;
+import com.kurento.kas.media.rx.AudioRx;
+import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
 
 public class AudioRecorderComponent extends MediaComponentBase implements AudioRx {
 	
