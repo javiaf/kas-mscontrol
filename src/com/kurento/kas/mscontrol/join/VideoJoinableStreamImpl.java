@@ -11,7 +11,12 @@ import com.kurento.kas.mscontrol.mediacomponent.VideoSink;
 public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		VideoSink, VideoRx {
 
+	public final static String LOG_TAG = "VideoJoinableStream";
+
 	private VideoProfile videoProfile;
+
+	private static long t_suma = 0;
+	private static long n = 1;
 
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
@@ -25,7 +30,16 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 	@Override
 	public void putVideoFrame(byte[] frame) {
+		long t_init = System.currentTimeMillis();
+
 		MediaTx.putVideoFrame(frame);
+
+		long t_fin = System.currentTimeMillis();
+		long tiempo = t_fin - t_init;
+		t_suma += tiempo;
+		long t_medio = t_suma / n;
+		Log.d(LOG_TAG, "Tiempo: " + tiempo + "\t\tTiempo medio: " + t_medio);
+		n++;
 	}
 
 	@Override
