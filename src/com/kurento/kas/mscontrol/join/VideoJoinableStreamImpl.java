@@ -19,6 +19,9 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 	private static long t_suma = 0;
 	private static long n = 1;
+	
+	private static long t_suma20 = 0;
+	private static long n20 = 1;
 
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
@@ -40,7 +43,14 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		long tiempo = t_fin - t_init;
 		t_suma += tiempo;
 		long t_medio = t_suma / n;
-		Log.d(LOG_TAG, "Tiempo: " + tiempo + "\t\tTiempo medio: " + t_medio);
+		if (n > 20) {
+			t_suma20 += tiempo;
+			t_medio = t_suma20 / n20;
+			Log.d(LOG_TAG, "Tiempo: " + tiempo + "\t\tTiempo medio: " + t_medio + "\t\tTiempo medio20: " + t_medio);
+			n20++;
+		} else {
+			Log.d(LOG_TAG, "Tiempo: " + tiempo + "\t\tTiempo medio: " + t_medio);
+		}
 		n++;
 	}
 
@@ -48,9 +58,6 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	public void putVideoFrameRx(int[] rgb, int width, int height) {
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
-				if (j instanceof VideoRx)
-					((VideoRx) j).putVideoFrameRx(rgb, width, height);
-			for (Joinable j : getJoinees(Direction.DUPLEX))
 				if (j instanceof VideoRx)
 					((VideoRx) j).putVideoFrameRx(rgb, width, height);
 		} catch (MsControlException e) {

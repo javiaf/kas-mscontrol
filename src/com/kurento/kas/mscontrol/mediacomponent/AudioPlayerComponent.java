@@ -134,10 +134,6 @@ public class AudioPlayerComponent extends MediaComponentBase {
 						if (j instanceof AudioSink)
 							((AudioSink) j).putAudioSamples(buffer,
 									bufferReadResult);
-					for (Joinable j : getJoinees(Direction.DUPLEX))
-						if (j instanceof AudioSink)
-							((AudioSink) j).putAudioSamples(buffer,
-									bufferReadResult);
 				}
 				if (audioRecord != null)
 					audioRecord.stop();

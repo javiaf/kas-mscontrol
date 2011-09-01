@@ -35,9 +35,6 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof AudioRx)
 					((AudioRx) j).putAudioSamplesRx(audio, length);
-			for (Joinable j : getJoinees(Direction.DUPLEX))
-				if (j instanceof AudioRx)
-					((AudioRx) j).putAudioSamplesRx(audio, length);
 		} catch (MsControlException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -91,9 +91,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof VideoSink)
 					((VideoSink) j).putVideoFrame(data, width, height);
-			for (Joinable j : getJoinees(Direction.DUPLEX))
-				if (j instanceof VideoSink)
-					((VideoSink) j).putVideoFrame(data, width, height);
 		} catch (MsControlException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
