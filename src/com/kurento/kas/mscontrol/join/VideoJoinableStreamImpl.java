@@ -1,5 +1,7 @@
 package com.kurento.kas.mscontrol.join;
 
+import android.util.Log;
+
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.join.Joinable;
 import com.kurento.commons.mscontrol.join.JoinableContainer;
