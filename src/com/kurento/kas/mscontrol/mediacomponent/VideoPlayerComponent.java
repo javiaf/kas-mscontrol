@@ -27,7 +27,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	private static final String LOG_TAG = "VideoPlayer";
 
 	private SurfaceView mVideoView;
-	private SurfaceHolder mHolder;
+//	private SurfaceHolder mHolder;
 
 	private Camera mCamera;
 	private View videoSurfaceTx;
@@ -82,119 +82,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		return cam;
 	}
 
-	private void startRecording() {
-		Log.d(LOG_TAG, "Start Camera Capturing");
-
-		Log.d(LOG_TAG, " Versión SDK " + VERSION.SDK_INT);
-
-		if (mCamera == null) {
-			if (VERSION.SDK_INT < 9) {
-				mCamera = Camera.open();
-			} else
-				mCamera = openFrontFacingCameraGingerbread();
-		}
-		mCamera.setErrorCallback(new ErrorCallback() {
-			public void onError(int error, Camera camera) {
-				Log.e(LOG_TAG, "Camera error : " + error);
-			}
-		});
-
-		Camera.Parameters parameters = mCamera.getParameters();
-
-		// parameters.set("camera-id", 2);
-		// mCamera.setParameters(parameters);
-
-		List<Size> sizes = parameters.getSupportedPreviewSizes();
-		String cad = "";
-		// Video Preferences is support?
-		boolean isSupport = false;
-		for (int i = 0; i < sizes.size(); i++) {
-			cad += sizes.get(i).width + " x " + sizes.get(i).height + "\n";
-			if ((width == sizes.get(i).width)
-					&& (height == sizes.get(i).height)) {
-				isSupport = true;
-				break;
-			}
-		}
-		if (!isSupport) {
-			width = sizes.get(0).width;
-			height = sizes.get(0).height;
-		}
-		parameters.setPreviewSize(width, height);
-		mCamera.setParameters(parameters);
-
-		mCamera.setPreviewCallback(this);
-	}
-
-	// @Override
-	// public void surfaceChanged(SurfaceHolder holder, int format, int width,
-	// int height) {
-	//
-	// if (mCamera != null) {
-	// Log.d(LOG_TAG, "surface Changed");
-	// mCamera.startPreview();
-	// }
-	// // Parameters params = mCamera.getParameters();
-	// // if (mCamera != null) {
-	// // int degrees = 90;
-	// //
-	// // mCamera.setDisplayOrientation(degrees);
-	// // Camera.Parameters parameters = mCamera.getParameters();
-	// //
-	// // parameters.setRotation(degrees);
-	// // // params.setPreviewSize(width, height);
-	// // mCamera.setParameters(parameters);
-	// //
-	// // mCamera.startPreview();
-	// // }
-	// }
-
-	// @Override
-	// public void surfaceCreated(SurfaceHolder holder) {
-	// try {
-	// Log.d(LOG_TAG, "SurfaceCreated");
-	// if (mCamera == null) {
-	// if (VERSION.SDK_INT < 9) {
-	// mCamera = Camera.open();
-	// } else
-	// mCamera = openFrontFacingCameraGingerbread();
-	// Log.d(LOG_TAG, "mCamera open on Created");
-	// }
-	//
-	// // mCamera.setPreviewCallback(this);
-	// // mCamera = Camera.open();
-	// if (mCamera != null) {
-	// Log.d(LOG_TAG, " mCamera opened " + mCamera.toString());
-	//
-	// // int degrees = 90;
-	// //
-	// // mCamera.setDisplayOrientation(degrees);
-	// // Camera.Parameters parameters = mCamera.getParameters();
-	// //
-	// // parameters.setRotation(degrees);
-	// // // params.setPreviewSize(width, height);
-	// // mCamera.setParameters(parameters);
-	//
-	// mCamera.setPreviewDisplay(mHolder);
-	//
-	// } else
-	// Log.w(LOG_TAG, "Not Surface Create");
-	//
-	// // startRecording();
-	// } catch (Exception e) {
-	// Log.e(LOG_TAG, "Exception : " + e.toString());
-	// e.printStackTrace();
-	// }
-	// }
-
-	// @Override
-	// public void surfaceDestroyed(SurfaceHolder holder) {
-	// mCamera.setPreviewCallback(null);
-	// mCamera.stopPreview();
-	// mCamera.release();
-	// mCamera = null;
-	// }
-
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
 		if (data == null)
@@ -203,10 +90,10 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof VideoSink)
-					((VideoSink) j).putVideoFrame(data);
+					((VideoSink) j).putVideoFrame(data, width, height);
 			for (Joinable j : getJoinees(Direction.DUPLEX))
 				if (j instanceof VideoSink)
-					((VideoSink) j).putVideoFrame(data);
+					((VideoSink) j).putVideoFrame(data, width, height);
 		} catch (MsControlException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -266,12 +153,9 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 				// mCamera.setParameters(parameters);
 
 				List<Size> sizes = parameters.getSupportedPreviewSizes();
-				String cad = "";
 				// Video Preferences is support?
 				boolean isSupport = false;
 				for (int i = 0; i < sizes.size(); i++) {
-					cad += sizes.get(i).width + " x " + sizes.get(i).height
-							+ "\n";
 					if ((width == sizes.get(i).width)
 							&& (height == sizes.get(i).height)) {
 						isSupport = true;
@@ -279,11 +163,20 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 					}
 				}
 				if (!isSupport) {
-					width = sizes.get(0).width;
-					height = sizes.get(0).height;
+					width = sizes.get(3).width;
+					height = sizes.get(3).height;
 				}
 				parameters.setPreviewSize(width, height);
 				mCamera.setParameters(parameters);
+
+				String cad = "";
+				for (int i = 0; i < sizes.size(); i++)
+					cad += sizes.get(i).width + " x " + sizes.get(i).height
+							+ "\n";
+				Log.d(LOG_TAG, "getPreviewSize: "
+						+ parameters.getPreviewSize().width + " x "
+						+ parameters.getPreviewSize().height);
+				Log.d(LOG_TAG, "getSupportedPreviewSizes:\n" + cad);
 
 				// int result = 0;
 				// if (VERSION.SDK_INT < 9) {

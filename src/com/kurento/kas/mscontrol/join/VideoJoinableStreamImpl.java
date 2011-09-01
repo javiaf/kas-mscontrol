@@ -31,10 +31,10 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	@Override
-	public void putVideoFrame(byte[] frame) {
+	public void putVideoFrame(byte[] frame, int width, int height) {
 		long t_init = System.currentTimeMillis();
 
-		MediaTx.putVideoFrame(frame);
+		MediaTx.putVideoFrame(frame, width, height);
 
 		long t_fin = System.currentTimeMillis();
 		long tiempo = t_fin - t_init;
