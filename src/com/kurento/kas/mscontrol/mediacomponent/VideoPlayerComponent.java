@@ -27,7 +27,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	private static final String LOG_TAG = "VideoPlayer";
 
 	private SurfaceView mVideoView;
-//	private SurfaceHolder mHolder;
+	// private SurfaceHolder mHolder;
 
 	private Camera mCamera;
 	private View videoSurfaceTx;
@@ -86,7 +86,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	public void onPreviewFrame(byte[] data, Camera camera) {
 		if (data == null)
 			return;
-		// Send video to subscribers
+		// Send frame to subscribers
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof VideoSink)
@@ -174,6 +174,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 						+ parameters.getPreviewSize().width + " x "
 						+ parameters.getPreviewSize().height);
 				Log.d(LOG_TAG, "getSupportedPreviewSizes:\n" + cad);
+				
 
 				// int result = 0;
 				// if (VERSION.SDK_INT < 9) {
@@ -233,7 +234,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 
 			public void surfaceChanged(SurfaceHolder holder, int format,
 					int width, int height) {
-
 				mCamera.setPreviewCallback(VideoPlayerComponent.this);
 			}
 		});
@@ -255,5 +255,4 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 			mCamera.stopPreview();
 		}
 	}
-
 }
