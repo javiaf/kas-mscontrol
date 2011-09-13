@@ -2,14 +2,15 @@ package com.kurento.kas.mscontrol;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-
-import android.util.Log;
+import java.util.Map;
 
 import com.kurento.commons.mscontrol.Configuration;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
 import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
 import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
+import com.kurento.commons.sdp.enums.MediaType;
+import com.kurento.commons.sdp.enums.Mode;
 import com.kurento.kas.media.AudioCodecType;
 import com.kurento.kas.media.VideoCodecType;
 import com.kurento.kas.mscontrol.mediacomponent.AudioPlayerComponent;
@@ -23,18 +24,20 @@ import com.kurento.kas.mscontrol.networkconnection.NetworkConnectionImpl;
 public class MediaSessionImpl implements MediaSessionAndroid {
 
 	public final static String LOG_TAG = "MSImpl";
-	
+
 	private MediaSessionConfig mediaSessionConfig;
 
 	public MediaSessionImpl(Parameters params) throws MsControlException {
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
-		ArrayList<AudioCodecType> audioCodecs = (ArrayList<AudioCodecType>) params.get(AUDIO_CODECS);
+		ArrayList<AudioCodecType> audioCodecs = (ArrayList<AudioCodecType>) params
+				.get(AUDIO_CODECS);
 		if (audioCodecs == null)
 			throw new MsControlException(
 					"Params must have MediaSessionAndroid.AUDIO_CODECS param");
-		ArrayList<VideoCodecType> videoCodecs = (ArrayList<VideoCodecType>) params.get(VIDEO_CODECS);
+		ArrayList<VideoCodecType> videoCodecs = (ArrayList<VideoCodecType>) params
+				.get(VIDEO_CODECS);
 		if (videoCodecs == null)
 			throw new MsControlException(
 					"Params must have MediaSessionAndroid.VIDEO_CODECS param");
@@ -42,14 +45,19 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		if (localAddress == null)
 			throw new MsControlException(
 					"Params must have MediaSessionAndroid.LOCAL_ADDRESS param");
-		ConnectionType connectionType = (ConnectionType) params.get(CONNECTION_TYPE);
+		ConnectionType connectionType = (ConnectionType) params
+				.get(CONNECTION_TYPE);
 		if (connectionType == null)
 			throw new MsControlException(
 					"Params must have MediaSessionAndroid.CONNECTION_TYPE param");
-
-		this.mediaSessionConfig = new MediaSessionConfig(audioCodecs, videoCodecs, localAddress,
-				connectionType);
-		Log.d(LOG_TAG, "this.mediaSessionConfig: " + this.mediaSessionConfig);
+		Map<MediaType, Mode> mediaTypeModes = (Map<MediaType, Mode>) params
+		.get(STREAMS_DIRECTIONS);
+		if (mediaTypeModes == null)
+			throw new MsControlException(
+					"Params must have MediaSessionAndroid.STREAMS_DIRECTIONS param");
+		
+		this.mediaSessionConfig = new MediaSessionConfig(audioCodecs,
+				videoCodecs, localAddress, connectionType, mediaTypeModes);
 	}
 
 	@Override
@@ -59,14 +67,15 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 	}
 
 	@Override
-	public NetworkConnection createNetworkConnection() throws MsControlException {
-		Log.d(LOG_TAG, "createNetworkConnection");
+	public NetworkConnection createNetworkConnection()
+			throws MsControlException {
 		return new NetworkConnectionImpl(mediaSessionConfig);
 	}
 
 	@Override
-	public MediaComponentAndroid createMediaComponent(Configuration<MediaComponent> predefinedConfig,
-			Parameters params) throws MsControlException {
+	public MediaComponentAndroid createMediaComponent(
+			Configuration<MediaComponent> predefinedConfig, Parameters params)
+			throws MsControlException {
 
 		if (predefinedConfig == null)
 			throw new MsControlException("Configuration is NULL");
@@ -80,7 +89,8 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		else if (MediaComponentAndroid.VIDEO_RECORDER.equals(predefinedConfig))
 			return new VideoRecorderComponent(params);
 
-		throw new MsControlException("Configuration is not supported: " + predefinedConfig);
+		throw new MsControlException("Configuration is not supported: "
+				+ predefinedConfig);
 	}
 
 }

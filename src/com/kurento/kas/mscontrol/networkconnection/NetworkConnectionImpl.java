@@ -16,6 +16,7 @@ import com.kurento.commons.media.format.SpecTools;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.join.JoinableStream.StreamType;
 import com.kurento.commons.sdp.enums.MediaType;
+import com.kurento.commons.sdp.enums.Mode;
 import com.kurento.kas.media.AudioCodecType;
 import com.kurento.kas.media.MediaPortManager;
 import com.kurento.kas.media.VideoCodecType;
@@ -68,11 +69,13 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	@Override
 	public void setLocalSessionSpec(SessionSpec arg0) {
 		this.localSessionSpec = arg0;
+		Log.d(LOG_TAG, "localSessionSpec:\n" + localSessionSpec);
 	}
 
 	@Override
 	public void setRemoteSessionSpec(SessionSpec arg0) {
 		this.remoteSessionSpec = arg0;
+		Log.d(LOG_TAG, "remoteSessionSpec:\n" + remoteSessionSpec);
 	}
 
 	public NetworkConnectionImpl(MediaSessionConfig mediaSessionConfig)
@@ -81,8 +84,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		Log.d(LOG_TAG, "ON NEW mediaSessionConfig: " + this.mediaSessionConfig);
 		if (mediaSessionConfig == null)
 			throw new MsControlException("Media Session Config are NULL");
-		this.mediaSessionConfig = mediaSessionConfig;
 		this.streams = new JoinableStreamBase[2];
+		this.mediaSessionConfig = mediaSessionConfig;
 
 		// Process MediaConfigure and determinate media profiles
 		audioProfiles = getAudioProfiles(this.mediaSessionConfig);
@@ -98,8 +101,6 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	@Override
 	public void confirm() throws MsControlException {
 		Log.d(LOG_TAG, "start on NCImpl");
-		Log.d(LOG_TAG, "remoteSessionSpec:\n" + remoteSessionSpec);
-		Log.d(LOG_TAG, "localSessionSpec:\n" + localSessionSpec);
 
 		if (remoteSessionSpec == null)
 			// throw new MediaException("SessionSpec corrupt");
@@ -192,9 +193,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		int payload = 96;
 
 		// VIDEO
-		List<PayloadSpec> videoList = new Vector<PayloadSpec>();
+		MediaSpec videoMedia = null;
 
 		if (videoProfiles != null) {
+			List<PayloadSpec> videoList = new Vector<PayloadSpec>();
 			for (VideoProfile vp : videoProfiles) {
 				if (VideoProfile.MPEG4.equals(vp))
 					addPayloadSpec(videoList, payload + " MP4V-ES/90000",
@@ -204,15 +206,19 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 							MediaType.VIDEO, videoPort);
 				payload++;
 			}
+
+			videoMedia = new MediaSpec();
+			videoMedia.setPayloadList(videoList);
+			Mode videoMode = this.mediaSessionConfig.getMediaTypeModes().get(
+					MediaType.VIDEO);
+			videoMedia.setMode(videoMode);
 		}
 
-		MediaSpec videoMedia = new MediaSpec();
-		videoMedia.setPayloadList(videoList);
-
 		// // AUDIO
-		List<PayloadSpec> audioList = new Vector<PayloadSpec>();
+		MediaSpec audioMedia = null;
 
 		if (audioProfiles != null) {
+			List<PayloadSpec> audioList = new Vector<PayloadSpec>();
 			for (AudioProfile ap : audioProfiles) {
 				if (AudioProfile.MP2.equals(ap)) {
 					PayloadSpec payloadAudioMP2 = new PayloadSpec();
@@ -234,14 +240,19 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				}
 				payload++;
 			}
+
+			audioMedia = new MediaSpec();
+			audioMedia.setPayloadList(audioList);
+			Mode audioMode = this.mediaSessionConfig.getMediaTypeModes().get(
+					MediaType.AUDIO);
+			audioMedia.setMode(audioMode);
 		}
 
-		MediaSpec audioMedia = new MediaSpec();
-		audioMedia.setPayloadList(audioList);
-
 		List<MediaSpec> mediaList = new Vector<MediaSpec>();
-		mediaList.add(videoMedia);
-		mediaList.add(audioMedia);
+		if (videoMedia != null)
+			mediaList.add(videoMedia);
+		if (audioMedia != null)
+			mediaList.add(audioMedia);
 
 		SessionSpec session = new SessionSpec();
 		session.setMediaSpec(mediaList);

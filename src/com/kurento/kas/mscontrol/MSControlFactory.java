@@ -16,8 +16,8 @@ public class MSControlFactory {
 	 * Create a MediaSessionAndroid from a set of parameters.
 	 * 
 	 * @param params
-	 *            Parameters to create a MediaSessionAndroid. The possible parameter
-	 *            keys are:
+	 *            Parameters to create a MediaSessionAndroid. The possible
+	 *            parameter keys are:
 	 *            <ul>
 	 *            <li>{@link MediaSessionAndroid.AUDIO_CODECS}:
 	 *            ArrayList&lt;AudioCodecType&gt; as value to indicate the audio
@@ -30,6 +30,9 @@ public class MSControlFactory {
 	 *            <li>{@link MediaSessionAndroid.CONNECTION_TYPE}: has as value
 	 *            a {@link ConnectionType} to indicate if the connection is WIFI
 	 *            or MOBILE.
+	 *            <li>{@link MediaSessionAndroid.STREAMS_DIRECTIONS}:
+	 *            HashMap&lt;MediaType, Mode&gt; as value to indicate if the
+	 *            direction of each media stream.
 	 *            </ul>
 	 * @return a MediaSessionAndroid
 	 * @throws MsControlException

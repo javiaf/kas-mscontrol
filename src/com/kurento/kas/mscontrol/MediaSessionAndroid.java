@@ -43,6 +43,12 @@ public interface MediaSessionAndroid extends MediaSession {
 	};
 
 	/**
+	 * Parameter whose value must be a HashMap&lt;MediaType, Mode&gt;.
+	 */
+	public static final Parameter STREAMS_DIRECTIONS = new Parameter() {
+	};
+
+	/**
 	 * Create a MediaComponentAndroid.
 	 * 
 	 * @param predefinedConfig

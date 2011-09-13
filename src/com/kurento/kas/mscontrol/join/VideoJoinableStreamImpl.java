@@ -1,7 +1,7 @@
 package com.kurento.kas.mscontrol.join;
 
-import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import android.util.Log;
 
@@ -35,20 +35,25 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 	private long t_tx_total_medio = 0;
 
+	// private int nSent = 0;
+
 	private class Frame {
 		private byte[] data;
 		private int width;
 		private int height;
+		private long time;
 
-		public Frame(byte[] data, int width, int height) {
+		public Frame(byte[] data, int width, int height, long time) {
 			this.data = data;
 			this.width = width;
 			this.height = height;
+			this.time = time;
 		}
 	}
-	
-	private ArrayBlockingQueue<Frame> framesQueue= new ArrayBlockingQueue<Frame>(1);
-	
+
+	private ArrayBlockingQueue<Frame> framesQueue = new ArrayBlockingQueue<Frame>(
+			1);
+
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
 	}
@@ -64,7 +69,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	public void putVideoFrame(byte[] data, int width, int height) {
 		Log.e(LOG_TAG, "RECEIVE FRAME FROM CAMERA");
 		framesQueue.clear();
-		framesQueue.offer( new Frame(data, width, height) );
+		framesQueue.offer(new Frame(data, width, height, System
+				.currentTimeMillis()));
 	}
 
 	private class VideoTxThread extends Thread {
@@ -77,7 +83,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 				} catch (InterruptedException e) {
 					break;
 				}
-				
+
 				Log.e(LOG_TAG, "\t\tPROCESS");
 
 				long t = System.currentTimeMillis();
@@ -93,19 +99,19 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 							+ "\t\tFrame rate: " + videoProfile.getFrameRate());
 
 					if (videoProfile != null) {
-						if (t_tx_total_medio != 0
-								&& t_tx_total_medio < 1.1 * 1000 / videoProfile
-										.getFrameRate()) {
-							Log.e(LOG_TAG, "return");
 
-							t_tx_total_suma += t_diff;
-							t_tx_total_medio = t_tx_total_suma / n50;
-							Log.d(LOG_TAG, "t TX total: " + t_diff
-									+ "\t\t t TX total medio: "
-									+ t_tx_total_medio);
-
-							n50++;
-							continue;
+						// if (t_tx_total_medio != 0
+						// && t_tx_total_medio < 1.1 * 1000 / videoProfile
+						// .getFrameRate()) {
+						if (t_diff < 1000 / videoProfile.getFrameRate()) {
+							long s = 1000 / videoProfile.getFrameRate() - t_diff;
+							Log.e(LOG_TAG, "sleep: " + s);
+							try {
+								sleep(s);
+								Log.e(LOG_TAG, "ok");
+							} catch (InterruptedException e) {
+								break;
+							}
 						}
 					}
 				}
@@ -143,6 +149,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 				t_tx_total = t_fin;
 
 				n++;
+				// nSent++;
 			}
 
 		}
