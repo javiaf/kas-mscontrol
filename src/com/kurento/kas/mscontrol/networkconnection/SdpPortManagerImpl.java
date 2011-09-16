@@ -1,7 +1,6 @@
 package com.kurento.kas.mscontrol.networkconnection;
 
 import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.sdp.SdpException;
