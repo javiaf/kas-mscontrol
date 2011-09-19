@@ -44,7 +44,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		}
 	}
 
-	private static final int QUEUE_SIZE = 2;
+	private int QUEUE_SIZE = 2;
 	private LinkedBlockingDeque<Frame> framesQueue = new LinkedBlockingDeque<Frame>(
 			QUEUE_SIZE);
 	private LinkedBlockingDeque<Long> txTimes = new LinkedBlockingDeque<Long>(
@@ -56,10 +56,13 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 	public VideoJoinableStreamImpl(JoinableContainer container,
 			StreamType type, SessionSpec remoteSessionSpec,
-			SessionSpec localSessionSpec) {
+			SessionSpec localSessionSpec, Integer framesQueueSize) {
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
-
+		if (framesQueueSize != null && framesQueueSize > QUEUE_SIZE)
+			QUEUE_SIZE = framesQueueSize;
+		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
+		
 		Map<MediaType, Mode> mediaTypesModes = SpecTools
 				.getModesOfFirstMediaTypes(localSessionSpec);
 		Mode videoMode = mediaTypesModes.get(MediaType.VIDEO);

@@ -20,7 +20,6 @@ import com.kurento.kas.media.AudioCodecType;
 import com.kurento.kas.media.MediaPortManager;
 import com.kurento.kas.media.VideoCodecType;
 import com.kurento.kas.media.profiles.AudioProfile;
-import com.kurento.kas.media.profiles.MediaQuality;
 import com.kurento.kas.media.profiles.VideoProfile;
 import com.kurento.kas.mscontrol.MediaSessionConfig;
 import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
@@ -94,15 +93,18 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		this.streams[0] = audioJoinableStreamImpl;
 
 		videoJoinableStreamImpl = new VideoJoinableStreamImpl(this,
-				StreamType.video, remoteSessionSpec, localSessionSpec);
+				StreamType.video, remoteSessionSpec, localSessionSpec,
+				mediaSessionConfig.getFramesQueueSize());
 		this.streams[1] = videoJoinableStreamImpl;
 	}
 
 	@Override
 	public void release() {
 		Log.d(LOG_TAG, "release");
-		videoJoinableStreamImpl.stop();
-		audioJoinableStreamImpl.stop();
+		if (videoJoinableStreamImpl != null)
+			videoJoinableStreamImpl.stop();
+		if (audioJoinableStreamImpl != null)
+			audioJoinableStreamImpl.stop();
 		Log.d(LOG_TAG, "ALL OK");
 
 		// MediaPortManager.releaseAudioLocalPort();
@@ -128,7 +130,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		// VIDEO
 		MediaSpec videoMedia = null;
 
-		if (videoProfiles != null) {
+		if (videoProfiles != null && videoProfiles.size() > 0) {
 			List<PayloadSpec> videoList = new Vector<PayloadSpec>();
 			for (VideoProfile vp : videoProfiles) {
 				if (VideoProfile.MPEG4.equals(vp))
@@ -150,7 +152,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		// // AUDIO
 		MediaSpec audioMedia = null;
 
-		if (audioProfiles != null) {
+		if (audioProfiles != null && audioProfiles.size() > 0) {
 			List<PayloadSpec> audioList = new Vector<PayloadSpec>();
 			for (AudioProfile ap : audioProfiles) {
 				if (AudioProfile.MP2.equals(ap)) {
@@ -210,12 +212,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			return null;
 
 		ArrayList<AudioProfile> audioProfiles = new ArrayList<AudioProfile>(0);
-		// Discard phase
+		// Discard/Select phase
 		for (AudioProfile ap : AudioProfile.values()) {
-			if (MediaQuality.HEIGH.equals(ap.getMediaQuality())
-					&& !ConnectionType.WIFI.equals(mediaSessionConfig
-							.getConnectionType()))
-				continue;
 			for (AudioCodecType act : audioCodecs) {
 				if (act.equals(ap.getAudioCodecType()))
 					audioProfiles.add(ap);
@@ -236,16 +234,47 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			return null;
 
 		ArrayList<VideoProfile> videoProfiles = new ArrayList<VideoProfile>(0);
-		// Discard phase
+		// Discard/Select phase
 		for (VideoProfile vp : VideoProfile.values()) {
-			if (MediaQuality.HEIGH.equals(vp.getMediaQuality())
-					&& !ConnectionType.WIFI.equals(mediaSessionConfig
-							.getConnectionType()))
-				continue;
 			for (VideoCodecType vct : videoCodecs) {
 				if (vct.equals(vp.getVideoCodecType()))
 					videoProfiles.add(vp);
 			}
+		}
+
+		// Set new attrs
+		Integer maxBW = null;
+		if (mediaSessionConfig.getMaxBW() != null)
+			Math.max(NetIF.MIN_BANDWITH, Math.min(mediaSessionConfig.getNetIF()
+					.getMaxBandwidth(), mediaSessionConfig.getMaxBW()));
+		Integer maxFrameRate = null;
+		if (mediaSessionConfig.getMaxFrameRate() != null)
+			maxFrameRate = Math.max(1, mediaSessionConfig.getMaxFrameRate());
+
+		Integer maxGopSize = null;
+		if (mediaSessionConfig.getGopSize() != null)
+			maxGopSize = Math.max(0, mediaSessionConfig.getGopSize());
+
+		Integer width = null;
+		Integer height = null;
+		if (mediaSessionConfig.getFrameSize() != null) {
+			width = Math
+					.abs((int) mediaSessionConfig.getFrameSize().getWidth());
+			height = Math.abs((int) mediaSessionConfig.getFrameSize()
+					.getHeight());
+		}
+
+		for (VideoProfile vp : videoProfiles) {
+			if (maxBW != null)
+				vp.setBitRate(maxBW);
+			if (maxFrameRate != null)
+				vp.setFrameRate(maxFrameRate);
+			if (maxGopSize != null)
+				vp.setGopSize(maxGopSize);
+			if (width != null)
+				vp.setWidth(width);
+			if (height != null)
+				vp.setHeight(height);
 		}
 
 		// Scoring phase
