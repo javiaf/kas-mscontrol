@@ -62,7 +62,7 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 
 		this.videoSurfaceRx = surface;
 		this.screenWidth = displayWidth;
-		this.screenHeight = displayHeight * 3 / 4;
+		this.screenHeight = displayHeight;// * 3 / 4;
 		dirty2 = new RectF(0, 0, screenWidth, screenHeight);
 		if (surface != null) {
 			mVideoReceiveView = (SurfaceView) videoSurfaceRx;
@@ -88,16 +88,23 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 
 			// RectF dirty2 = new RectF(0, 0, screenWidth, screenHeight);
 
+			int heighAux = height;
+			int widthAux = width;
+
+			double aux = (double) screenHeight / (double) heighAux;
+			heighAux = (int) (aux * heighAux);
+			widthAux = (int) (aux * widthAux);
+
 			Bitmap srcBitmap = Bitmap.createBitmap(rgb, width, height,
 					Bitmap.Config.ARGB_8888);
 
+			dirty2 = new RectF(0, 0, widthAux, heighAux);
 			canvas.drawBitmap(srcBitmap, null, dirty2, null);
 			Canvas.freeGlCaches();
 			if (mSurfaceReceive == null)
 				return;
 			mSurfaceReceive.unlockCanvasAndPost(canvas);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			Log.e(LOG_TAG, "Exception: " + e.toString());
 			e.printStackTrace();
 		} catch (OutOfResourcesException e) {
