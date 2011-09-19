@@ -152,16 +152,25 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 				List<Size> sizes = parameters.getSupportedPreviewSizes();
 				// Video Preferences is support?
 				boolean isSupport = false;
+				int sizeSelected = -1;
 				for (int i = 0; i < sizes.size(); i++) {
 					if ((width == sizes.get(i).width)
 							&& (height == sizes.get(i).height)) {
 						isSupport = true;
 						break;
 					}
+					if (sizeSelected == -1) {
+						if (sizes.get(i).width <= width)
+							sizeSelected = i;
+					} else if ((sizes.get(i).width >= sizes.get(sizeSelected).width)
+							&& (sizes.get(i).width <= width))
+						sizeSelected = i;
 				}
+				if (sizeSelected == -1)
+					sizeSelected = 0;
 				if (!isSupport) {
-					width = sizes.get(3).width;
-					height = sizes.get(3).height;
+					width = sizes.get(sizeSelected).width;
+					height = sizes.get(sizeSelected).height;
 				}
 				parameters.setPreviewSize(width, height);
 				mCamera.setParameters(parameters);
@@ -174,7 +183,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 						+ parameters.getPreviewSize().width + " x "
 						+ parameters.getPreviewSize().height);
 				Log.d(LOG_TAG, "getSupportedPreviewSizes:\n" + cad);
-				
 
 				// int result = 0;
 				// if (VERSION.SDK_INT < 9) {
