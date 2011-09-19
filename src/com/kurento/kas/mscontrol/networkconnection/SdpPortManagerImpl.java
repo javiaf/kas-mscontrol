@@ -102,8 +102,8 @@ public class SdpPortManagerImpl implements SdpPortManager {
 		try {
 			userAgentSDP = new SessionSpec(new String(offer));
 			SessionSpec[] intersectionSessions = SpecTools
-					.intersectionSessionSpec(userAgentSDP,
-							resource.generateSessionSpec());
+					.intersectSessionSpec(resource.generateSessionSpec(),
+							userAgentSDP);
 			combinedMediaList = intersectionSessions[1].getMediaSpec();
 
 			if (combinedMediaList.isEmpty()) {
@@ -143,8 +143,8 @@ public class SdpPortManagerImpl implements SdpPortManager {
 			combinedMediaList = userAgentSDP.getMediaSpec();
 			resource.setRemoteSessionSpec(userAgentSDP);
 
-			localSpec = SpecTools.intersectionSessionSpec(userAgentSDP,
-					resource.generateSessionSpec())[0];
+			localSpec = SpecTools.intersectSessionSpec(
+					resource.generateSessionSpec(), userAgentSDP)[0];
 			resource.setLocalSessionSpec(localSpec);
 			String localAddress = resource.getLocalAddress().getHostAddress();
 			localSpec.setOriginAddress(localAddress);
