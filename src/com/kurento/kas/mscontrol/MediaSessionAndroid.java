@@ -19,6 +19,30 @@ import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
 public interface MediaSessionAndroid extends MediaSession {
 
 	/**
+	 * Parameter whose value must be a NetIF.
+	 */
+	public static final Parameter NET_IF = new Parameter() {
+	};
+
+	/**
+	 * Parameter whose value must be an InetAddress.
+	 */
+	public static final Parameter LOCAL_ADDRESS = new Parameter() {
+	};
+
+	/**
+	 * Parameter whose value must be an integer.
+	 */
+	public static final Parameter MAX_BANDWIDTH = new Parameter() {
+	};
+
+	/**
+	 * Parameter whose value must be a HashMap&lt;MediaType, Mode&gt;.
+	 */
+	public static final Parameter STREAMS_MODES = new Parameter() {
+	};
+
+	/**
 	 * Parameter whose value must be an ArrayList&lt;AudioCodecType&gt;.
 	 */
 	public static final Parameter AUDIO_CODECS = new Parameter() {
@@ -31,15 +55,26 @@ public interface MediaSessionAndroid extends MediaSession {
 	};
 
 	/**
-	 * Parameter whose value must be an InetAddress.
+	 * Parameter whose value must be a Dimension.
 	 */
-	public static final Parameter LOCAL_ADDRESS = new Parameter() {
+	public static final Parameter FRAME_SIZE = new Parameter() {
 	};
 
 	/**
-	 * Parameter whose value must be a ConnectionType.
+	 * Parameter whose value must be an integer.
 	 */
-	public static final Parameter CONNECTION_TYPE = new Parameter() {
+	public static final Parameter MAX_FRAME_RATE = new Parameter() {
+	};
+	/**
+	 * Parameter whose value must be an integer.
+	 */
+	public static final Parameter GOP_SIZE = new Parameter() {
+	};
+
+	/**
+	 * Parameter whose value must be an integer.
+	 */
+	public static final Parameter FRAMES_QUEUE_SIZE = new Parameter() {
 	};
 
 	/**
