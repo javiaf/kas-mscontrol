@@ -72,14 +72,14 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			VideoCodecType videoCodecType = remoteRTPInfo.getVideoCodecType();
 			VideoProfile videoProfile = VideoProfile
 					.getVideoProfileFromVideoCodecType(videoCodecType);
-			if ((Mode.SENDRECV.equals(videoMode) || Mode.RECVONLY
+			if ((Mode.SENDRECV.equals(videoMode) || Mode.SENDONLY
 					.equals(videoMode)) && videoProfile != null) {
 				VideoInfoTx videoInfo = new VideoInfoTx(videoProfile);
 				videoInfo.setOut(remoteRTPInfo.getVideoRTPDir());
 				videoInfo.setPayloadType(remoteRTPInfo.getVideoPayloadType());
 				int ret = MediaTx.initVideo(videoInfo);
 				if (ret < 0) {
-					Log.d(LOG_TAG, "Error in initVideo");
+					Log.e(LOG_TAG, "Error in initVideo");
 					MediaTx.finishVideo();
 				}
 				this.videoProfile = videoProfile;
