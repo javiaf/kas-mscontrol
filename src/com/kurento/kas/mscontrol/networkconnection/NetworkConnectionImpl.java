@@ -28,7 +28,7 @@ import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
 
 /**
  * 
- * @author Miguel París Díaz
+ * @author mparis
  * 
  */
 public class NetworkConnectionImpl extends NetworkConnectionBase {

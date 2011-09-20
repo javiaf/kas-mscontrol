@@ -18,7 +18,7 @@ import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
 public interface MediaComponentAndroid extends MediaComponent {
 
 	/**
-	 * To a component that record audio from microphone.
+	 * To create a component that record audio from microphone.
 	 */
 	public static final Configuration<MediaComponent> AUDIO_PLAYER = new Configuration<MediaComponent>() {
 	};

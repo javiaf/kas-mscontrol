@@ -31,7 +31,7 @@ public interface MediaSessionAndroid extends MediaSession {
 	};
 
 	/**
-	 * Parameter whose value must be an integer.
+	 * Parameter whose value must be an Integer.
 	 */
 	public static final Parameter MAX_BANDWIDTH = new Parameter() {
 	};
@@ -61,18 +61,18 @@ public interface MediaSessionAndroid extends MediaSession {
 	};
 
 	/**
-	 * Parameter whose value must be an integer.
+	 * Parameter whose value must be an Integer.
 	 */
 	public static final Parameter MAX_FRAME_RATE = new Parameter() {
 	};
 	/**
-	 * Parameter whose value must be an integer.
+	 * Parameter whose value must be an Integer.
 	 */
 	public static final Parameter GOP_SIZE = new Parameter() {
 	};
 
 	/**
-	 * Parameter whose value must be an integer.
+	 * Parameter whose value must be an Integer.
 	 */
 	public static final Parameter FRAMES_QUEUE_SIZE = new Parameter() {
 	};

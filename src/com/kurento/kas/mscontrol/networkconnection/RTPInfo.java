@@ -10,7 +10,7 @@ import com.kurento.kas.media.VideoCodecType;
 
 /**
  * 
- * @author Miguel París Díaz
+ * @author mparis
  * 
  */
 public class RTPInfo {

@@ -7,7 +7,7 @@ import com.kurento.kas.mscontrol.networkconnection.NetIF;
 /**
  * This factory creates MediaSessionAndroid from a set of parameters.
  * 
- * @author Miguel París Díaz
+ * @author mparis
  * 
  */
 public class MSControlFactory {
@@ -19,13 +19,13 @@ public class MSControlFactory {
 	 *            Parameters to create a MediaSessionAndroid. The possible
 	 *            parameter keys are:
 	 *            <ul>
-	 *            <li>{@link MediaSessionAndroid.CONNECTION_TYPE}: a
-	 *            {@link NetIF} to indicate if the network interface is WIFI or
-	 *            MOBILE. MANDATORY.
+	 *            <li>{@link MediaSessionAndroid.NET_IF}: a {@link NetIF} to
+	 *            indicate if the network interface is WIFI or MOBILE.
+	 *            MANDATORY.
 	 *            <li>{@link MediaSessionAndroid.LOCAL_ADDRESS}: an InetAddress
 	 *            to indicate the local IP address.
-	 *            <li>{@link MediaSessionAndroid.MAX_BANDWIDTH}: Integer to indicate
-	 *            the max bandwidth will be used.
+	 *            <li>{@link MediaSessionAndroid.MAX_BANDWIDTH}: Integer to
+	 *            indicate the max bandwidth will be used.
 	 * 
 	 *            <li>{@link MediaSessionAndroid.STREAMS_MODES}: a
 	 *            HashMap&lt;MediaType, Mode&gt;to indicate the mode of each
@@ -45,7 +45,8 @@ public class MSControlFactory {
 	 *            the number of frames in a group of pictures, or 0 for
 	 *            intra_only.
 	 *            <li>{@link MediaSessionAndroid.FRAMES_QUEUE_SIZE}: Integer to
-	 *            indicate the number of frames will be kept.
+	 *            indicate the number of frames will be buffered from the
+	 *            camera.
 	 *            </ul>
 	 * @return a MediaSessionAndroid
 	 * @throws MsControlException
