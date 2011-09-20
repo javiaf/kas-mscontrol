@@ -17,8 +17,8 @@ import com.kurento.kas.media.rx.AudioRx;
 import com.kurento.kas.media.rx.MediaRx;
 import com.kurento.kas.media.tx.AudioInfoTx;
 import com.kurento.kas.media.tx.MediaTx;
-import com.kurento.kas.mscontrol.mediacomponent.AudioSink;
-import com.kurento.kas.mscontrol.networkconnection.RTPInfo;
+import com.kurento.kas.mscontrol.mediacomponent.internal.AudioSink;
+import com.kurento.kas.mscontrol.networkconnection.internal.RTPInfo;
 
 public class AudioJoinableStreamImpl extends JoinableStreamBase implements
 		AudioSink, AudioRx {

@@ -1,4 +1,4 @@
-package com.kurento.kas.mscontrol.networkconnection;
+package com.kurento.kas.mscontrol.networkconnection.internal;
 
 import android.util.Log;
 

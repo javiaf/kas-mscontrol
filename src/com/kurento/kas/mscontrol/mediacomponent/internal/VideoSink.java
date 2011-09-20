@@ -1,4 +1,4 @@
-package com.kurento.kas.mscontrol.mediacomponent;
+package com.kurento.kas.mscontrol.mediacomponent.internal;
 
 public interface VideoSink {
 

@@ -1,4 +1,4 @@
-package com.kurento.kas.mscontrol.networkconnection;
+package com.kurento.kas.mscontrol.networkconnection.internal;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

@@ -1,4 +1,4 @@
-package com.kurento.kas.mscontrol.mediacomponent;
+package com.kurento.kas.mscontrol.mediacomponent.internal;
 
 import java.io.IOException;
 import java.util.List;

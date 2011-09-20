@@ -1,4 +1,4 @@
-package com.kurento.kas.mscontrol.mediacomponent;
+package com.kurento.kas.mscontrol.mediacomponent.internal;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

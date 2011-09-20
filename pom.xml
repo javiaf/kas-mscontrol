@@ -9,7 +9,7 @@
 	<name>Android MSControl Library</name>
 	<description>MSControl implementation for Android.</description>
 	<url>http://repository.kurento.com/site/kas-mscontrol</url>
-	
+
 	<developers>
 		<developer>
 			<id>mparis</id>
@@ -76,41 +76,65 @@
 				<configuration>
 					<siteDirectory>${basedir}/site</siteDirectory>
 					<port>9000</port>
-					<tempWebappDirectory>${basedir}/target/site/tempdir</tempWebappDirectory>
+					<tempWebappDirectory>${basedir}/target/site/tempdir
+					</tempWebappDirectory>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-	
-  <repositories>
-    <repository>
-      <id>kurento-snapshots</id>
-      <name>Kurento Snapshot Repository</name>
-      <url>http://repository.kurento.com/archiva/repository/snapshots/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>kurento-releases</id>
-      <name>Kurento Repository</name>
-      <url>http://repository.kurento.com/archiva/repository/internal/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+
+	<repositories>
+		<repository>
+			<id>kurento-snapshots</id>
+			<name>Kurento Snapshot Repository</name>
+			<url>http://repository.kurento.com/archiva/repository/snapshots/
+			</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>kurento-releases</id>
+			<name>Kurento Repository</name>
+			<url>http://repository.kurento.com/archiva/repository/internal/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.8</version>
+				<configuration>
+					<siteDirectory>${basedir}/site</siteDirectory>
+					<tempWebappDirectory>${basedir}/target/site</tempWebappDirectory>
+
+					<excludePackageNames>com.kurento.kas.media:com.kurento.kas.media.*:com.kurento.kas.mscontrol.join:com.kurento.kas.*.internal.*</excludePackageNames>
+
+					<!-- <dependencySourceExcludes> -->
+					<!-- <dependencySourceExclude>com.kurento.kas.media.tx:*</dependencySourceExclude> -->
+					<!-- </dependencySourceExcludes> -->
+
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 
 	<distributionManagement>
 		<site>
 			<id>maven-site</id>
-			<url>scp://repository.kurento.com/var/www/kurento/site/kas-mscontrol/${project.version}</url>
+			<url>scp://repository.kurento.com/var/www/kurento/site/kas-mscontrol/${project.version}
+			</url>
 		</site>
 		<repository>
 			<id>releases</id>

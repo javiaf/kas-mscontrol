@@ -18,8 +18,8 @@ import com.kurento.kas.media.rx.MediaRx;
 import com.kurento.kas.media.rx.VideoRx;
 import com.kurento.kas.media.tx.MediaTx;
 import com.kurento.kas.media.tx.VideoInfoTx;
-import com.kurento.kas.mscontrol.mediacomponent.VideoSink;
-import com.kurento.kas.mscontrol.networkconnection.RTPInfo;
+import com.kurento.kas.mscontrol.mediacomponent.internal.VideoSink;
+import com.kurento.kas.mscontrol.networkconnection.internal.RTPInfo;
 
 public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		VideoSink, VideoRx {

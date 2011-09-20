@@ -1,4 +1,4 @@
-package com.kurento.kas.mscontrol.networkconnection;
+package com.kurento.kas.mscontrol.networkconnection.internal;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -21,10 +21,11 @@ import com.kurento.kas.media.MediaPortManager;
 import com.kurento.kas.media.VideoCodecType;
 import com.kurento.kas.media.profiles.AudioProfile;
 import com.kurento.kas.media.profiles.VideoProfile;
-import com.kurento.kas.mscontrol.MediaSessionConfig;
+import com.kurento.kas.mscontrol.internal.MediaSessionConfig;
 import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
 import com.kurento.kas.mscontrol.join.JoinableStreamBase;
 import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
+import com.kurento.kas.mscontrol.networkconnection.NetIF;
 
 /**
  * 

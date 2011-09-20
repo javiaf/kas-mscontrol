@@ -2,6 +2,7 @@ package com.kurento.kas.mscontrol;
 
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
+import com.kurento.kas.mscontrol.internal.MediaSessionImpl;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
 
 /**

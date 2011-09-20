@@ -1,4 +1,4 @@
-package com.kurento.kas.mscontrol;
+package com.kurento.kas.mscontrol.internal;
 
 import java.awt.Dimension;
 import java.net.InetAddress;
@@ -14,13 +14,14 @@ import com.kurento.commons.sdp.enums.MediaType;
 import com.kurento.commons.sdp.enums.Mode;
 import com.kurento.kas.media.AudioCodecType;
 import com.kurento.kas.media.VideoCodecType;
-import com.kurento.kas.mscontrol.mediacomponent.AudioPlayerComponent;
-import com.kurento.kas.mscontrol.mediacomponent.AudioRecorderComponent;
+import com.kurento.kas.mscontrol.MediaSessionAndroid;
 import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
-import com.kurento.kas.mscontrol.mediacomponent.VideoPlayerComponent;
-import com.kurento.kas.mscontrol.mediacomponent.VideoRecorderComponent;
+import com.kurento.kas.mscontrol.mediacomponent.internal.AudioPlayerComponent;
+import com.kurento.kas.mscontrol.mediacomponent.internal.AudioRecorderComponent;
+import com.kurento.kas.mscontrol.mediacomponent.internal.VideoPlayerComponent;
+import com.kurento.kas.mscontrol.mediacomponent.internal.VideoRecorderComponent;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
-import com.kurento.kas.mscontrol.networkconnection.NetworkConnectionImpl;
+import com.kurento.kas.mscontrol.networkconnection.internal.NetworkConnectionImpl;
 
 public class MediaSessionImpl implements MediaSessionAndroid {
 
