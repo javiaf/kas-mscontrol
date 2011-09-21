@@ -118,13 +118,7 @@
 				<configuration>
 					<siteDirectory>${basedir}/site</siteDirectory>
 					<tempWebappDirectory>${basedir}/target/site</tempWebappDirectory>
-
-					<excludePackageNames>com.kurento.kas.media:com.kurento.kas.media.*:com.kurento.kas.mscontrol.join:com.kurento.kas.*.internal.*</excludePackageNames>
-
-					<!-- <dependencySourceExcludes> -->
-					<!-- <dependencySourceExclude>com.kurento.kas.media.tx:*</dependencySourceExclude> -->
-					<!-- </dependencySourceExcludes> -->
-
+					<excludePackageNames>com.kurento.kas.media:com.kurento.kas.mscontrol.join:*.internal</excludePackageNames>
 				</configuration>
 			</plugin>
 		</plugins>
