@@ -246,8 +246,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		// Set new attrs
 		Integer maxBW = null;
 		if (mediaSessionConfig.getMaxBW() != null)
-			Math.max(NetIF.MIN_BANDWITH, Math.min(mediaSessionConfig.getNetIF()
-					.getMaxBandwidth(), mediaSessionConfig.getMaxBW()));
+			maxBW = Math.max(NetIF.MIN_BANDWITH, Math.min(mediaSessionConfig
+					.getNetIF().getMaxBandwidth(), mediaSessionConfig
+					.getMaxBW()));
 		Integer maxFrameRate = null;
 		if (mediaSessionConfig.getMaxFrameRate() != null)
 			maxFrameRate = Math.max(1, mediaSessionConfig.getMaxFrameRate());
