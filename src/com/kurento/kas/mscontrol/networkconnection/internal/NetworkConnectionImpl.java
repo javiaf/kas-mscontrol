@@ -101,12 +101,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	@Override
 	public void release() {
-		Log.d(LOG_TAG, "release");
 		if (videoJoinableStreamImpl != null)
 			videoJoinableStreamImpl.stop();
 		if (audioJoinableStreamImpl != null)
 			audioJoinableStreamImpl.stop();
-		Log.d(LOG_TAG, "ALL OK");
 
 		// MediaPortManager.releaseAudioLocalPort();
 		// MediaPortManager.releaseVideoLocalPort();
