@@ -1,4 +1,4 @@
-package com.kurento.kas.mscontrol.internal;
+package com.kurento.kas.mscontrol;
 
 import java.util.Collection;
 import java.util.HashMap;
