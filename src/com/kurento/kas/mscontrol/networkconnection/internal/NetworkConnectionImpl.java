@@ -163,7 +163,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				} else if (AudioProfile.AMR.equals(ap)) {
 					PayloadSpec audioPayloadAMR = null;
 					try {
-						audioPayloadAMR = new PayloadSpec("100 AMR/8000/1");
+						audioPayloadAMR = new PayloadSpec(payload + " AMR/8000/1");
 						audioPayloadAMR.setFormatParams("octet-align=1");
 						audioPayloadAMR.setMediaType(MediaType.AUDIO);
 						audioPayloadAMR.setPort(audioPort);
