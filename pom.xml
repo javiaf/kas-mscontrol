@@ -75,9 +75,7 @@
 				<version>2.3</version>
 				<configuration>
 					<siteDirectory>${basedir}/site</siteDirectory>
-					<port>9000</port>
-					<tempWebappDirectory>${basedir}/target/site/tempdir
-					</tempWebappDirectory>
+					<tempWebappDirectory>${basedir}/target/site</tempWebappDirectory>
 				</configuration>
 			</plugin>
 		</plugins>
