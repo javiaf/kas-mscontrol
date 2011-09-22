@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Kurento Android MSControl">
+	<bannerLeft>
+		<name>Kurento Android Project</name>
+		<src>http://www.kurento.com/kurento/sites/all/themes/bartikplus/logo.png
+		</src>
+		<href>http://repository.kurento.com/site/kurento-android-docs/${project.version}
+		</href>
+	</bannerLeft>
+	<body>
+		<links>
+			<item name="Kurento" href="http://www.kurento.com/" />
+			<item name="Kurento Commons MSControl" href="https://www.kurento.com/site/kc-mscontrol" />
+		</links>
+		<menu name="Kurento Android MSControl">
+			<item name="Main" href="./index.html" />
+			<!-- <item name="Source code" href="./source.html" /> -->
+			<!-- <item name="Download" href="./download.html"/> -->
+		</menu>
+		<menu name="Documentation">
+			<item name="Media management" href="./media-management.html" />
+			<!-- <item name="Developer's guide" href="./developer-guide.html"/> -->
+			<!-- <item name="SDK reference guide" href="./reference-guide.html"/> -->
+			<!-- <item name="License" href="./license.html"/> -->
+		</menu>
+
+		<menu ref="reports" />
+
+	</body>
+</project>

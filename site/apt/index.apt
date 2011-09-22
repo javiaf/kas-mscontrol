@@ -1,0 +1,151 @@
+   ------
+   Kurento Android MSControl
+   ------
+   ------
+   Date
+   ------
+
+Kurento Android MSControl
+
+* Introduction
+
+	Kurento Android MSControl is a sub-API of Kurento Commons MSControl that add specific features
+	extending general interfaces and implements them internally.
+	
+	
+* Simple and usable API
+
+	To use this API we only need to know a few classes and interfaces:
+	
+		* A principal factory named <<MSControlFactory>> to create <<MediaSessionAndroid>> objects.
+		For this we must use createMediaSession() method with some parameters to create a MediaSessionAndroid with specific features.
+		
+		* A <<MediaSessionAndroid>> acts as a factory to create NetworkConnection and MediaComponentAndroid objects.
+		
+			* To create a <<NetworkConnection>> object we must use createNetworkConnection() method inherited from interface MediaSession.
+			
+			* To create a <<MediaComponentAndroid>> object we must use createMediaComponent() specified in MediaSession also. We can create
+			certain media components, each from a particular configuration defined in MediaComponentAndroid interface, with
+			specific features from a set of parameters.
+	
+	
+[./images/kas-mscontrol.png] kas-mscontrol API
+	
+	
+	
+
+* NetworkConnection
+
+	A NetworkConnection represents the component directly connected to the network. It has two basically functions:
+	
+		* Send the media received from its joinee through the net.
+		
+		* Send the media received from the net to all its joinees.
+
+	The concrete NetworkConnection implementation in this API has two stream types, a video and an audio streams.
+	Each one of them is instantiated, started and stopped by its container, in this case the NetworkConnection.
+
+	To create this component from a MediaSession we must do:
+		
++---
+NetworkConnection NC = mediaSession.createNetworkConnection();
++---		
+
+
+
+* MediaComponentAndroid
+
+	A player component  extracts media from its configured source and streams it out. If the component
+	is joined to a NetworkConnection, the stream is sent out on the network.
+	
+	A recorder component retrieves the media stream from the Joinable object to which it is joined; In the simple case,
+	it is a NetworkConnection, and the data come from the network.
+	
+	Through the API we can create specifically four different media components:
+	
+		* <<Audio Player Component:>> extract audio from the device microphone and give it to all his joinees.
+		To create this component from a MediaSession we must do:
+		
++---
+MediaComponentAndroid APC = mediaSession.createMediaComponent(MediaComponentAndroid.AUDIO_PLAYER,Parameters.NO_PARAMETER);
++---
+		
+		* <<Audio Recorder Component:>> receive audio from his joinee and play it with the speaker.
+		To create this component from a MediaSession we must do:
+		
++---	
+Parameters params = new ParametersImpl();
+params.put(MediaComponentAndroid.STREAM_TYPE, AudioManager.STREAM_MUSIC);
+MediaComponentAndroid ARC = mediaSession.createMediaComponent(MediaComponentAndroid.AUDIO_RECORDER, params);
++---
+
+		* <<Video Player Component:>> extract video from the device camera and give it to all his joinees.
+		To create this component from a MediaSession we must do:
+
++---
+View view = ...;
+int orientation = ...;
+Parameters params = new ParametersImpl();
+params.put(MediaComponentAndroid.PREVIEW_SURFACE, view);
+params.put(MediaComponentAndroid.DISPLAY_ORIENTATION, orientation);
+MediaComponentAndroid VPC = mediaSession.createMediaComponent( MediaComponentAndroid.VIDEO_PLAYER, params);
++---			
+							
+		
+		* <<Video Recorder Component:>> receive video from his joinee and play it into a display.
+		To create this component from a MediaSession we must do:
+
++---
+View view = ...;
+int displayWidth = ...;
+int displaoyHeight = ...;
+Parameters params = new ParametersImpl();
+params = new ParametersImpl();
+params.put(MediaComponentAndroid.VIEW_SURFACE, view);
+params.put(MediaComponentAndroid.DISPLAY_WIDTH, dm.displayWidth);
+params.put(MediaComponentAndroid.DISPLAY_HEIGHT, displaoyHeight);
+MediaComponentAndroid VRC = mediaSession.createMediaComponent(MediaComponentAndroid.VIDEO_RECORDER, params);
++---
+
+
+
+
+* Media composition
+		
+	The common composite that we can use is join MediaComponent with NetworkConnection.
+	Each MediaComponent must be joined with its correspondent NetworkConnection stream and with the correct direction:
+	
+		* The Audio Player Component must be join join with NetworkConnection like:
+		
++---
+APC.join(SEND, NC.getJoinableStream(audio))
++---
+		
+		
+		* The Audio Recorder Component must be join join with NetworkConnection like:
+		
++---
+ARC.join(RECV, NC.getJoinableStream(audio))
++---
+		
+		
+		* The Video Player Component must be join join with NetworkConnection like:
+		
++---
+VPC.join(SEND, NC.getJoinableStream(video))
++---
+		
+		
+		* The Video Recorder Component must be join join with NetworkConnection like:
+		
++---
+VRC.join(RECV, NC.getJoinableStream(video))
++---
+	
+[./images/media-composition.png] Media Composition
+	
+	
+
+	
+	
+	

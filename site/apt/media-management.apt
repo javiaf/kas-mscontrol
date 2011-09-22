@@ -1,0 +1,45 @@
+   ------
+   Kurento Android media management
+   ------
+   ------
+   Date
+   ------
+   
+Kurento Android media management
+
+* Introduction
+  
+  Kurento Android SDK requires large amount of resources in terms of CPU time,
+  memory and bandwidth. Resources that are quite limited in mobile platforms.
+  This requires a careful design of process algorithms to achieve objective:
+  To relay audio and video on time with best possible quality.
+  
+  Several algorithms has to be implemented to handle different aspects of media
+  management
+  
+      * Frame adaptation buffer: video conferencing applications require extremely
+      	low latencies and hence a strict jitter control. The adaptation buffer
+      	provides a trade-off between latency and video continuity while adjusting
+      	bandwidth to interface capabilities.
+      	
+      * Optimal codec configuration: video quality can be enhanced with a proper
+        codec parameterization based in available bandwidth, target frame rate
+        and frame size requested by user application. This algorithm is intended
+        to select the best initialization parameters to improve performance
+
+
+
+* Frame adaptation buffer
+
+	
+	
+	
+	
+      
+* Optimal codec configuration
+
+	
+	
+	
+	
+
