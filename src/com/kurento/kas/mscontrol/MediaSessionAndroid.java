@@ -142,6 +142,11 @@ public interface MediaSessionAndroid extends MediaSession {
 	 *            <td>{@link MediaComponentAndroid.DISPLAY_HEIGHT}</td>
 	 *            <td>int</td>
 	 *            </tr>
+	 *            <tr>
+	 *            <td>{@link MediaComponentAndroid.DISPLAY_ORIENTATION}</td>
+	 *            <td>int</td>
+	 *            </tr>
+	 * 
 	 * 
 	 *            </tbody>
 	 *            </table>
