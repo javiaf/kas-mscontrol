@@ -98,8 +98,8 @@ public interface MediaSessionAndroid extends MediaSession {
 	 *            has its own parameters:
 	 * 
 	 *            <table border="1" cellpadding=5>
-	 *            <col width="25%"/> <col width="75%"/> <thead>
 	 *            <tr>
+	 *            <thead>
 	 *            <th>Configurarion&lt;MediaComponentAndroid&gt;</th>
 	 *            <th colspan=2>Parameters</th>
 	 *            </tr>
@@ -119,7 +119,7 @@ public interface MediaSessionAndroid extends MediaSession {
 	 *            <tr>
 	 *            <td>{@link MediaComponentAndroid.AUDIO_RECORDER}</td>
 	 *            <td>{@link MediaComponentAndroid.STREAM_TYPE}</td>
-	 *            <td>int</td>
+	 *            <td>int (see 	android.media.AudioManager)</td>
 	 *            </tr>
 	 * 
 	 *            <tr>
@@ -129,7 +129,7 @@ public interface MediaSessionAndroid extends MediaSession {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td rowspan=3 valign=top>
+	 *            <td rowspan=4 valign=top>
 	 *            {@link MediaComponentAndroid.VIDEO_RECORDER}</td>
 	 *            <td>{@link MediaComponentAndroid.VIEW_SURFACE}</td>
 	 *            <td>android.view.View</td>
