@@ -28,9 +28,67 @@ Kurento Android MSControl
 			certain media components, each from a particular configuration defined in MediaComponentAndroid interface, with
 			specific features from a set of parameters.
 	
-	
+
 [./images/kas-mscontrol.png] kas-mscontrol API
+
+
+
+* Parameters
 	
+	Parameters are used to configure or create specific components and factories.
+	They are a Map of (Parameter=value) pairs where each key identifies a Parameter, and the Map provides its value
+	(extract from javadoc).
+	
+	With they we can provide an easily extensible and very simple API, but to use it correctly it is necessary to read javadoc to see
+	which Parameters are correct for each specific component or factory. Also, in the distinct component sections of this document
+	there are some examples to show how this parameters must be used.
+	
+	Generally, we must instantiate an object of ParametersImpl, an implemented class provided by the API to can manage a set of parameters.
+	With this implementation we can add the parameters with their values with put() method.
+
++---	
+Parameters params = new ParametersImpl();
+Parameter param = ...;
+Object value = ...;
+params.put(param, value);
++---
+
+
+
+* Create a MediaSessionAndroid object with MSControlFactory
+	
+	To crate a MediaSessionAndroid object we must use createMediaSession() method in MSControlFactory. This method requires
+	a set of Parameters defined in MediaSessionAndroid interface. In the next table extracted from javadoc
+	we can see all supported parameters and their features.
+	
+	
+*--------*-----------*----*-------*--------------*--------------------------------------------------*
+| <<Basic parameters>> | <<M/O>> | <<Type>> | <<Rank>> | <<Default value>> | <<Description>>                                                     |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| NET_IF |  M | NetIF | [WIFI, MOBILE] | | Indicate if the network interface is WIFI or MOBILE. |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| LOCAL_ADDRESS |   M        | InetAddress | NA | |Indicate the local IP address.|
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+|MAX_BANDWIDTH | O | Integer | NA | NET_IF.MOBILE: 3840000 NET_IF.WIFI: 15000000 | Indicate the max bandwidth will be used in bps(bits per second).
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| STREAMS_MODES | O | Map<MediaType, Mode> | [SENDRECV, SENDONLY, RECVONLY] | SENDRECV | Indicate the mode of each media stream.|
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| AUDIO_CODECS   | O | List | [AMR, MP2] | [AMR, MP2] |Indicate the audio codecs supported. |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| VIDEO_CODECS   | O | List | [H263, MPEG4]| [H263, MPEG4] |	Indicate the video codecs supported. |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| <<Advanced parameters>> |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| FRAME_SIZE | O | Dimension | NA | 352x288 | Indicate the frame size in pixels (width x height).  |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| MAX_FRAME_RATE | O |Integer|  NA | 15 |Indicate the max frame rate will be used. |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| GOP_SIZE | O |Integer|  NA | 6 | Indicate the max number of frames in a group of pictures, or 0 for intra_only.  |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| FRAMES_QUEUE_SIZE | O | Integer | NA | 2 | Indicate the number of frames will be buffered from the camera. |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+(M: Mandatory; O: Optional)
+
 	
 	
 
@@ -67,7 +125,7 @@ NetworkConnection NC = mediaSession.createNetworkConnection();
 		To create this component from a MediaSession we must do:
 		
 +---
-MediaComponentAndroid APC = mediaSession.createMediaComponent(MediaComponentAndroid.AUDIO_PLAYER,Parameters.NO_PARAMETER);
+MediaComponentAndroid APC = mediaSession.createMediaComponent(MediaComponentAndroid.AUDIO_PLAYER, Parameters.NO_PARAMETER);
 +---
 		
 		* <<Audio Recorder Component:>> receive audio from his joinee and play it with the speaker.
