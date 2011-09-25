@@ -29,7 +29,7 @@ Kurento Android MSControl
 			specific features from a set of parameters.
 	
 
-[./images/kas-mscontrol.png] kas-mscontrol API
+[./images/kas-mscontrol.jpeg] kas-mscontrol API
 
 
 
@@ -52,6 +52,13 @@ Parameter param = ...;
 Object value = ...;
 params.put(param, value);
 +---
+
+	Also exists a special Parameters to indicate NO Parameters:
+
++---
+Parameters.NO_PARAMETER
++---
+
 
 
 
@@ -89,6 +96,57 @@ params.put(param, value);
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 (M: Mandatory; O: Optional)
 
+
+	An example:
+
++---
+Parameters params = new ParametersImpl();
+
+params.put(MediaSessionAndroid.NET_IF, NetIF.MOBILE);
+
+InetAddress localAddress =...;
+params.put(MediaSessionAndroid.LOCAL_ADDRESS, localAddress);
+
+int maxBW = 320000;
+params.put(MediaSessionAndroid.MAX_BANDWIDTH, maxBW);
+
+Map<MediaType, Mode> callDirection = new HashMap<MediaType, Mode>();
+callDirection.put(MediaType.VIDEO, Mode.SENDRECV);
+callDirection.put(MediaType.AUDIO, Mode.SENDRECV);
+params.put(MediaSessionAndroid.STREAMS_MODES, callDirection);
+
+ArrayList<AudioCodecType> audioCodecs = new ArrayList<AudioCodecType>();
+audioCodecs.add(AudioCodecType.AMR);
+audioCodecs.add(AudioCodecType.MP2);
+params.put(MediaSessionAndroid.AUDIO_CODECS, audioCodecs);
+
+ArrayList<VideoCodecType> videoCodecs = new ArrayList<VideoCodecType>();
+videoCodecs.add(VideoCodecType.H263);
+videoCodecs.add(VideoCodecType.MPEG4);
+params.put(MediaSessionAndroid.VIDEO_CODECS, videoCodecs);
+
+Dimension frame_size = ...;
+params.put(MediaSessionAndroid.FRAME_SIZE, frame_size);
+
+int maxFR = 12;
+params.put(MediaSessionAndroid.MAX_FRAME_RATE, maxFR);
+
+int gopSize = 8;
+params.put(MediaSessionAndroid.GOP_SIZE, gopSize);
+
+int maxQueueSize = 3;
+params.put(MediaSessionAndroid.FRAMES_QUEUE_SIZE, maxQueueSize);
+
+
+MediaSessionAndroid mediaSession = MSControlFactory.createMediaSession(params);
++---
+
+
+
+
+
+
+
 	
 	
 
@@ -113,13 +171,16 @@ NetworkConnection NC = mediaSession.createNetworkConnection();
 
 * MediaComponentAndroid
 
-	A player component  extracts media from its configured source and streams it out. If the component
-	is joined to a NetworkConnection, the stream is sent out on the network.
+	We can distinguish two types of media component:
+		
+		* A player component  extracts media from its configured source and streams it out. If the component
+		is joined to a NetworkConnection, the stream is sent out on the network.
 	
-	A recorder component retrieves the media stream from the Joinable object to which it is joined; In the simple case,
-	it is a NetworkConnection, and the data come from the network.
+		* A recorder component retrieves the media stream from the Joinable object to which it is joined; In the simple case,
+		it is a NetworkConnection, and the data come from the network.
 	
-	Through the API we can create specifically four different media components:
+	Through the API we can create specifically four different media components using a MediaSession object as factory.
+	Each component need a concrete parameters to create it.
 	
 		* <<Audio Player Component:>> extract audio from the device microphone and give it to all his joinees.
 		To create this component from a MediaSession we must do:
@@ -170,8 +231,10 @@ MediaComponentAndroid VRC = mediaSession.createMediaComponent(MediaComponentAndr
 
 * Media composition
 		
-	The common composite that we can use is join MediaComponent with NetworkConnection.
-	Each MediaComponent must be joined with its correspondent NetworkConnection stream and with the correct direction:
+	The common composite that we can use is join MediaComponent with NetworkConnection. Both are Joinable objects allowing us make dynamic compositions, we
+	can join and unjoin different types of MediaComponent with a NetworkConnection while it is started. For example, with this we can unjoin a component
+	that feed audio to NetworkConnection to simulate a mute.
+	Specially, each MediaComponent must be joined with its correspondent NetworkConnection stream and with the correct direction:
 	
 		* The Audio Player Component must be join join with NetworkConnection like:
 		
