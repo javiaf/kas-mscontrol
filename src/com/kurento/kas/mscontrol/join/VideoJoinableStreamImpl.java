@@ -1,5 +1,6 @@
 package com.kurento.kas.mscontrol.join;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -55,14 +56,15 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	public VideoJoinableStreamImpl(JoinableContainer container,
-			StreamType type, SessionSpec remoteSessionSpec,
-			SessionSpec localSessionSpec, Integer framesQueueSize) {
+			StreamType type, ArrayList<VideoProfile> videoProfiles,
+			SessionSpec remoteSessionSpec, SessionSpec localSessionSpec,
+			Integer framesQueueSize) {
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
 		if (framesQueueSize != null && framesQueueSize > QUEUE_SIZE)
 			QUEUE_SIZE = framesQueueSize;
 		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
-		
+
 		Map<MediaType, Mode> mediaTypesModes = SpecTools
 				.getModesOfFirstMediaTypes(localSessionSpec);
 		Mode videoMode = mediaTypesModes.get(MediaType.VIDEO);
@@ -70,8 +72,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 		if (videoMode != null) {
 			VideoCodecType videoCodecType = remoteRTPInfo.getVideoCodecType();
-			VideoProfile videoProfile = VideoProfile
-					.getVideoProfileFromVideoCodecType(videoCodecType);
+			VideoProfile videoProfile = getVideoProfileFromVideoCodecType(
+					videoProfiles, videoCodecType);
 			if ((Mode.SENDRECV.equals(videoMode) || Mode.SENDONLY
 					.equals(videoMode)) && videoProfile != null) {
 				VideoInfoTx videoInfo = new VideoInfoTx(videoProfile);
@@ -169,6 +171,16 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 				MediaRx.startVideoRx(sdpVideo, this.videoRx);
 			}
 		}
+	}
+
+	private VideoProfile getVideoProfileFromVideoCodecType(
+			ArrayList<VideoProfile> videoProfiles, VideoCodecType videoCodecType) {
+		if (videoCodecType == null)
+			return null;
+		for (VideoProfile vp : videoProfiles)
+			if (videoCodecType.equals(vp.getVideoCodecType()))
+				return vp;
+		return null;
 	}
 
 }

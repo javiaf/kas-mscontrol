@@ -94,8 +94,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		this.streams[0] = audioJoinableStreamImpl;
 
 		videoJoinableStreamImpl = new VideoJoinableStreamImpl(this,
-				StreamType.video, remoteSessionSpec, localSessionSpec,
-				mediaSessionConfig.getFramesQueueSize());
+				StreamType.video, this.videoProfiles, remoteSessionSpec,
+				localSessionSpec, mediaSessionConfig.getFramesQueueSize());
 		this.streams[1] = videoJoinableStreamImpl;
 	}
 
@@ -132,10 +132,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		if (videoProfiles != null && videoProfiles.size() > 0) {
 			List<PayloadSpec> videoList = new Vector<PayloadSpec>();
 			for (VideoProfile vp : videoProfiles) {
-				if (VideoProfile.MPEG4.equals(vp))
+				if (VideoCodecType.MPEG4.equals(vp.getVideoCodecType()))
 					addPayloadSpec(videoList, payload + " MP4V-ES/90000",
 							MediaType.VIDEO, videoPort);
-				else if (VideoProfile.H263.equals(vp))
+				else if (VideoCodecType.H263.equals(vp.getVideoCodecType()))
 					addPayloadSpec(videoList, payload + " H263-1998/90000",
 							MediaType.VIDEO, videoPort);
 				payload++;
@@ -143,8 +143,13 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 			videoMedia = new MediaSpec();
 			videoMedia.setPayloadList(videoList);
-			Mode videoMode = this.mediaSessionConfig.getMediaTypeModes().get(
-					MediaType.VIDEO);
+
+			Mode videoMode = Mode.SENDRECV;
+			if (this.mediaSessionConfig.getMediaTypeModes() != null
+					&& this.mediaSessionConfig.getMediaTypeModes().get(
+							MediaType.VIDEO) != null)
+				videoMode = this.mediaSessionConfig.getMediaTypeModes().get(
+						MediaType.VIDEO);
 			videoMedia.setMode(videoMode);
 		}
 
@@ -163,7 +168,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				} else if (AudioProfile.AMR.equals(ap)) {
 					PayloadSpec audioPayloadAMR = null;
 					try {
-						audioPayloadAMR = new PayloadSpec(payload + " AMR/8000/1");
+						audioPayloadAMR = new PayloadSpec(payload
+								+ " AMR/8000/1");
 						audioPayloadAMR.setFormatParams("octet-align=1");
 						audioPayloadAMR.setMediaType(MediaType.AUDIO);
 						audioPayloadAMR.setPort(audioPort);
@@ -177,8 +183,13 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 			audioMedia = new MediaSpec();
 			audioMedia.setPayloadList(audioList);
-			Mode audioMode = this.mediaSessionConfig.getMediaTypeModes().get(
-					MediaType.AUDIO);
+
+			Mode audioMode = Mode.SENDRECV;
+			if (this.mediaSessionConfig.getMediaTypeModes() != null
+					&& this.mediaSessionConfig.getMediaTypeModes().get(
+							MediaType.AUDIO) != null)
+				audioMode = this.mediaSessionConfig.getMediaTypeModes().get(
+						MediaType.AUDIO);
 			audioMedia.setMode(audioMode);
 		}
 
@@ -207,15 +218,19 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			MediaSessionConfig mediaSessionConfig) {
 		ArrayList<AudioCodecType> audioCodecs = mediaSessionConfig
 				.getAudioCodecs();
-		if (audioCodecs == null)
-			return null;
 
 		ArrayList<AudioProfile> audioProfiles = new ArrayList<AudioProfile>(0);
+
 		// Discard/Select phase
-		for (AudioProfile ap : AudioProfile.values()) {
-			for (AudioCodecType act : audioCodecs) {
-				if (act.equals(ap.getAudioCodecType()))
-					audioProfiles.add(ap);
+		if (audioCodecs == null) {// Default: all codecs
+			for (AudioProfile ap : AudioProfile.values())
+				audioProfiles.add(ap);
+		} else {
+			for (AudioProfile ap : AudioProfile.values()) {
+				for (AudioCodecType act : audioCodecs) {
+					if (act.equals(ap.getAudioCodecType()))
+						audioProfiles.add(ap);
+				}
 			}
 		}
 
@@ -229,24 +244,29 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			MediaSessionConfig mediaSessionConfig) {
 		ArrayList<VideoCodecType> videoCodecs = mediaSessionConfig
 				.getVideoCodecs();
-		if (videoCodecs == null)
-			return null;
+		NetIF netIF = mediaSessionConfig.getNetIF();
 
 		ArrayList<VideoProfile> videoProfiles = new ArrayList<VideoProfile>(0);
+
 		// Discard/Select phase
-		for (VideoProfile vp : VideoProfile.values()) {
+		if (videoCodecs == null) {// Default: all codecs
+			for (VideoCodecType vct : VideoCodecType.values())
+				videoProfiles
+						.add(new VideoProfile(vct, netIF.getMaxBandwidth()));
+		} else {
 			for (VideoCodecType vct : videoCodecs) {
-				if (vct.equals(vp.getVideoCodecType()))
-					videoProfiles.add(vp);
+				videoProfiles
+						.add(new VideoProfile(vct, netIF.getMaxBandwidth()));
 			}
 		}
 
 		// Set new attrs
 		Integer maxBW = null;
 		if (mediaSessionConfig.getMaxBW() != null)
-			maxBW = Math.max(NetIF.MIN_BANDWITH, Math.min(mediaSessionConfig
-					.getNetIF().getMaxBandwidth(), mediaSessionConfig
-					.getMaxBW()));
+			maxBW = Math.max(
+					NetIF.MIN_BANDWITH,
+					Math.min(netIF.getMaxBandwidth(),
+							mediaSessionConfig.getMaxBW()));
 		Integer maxFrameRate = null;
 		if (mediaSessionConfig.getMaxFrameRate() != null)
 			maxFrameRate = Math.max(1, mediaSessionConfig.getMaxFrameRate());

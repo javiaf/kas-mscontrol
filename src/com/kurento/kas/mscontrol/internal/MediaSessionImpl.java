@@ -82,15 +82,14 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 					"Parameter MediaSessionAndroid.NET_IF must be instance of NetIF");
 		NetIF netIF = (NetIF) obj;
 
-		InetAddress localAddress = null;
 		obj = params.get(LOCAL_ADDRESS);
 		if (obj == null) {
-			// Por defecto
+			throw new MsControlException(
+					"Params must have MediaSessionAndroid.LOCAL_ADDRESS param");
 		} else if (!(obj instanceof InetAddress))
 			throw new MsControlException(
 					"Parameter MediaSessionAndroid.LOCAL_ADDRESS must be instance of InetAddress");
-		else
-			localAddress = (InetAddress) obj;
+		InetAddress localAddress = (InetAddress) obj;
 
 		Integer maxBW = null;
 		obj = params.get(MAX_BANDWIDTH);
@@ -181,9 +180,9 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		else
 			framesQueueSize = (Integer) obj;
 
-		return new MediaSessionConfig(netIF, localAddress, maxBW, mediaTypeModes,
-				audioCodecs, videoCodecs, frameSize, maxFrameRate, gopSize,
-				framesQueueSize);
+		return new MediaSessionConfig(netIF, localAddress, maxBW,
+				mediaTypeModes, audioCodecs, videoCodecs, frameSize,
+				maxFrameRate, gopSize, framesQueueSize);
 	}
 
 }
