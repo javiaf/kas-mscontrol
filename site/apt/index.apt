@@ -18,16 +18,19 @@ Kurento Android MSControl
 	To use this API we only need to know a few classes and interfaces:
 	
 		* A principal factory named <<MSControlFactory>> to create <<MediaSessionAndroid>> objects.
-		For this we must use createMediaSession() method with some parameters to create a MediaSessionAndroid with specific features.
+		For this we must use <<<createMediaSession()>>> method with some parameters to create a <<<MediaSessionAndroid>>> with specific features.
 		
-		* A <<MediaSessionAndroid>> acts as a factory to create NetworkConnection and MediaComponentAndroid objects.
+		* A <<MediaSessionAndroid>> acts as a factory to create <<<NetworkConnection>>> and <<<MediaComponentAndroid>>> objects.
 		
-			* To create a <<NetworkConnection>> object we must use createNetworkConnection() method inherited from interface MediaSession.
+			* To create a <<NetworkConnection>> object we must use <<<createNetworkConnection()>>> method inherited from interface <<<MediaSession>>>.
 			
-			* To create a <<MediaComponentAndroid>> object we must use createMediaComponent() specified in MediaSession also. We can create
-			certain media components, each from a particular configuration defined in MediaComponentAndroid interface, with
+			* To create a <<MediaComponentAndroid>> object we must use <<<createMediaComponent()>>> specified in <<<MediaSession>>> also.
+			We can create certain media components, each from a particular configuration defined in <<<MediaComponentAndroid>>> interface, with
 			specific features from a set of parameters.
-
+			
+			[]
+			
+		[]
 
 [./images/kas-mscontrol.jpeg] kas-mscontrol API
 
@@ -35,16 +38,16 @@ Kurento Android MSControl
 
 * Parameters
 	
-	Parameters are used to configure or create specific components and factories.
-	They are a Map of (Parameter=value) pairs where each key identifies a Parameter, and the Map provides its value
+	<<<Parameters>>> are used to configure or create specific components and factories.
+	They are a Map of (Parameter=value) pairs where each key identifies a <<<Parameter>>>, and the Map provides its value
 	(extract from javadoc).
 	
 	With they we can provide an easily extensible and very simple API, but to use it correctly it is necessary to read javadoc to see
-	which Parameters are correct for each specific component or factory. Also, in the distinct component sections of this document
+	which <<<Parameters>>> are correct for each specific component or factory. Also, in the distinct component sections of this document
 	there are some examples to show how this parameters must be used.
 	
-	Generally, we must instantiate an object of ParametersImpl, an implemented class provided by the API to can manage a set of parameters.
-	With this implementation we can add the parameters with their values with put() method.
+	Generally, we must instantiate an object of <<<ParametersImpl>>>, an implemented class provided by the API to can manage a set of parameters.
+	With this implementation we can add the parameters with their values with <<<put()>>> method.
 
 +---	
 Parameters params = new ParametersImpl();
@@ -53,7 +56,7 @@ Object value = ...;
 params.put(param, value);
 +---
 
-	Also exists a special Parameters to indicate NO Parameters:
+	Also exists a special <<<Parameters>>> to indicate NO parameters:
 
 +---
 Parameters.NO_PARAMETER
@@ -64,35 +67,36 @@ Parameters.NO_PARAMETER
 
 * Create a MediaSessionAndroid object with MSControlFactory
 	
-	To crate a MediaSessionAndroid object we must use createMediaSession() method in MSControlFactory. This method requires
-	a set of Parameters defined in MediaSessionAndroid interface. In the next table extracted from javadoc
+	To crate a <<<MediaSessionAndroid>>> object we must use <<<createMediaSession()>>> method in <<<MSControlFactory>>>. This method requires
+	a set of <<<Parameters>>> defined in <<<MediaSessionAndroid>>> interface. In the next table extracted from javadoc
 	we can see all supported parameters and their features.
 	
 	
 *--------*-----------*----*-------*--------------*--------------------------------------------------*
-| <<Basic parameters>> | <<M/O>> | <<Type>> | <<Rank>> | <<Default value>> | <<Description>>                                                     |
+| <<Basic parameters>> | <<M/O>> | <<Type>> | <<Rank>> | <<Default value>> | <<Description>> |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | NET_IF |  M | NetIF | [WIFI, MOBILE] | | Indicate if the network interface is WIFI or MOBILE. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| LOCAL_ADDRESS |   M        | InetAddress | NA | |Indicate the local IP address.|
+| LOCAL_ADDRESS | M | InetAddress | NA | |Indicate the local IP address.|
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-|MAX_BANDWIDTH | O | Integer | NA | NET_IF.MOBILE: 3840000 NET_IF.WIFI: 15000000 | Indicate the max bandwidth will be used in bps(bits per second).
+| MAX_BANDWIDTH | O | Integer | NET_IF.MOBILE:\ [150000,\ 384000]\ | NET_IF.MOBILE:\ 384000\ | Indicate the max bandwidth will be used in bps(bits per second). |
+|				|	|		  | NET_IF.WIFI:\ [150000,\ 1500000]	| NET_IF.WIFI:\ 1500000  |																	|	
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| STREAMS_MODES | O | Map<MediaType, Mode> | [SENDRECV, SENDONLY, RECVONLY] | SENDRECV | Indicate the mode of each media stream.|
+| STREAMS_MODES | O | Map\<MediaType,\ Mode\> | [SENDRECV, SENDONLY, RECVONLY] | SENDRECV | Indicate the mode of each media stream.|
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| AUDIO_CODECS   | O | List | [AMR, MP2] | [AMR, MP2] |Indicate the audio codecs supported. |
+| AUDIO_CODECS   | O | List\<AudioCodectype\> | [AMR, MP2] | [AMR, MP2] |Indicate the audio codecs supported. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| VIDEO_CODECS   | O | List | [H263, MPEG4]| [H263, MPEG4] |	Indicate the video codecs supported. |
+| VIDEO_CODECS   | O | List\<VideoCodectype\> | [H263, MPEG4]| [H263, MPEG4] |	Indicate the video codecs supported. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | <<Advanced parameters>> |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | FRAME_SIZE | O | Dimension | NA | 352x288 | Indicate the frame size in pixels (width x height).  |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| MAX_FRAME_RATE | O |Integer|  NA | 15 |Indicate the max frame rate will be used. |
+| MAX_FRAME_RATE | O |Integer|  [1, MAX_INT] | 15 |Indicate the max frame rate will be used. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| GOP_SIZE | O |Integer|  NA | 6 | Indicate the max number of frames in a group of pictures, or 0 for intra_only.  |
+| GOP_SIZE | O |Integer| [0, MAX_INT] | 6 | Indicate the max number of frames in a group of pictures, or 0 for intra_only.  |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| FRAMES_QUEUE_SIZE | O | Integer | NA | 2 | Indicate the number of frames will be buffered from the camera. |
+| FRAMES_QUEUE_SIZE | O | Integer | [2, MAX_INT] | 2 | Indicate the number of frames will be buffered from the camera. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 (M: Mandatory; O: Optional)
 
@@ -152,16 +156,16 @@ MediaSessionAndroid mediaSession = MSControlFactory.createMediaSession(params);
 
 * NetworkConnection
 
-	A NetworkConnection represents the component directly connected to the network. It has two basically functions:
+	A <<<NetworkConnection>>> represents the component directly connected to the network. It has two basically functions:
 	
 		* Send the media received from its joinee through the net.
 		
-		* Send the media received from the net to all its joinees.
+		* Send the media received from the net to all its <<<joinees>>>.
 
 	The concrete NetworkConnection implementation in this API has two stream types, a video and an audio streams.
-	Each one of them is instantiated, started and stopped by its container, in this case the NetworkConnection.
+	Each one of them is instantiated, started and stopped by its container, in this case the <<<NetworkConnection>>>.
 
-	To create this component from a MediaSession we must do:
+	To create this component from a <<<MediaSession>>> we must do:
 		
 +---
 NetworkConnection NC = mediaSession.createNetworkConnection();
@@ -173,17 +177,17 @@ NetworkConnection NC = mediaSession.createNetworkConnection();
 
 	We can distinguish two types of media component:
 		
-		* A player component  extracts media from its configured source and streams it out. If the component
-		is joined to a NetworkConnection, the stream is sent out on the network.
+		* A <<player>> component  extracts media from its configured source and streams it out. If the component
+		is joined to a <<<NetworkConnection>>>, the stream is sent out on the network.
 	
-		* A recorder component retrieves the media stream from the Joinable object to which it is joined; In the simple case,
-		it is a NetworkConnection, and the data come from the network.
+		* A <<recorder>> component retrieves the media stream from the <<<Joinable>>> object to which it is joined; In the simple case,
+		it is a <<<NetworkConnection>>>, and the data come from the network.
 	
-	Through the API we can create specifically four different media components using a MediaSession object as factory.
+	Through the API we can create specifically four different media components using a <<<MediaSession>>> object as factory.
 	Each component need a concrete parameters to create it.
 	
-		* <<Audio Player Component:>> extract audio from the device microphone and give it to all his joinees.
-		To create this component from a MediaSession we must do:
+		* <<Audio Player Component:>> extract audio from the device microphone and give it to all his <<<joinees>>>.
+		To create this component from a <<<MediaSession>>> we must do:
 		
 +---
 MediaComponentAndroid APC = mediaSession.createMediaComponent(MediaComponentAndroid.AUDIO_PLAYER, Parameters.NO_PARAMETER);
@@ -198,7 +202,7 @@ params.put(MediaComponentAndroid.STREAM_TYPE, AudioManager.STREAM_MUSIC);
 MediaComponentAndroid ARC = mediaSession.createMediaComponent(MediaComponentAndroid.AUDIO_RECORDER, params);
 +---
 
-		* <<Video Player Component:>> extract video from the device camera and give it to all his joinees.
+		* <<Video Player Component:>> extract video from the device camera and give it to all his <<<joinees>>>.
 		To create this component from a MediaSession we must do:
 
 +---
@@ -211,7 +215,7 @@ MediaComponentAndroid VPC = mediaSession.createMediaComponent( MediaComponentAnd
 +---			
 							
 		
-		* <<Video Recorder Component:>> receive video from his joinee and play it into a display.
+		* <<Video Recorder Component:>> receive video from his <<<joinee>>> and play it into a display.
 		To create this component from a MediaSession we must do:
 
 +---
@@ -231,37 +235,39 @@ MediaComponentAndroid VRC = mediaSession.createMediaComponent(MediaComponentAndr
 
 * Media composition
 		
-	The common composite that we can use is join MediaComponent with NetworkConnection. Both are Joinable objects allowing us make dynamic compositions, we
-	can join and unjoin different types of MediaComponent with a NetworkConnection while it is started. For example, with this we can unjoin a component
+	The common composite that we can use is join <<<MediaComponent>>> with <<<NetworkConnection>>>. Both are <<<Joinable>>> objects allowing us make dynamic compositions, we
+	can join and unjoin different types of <<<MediaComponent>>> with a <<<NetworkConnection>>> while it is started. For example, with this we can unjoin a component
 	that feed audio to NetworkConnection to simulate a mute.
-	Specially, each MediaComponent must be joined with its correspondent NetworkConnection stream and with the correct direction:
+	Specially, each <<<MediaComponent>>> must be joined with its correspondent <<<NetworkConnection>>> stream and with the correct direction:
 	
-		* The Audio Player Component must be join join with NetworkConnection like:
+		* The Audio Player Component must be join join with <<<NetworkConnection>>> like:
 		
 +---
 APC.join(SEND, NC.getJoinableStream(audio))
 +---
 		
 		
-		* The Audio Recorder Component must be join join with NetworkConnection like:
+		* The Audio Recorder Component must be join join with <<<NetworkConnection>>> like:
 		
 +---
 ARC.join(RECV, NC.getJoinableStream(audio))
 +---
 		
 		
-		* The Video Player Component must be join join with NetworkConnection like:
+		* The Video Player Component must be join join with <<<NetworkConnection>>> like:
 		
 +---
 VPC.join(SEND, NC.getJoinableStream(video))
 +---
 		
 		
-		* The Video Recorder Component must be join join with NetworkConnection like:
+		* The Video Recorder Component must be join join with <<<NetworkConnection>>> like:
 		
 +---
 VRC.join(RECV, NC.getJoinableStream(video))
 +---
+
+		[]
 	
 [./images/media-composition.png] Media Composition
 	
