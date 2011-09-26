@@ -5,8 +5,8 @@ import android.util.Log;
 import com.kurento.commons.media.format.MediaSpec;
 import com.kurento.commons.media.format.SessionSpec;
 import com.kurento.commons.sdp.enums.MediaType;
-import com.kurento.kas.media.AudioCodecType;
-import com.kurento.kas.media.VideoCodecType;
+import com.kurento.kas.media.codecs.AudioCodecType;
+import com.kurento.kas.media.codecs.VideoCodecType;
 
 public class RTPInfo {
 

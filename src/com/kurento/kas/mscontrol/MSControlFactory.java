@@ -2,8 +2,9 @@ package com.kurento.kas.mscontrol;
 
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
+import com.kurento.kas.media.codecs.AudioCodecType;
+import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.mscontrol.internal.MediaSessionImpl;
-import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
 
 /**
@@ -26,7 +27,7 @@ public class MSControlFactory {
 	 *            <th>Basic Parameters</th>
 	 *            <th>M&nbsp;/&nbsp;O</th>
 	 *            <th>Type</th>
-	 *            <th>Rank</th>
+	 *            <th>Range</th>
 	 *            <th>Default value</th>
 	 *            <th>Description</th>
 	 *            </tr>
@@ -69,7 +70,7 @@ public class MSControlFactory {
 	 *            <tr>
 	 *            <td>{@link MediaSessionAndroid.STREAMS_MODES}</td>
 	 *            <td>O</td>
-	 *            <td>HashMap&lt;MediaType, Mode&gt;</td>
+	 *            <td>HashMap&lt;{@link MediaType, Mode}&gt;</td>
 	 *            <td>[SENDRECV, SENDONLY, RECVONLY]</td>
 	 *            <td>SENDRECV</td>
 	 *            <td>Indicate the mode of each media stream.</td>
@@ -78,7 +79,7 @@ public class MSControlFactory {
 	 *            <tr>
 	 *            <td>{@link MediaSessionAndroid.AUDIO_CODECS}</td>
 	 *            <td>O</td>
-	 *            <td>ArrayList&lt;AudioCodecType&gt;</td>
+	 *            <td>ArrayList&lt;{@link AudioCodecType}&gt;</td>
 	 *            <td>[AMR, MP2]</td>
 	 *            <td>[AMR, MP2]</td>
 	 *            <td>Indicate the audio codecs supported.</td>
@@ -87,7 +88,7 @@ public class MSControlFactory {
 	 *            <tr>
 	 *            <td>{@link MediaSessionAndroid.VIDEO_CODECS}</td>
 	 *            <td>O</td>
-	 *            <td>ArrayList&lt;VideoCodecType&gt;</td>
+	 *            <td>ArrayList&lt;{@link VideoCodecType}&gt;</td>
 	 *            <td>[H263, MPEG4]</td>
 	 *            <td>[H263, MPEG4]</td>
 	 *            <td>Indicate the video codecs supported.</td>

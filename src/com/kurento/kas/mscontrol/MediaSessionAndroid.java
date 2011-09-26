@@ -17,60 +17,64 @@ import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
 public interface MediaSessionAndroid extends MediaSession {
 
 	/**
-	 * Parameter whose value must be a NetIF.
+	 * MediaSessionAndoid.NetIF to indicate if the network interface is WIFI or
+	 * MOBILE.
 	 */
 	public static final Parameter NET_IF = new Parameter() {
 	};
 
 	/**
-	 * Parameter whose value must be an InetAddress.
+	 * InetAddress to indicate the local IP address
 	 */
 	public static final Parameter LOCAL_ADDRESS = new Parameter() {
 	};
 
 	/**
-	 * Parameter whose value must be an Integer.
+	 * Integer to indicate the max bandwidth will be used in bps(bits per
+	 * second).
 	 */
 	public static final Parameter MAX_BANDWIDTH = new Parameter() {
 	};
 
 	/**
-	 * Parameter whose value must be a HashMap&lt;MediaType, Mode&gt;.
+	 * HashMap&lt;MediaType, Mode&gt; to indicate the mode of each media stream.
 	 */
 	public static final Parameter STREAMS_MODES = new Parameter() {
 	};
 
 	/**
-	 * Parameter whose value must be an ArrayList&lt;AudioCodecType&gt;.
+	 * ArrayList&lt;AudioCodecType&gt; to indicate the audio codecs supported.
 	 */
 	public static final Parameter AUDIO_CODECS = new Parameter() {
 	};
 
 	/**
-	 * Parameter whose value must be an ArrayList&lt;VideoCodecType&gt;.
+	 * ArrayList&lt;VideoCodecType&gt; to indicate the video codecs supported.
 	 */
 	public static final Parameter VIDEO_CODECS = new Parameter() {
 	};
 
 	/**
-	 * Parameter whose value must be a Dimension.
+	 * Dimension to indicate the frame size in pixels.
 	 */
 	public static final Parameter FRAME_SIZE = new Parameter() {
 	};
 
 	/**
-	 * Parameter whose value must be an Integer.
+	 * Integer to indicate the max frame rate will be used.
 	 */
 	public static final Parameter MAX_FRAME_RATE = new Parameter() {
 	};
 	/**
-	 * Parameter whose value must be an Integer.
+	 * Integer to indicate the max number of frames in a group of pictures, or 0
+	 * for intra_only.
 	 */
 	public static final Parameter GOP_SIZE = new Parameter() {
 	};
 
 	/**
-	 * Parameter whose value must be an Integer.
+	 * Integer to indicate the number of frames will be buffered from the
+	 * camera.
 	 */
 	public static final Parameter FRAMES_QUEUE_SIZE = new Parameter() {
 	};

@@ -9,8 +9,8 @@ import com.kurento.commons.mscontrol.Configuration;
 import com.kurento.commons.mscontrol.MediaSession;
 import com.kurento.commons.sdp.enums.MediaType;
 import com.kurento.commons.sdp.enums.Mode;
-import com.kurento.kas.media.AudioCodecType;
-import com.kurento.kas.media.VideoCodecType;
+import com.kurento.kas.media.codecs.AudioCodecType;
+import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
 
 public class MediaSessionConfig implements Configuration<MediaSession> {
