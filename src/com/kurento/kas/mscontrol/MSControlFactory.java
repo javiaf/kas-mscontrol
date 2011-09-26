@@ -26,7 +26,7 @@ public class MSControlFactory {
 	 *            <thead>
 	 *            <tr>
 	 *            <th>Basic Parameters</th>
-	 *            <th>M / O</th>
+	 *            <th>M&nbsp;/&nbsp;O</th>
 	 *            <th>Type</th>
 	 *            <th>Rank</th>
 	 *            <th>Default value</th>
@@ -57,11 +57,11 @@ public class MSControlFactory {
 	 *            <td>{@link MediaSessionAndroid.MAX_BANDWIDTH}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
-	 *            <td>NA</td>
+	 *            <td>NET_IF.MOBILE: [150000, 384000] NET_IF.WIFI: [150000, 1500000]</td>
 	 *            <td>
 	 *            <ul>
-	 *            <li>NET_IF.MOBILE: 3840000</li>
-	 *            <li>NET_IF.WIFI: 15000000</li>
+	 *            <li>NET_IF.MOBILE: 384000</li>
+	 *            <li>NET_IF.WIFI: 1500000</li>
 	 *            </ul>
 	 *            </td>
 	 *            <td>Indicate the max bandwidth will be used in bps(bits per
@@ -115,7 +115,7 @@ public class MSControlFactory {
 	 *            <td>{@link MediaSessionAndroid.MAX_FRAME_RATE}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
-	 *            <td>NA</td>
+	 *            <td>[1, Integer.MAX_VALUE]</td>
 	 *            <td>15</td>
 	 *            <td>Indicate the max frame rate will be used.</td>
 	 *            </tr>
@@ -124,7 +124,7 @@ public class MSControlFactory {
 	 *            <td>{@link MediaSessionAndroid.GOP_SIZE}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
-	 *            <td>NA</td>
+	 *            <td>[0, Integer.MAX_VALUE]</td>
 	 *            <td>6</td>
 	 *            <td>Indicate the max number of frames in a group of pictures,
 	 *            or 0 for intra_only.</td>
@@ -134,7 +134,7 @@ public class MSControlFactory {
 	 *            <td>{@link MediaSessionAndroid.FRAMES_QUEUE_SIZE}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
-	 *            <td>NA</td>
+	 *            <td>[2, Integer.MAX_VALUE]</td>
 	 *            <td>2</td>
 	 *            <td>Indicate the number of frames will be buffered from the
 	 *            camera.</td>
