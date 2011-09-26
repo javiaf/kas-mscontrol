@@ -27,7 +27,7 @@ Kurento Android MSControl
 			* To create a <<MediaComponentAndroid>> object we must use createMediaComponent() specified in MediaSession also. We can create
 			certain media components, each from a particular configuration defined in MediaComponentAndroid interface, with
 			specific features from a set of parameters.
-	
+
 
 [./images/kas-mscontrol.jpeg] kas-mscontrol API
 
@@ -217,12 +217,12 @@ MediaComponentAndroid VPC = mediaSession.createMediaComponent( MediaComponentAnd
 +---
 View view = ...;
 int displayWidth = ...;
-int displaoyHeight = ...;
+int displayHeight = ...;
 Parameters params = new ParametersImpl();
 params = new ParametersImpl();
 params.put(MediaComponentAndroid.VIEW_SURFACE, view);
-params.put(MediaComponentAndroid.DISPLAY_WIDTH, dm.displayWidth);
-params.put(MediaComponentAndroid.DISPLAY_HEIGHT, displaoyHeight);
+params.put(MediaComponentAndroid.DISPLAY_WIDTH, displayWidth);
+params.put(MediaComponentAndroid.DISPLAY_HEIGHT, displayHeight);
 MediaComponentAndroid VRC = mediaSession.createMediaComponent(MediaComponentAndroid.VIDEO_RECORDER, params);
 +---
 
