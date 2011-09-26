@@ -13,8 +13,6 @@ import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
  * 
  * Defines a set of parameters to config a MediaSession instance.
  * 
- * @author mparis
- * 
  */
 public interface MediaSessionAndroid extends MediaSession {
 
@@ -120,7 +118,7 @@ public interface MediaSessionAndroid extends MediaSession {
 	 *            <tr>
 	 *            <td>{@link MediaComponentAndroid.AUDIO_RECORDER}</td>
 	 *            <td>{@link MediaComponentAndroid.STREAM_TYPE}</td>
-	 *            <td>int (see 	android.media.AudioManager)</td>
+	 *            <td>int (see android.media.AudioManager)</td>
 	 *            <td>Speaker that will be used.</td>
 	 *            </tr>
 	 * 
@@ -128,7 +126,8 @@ public interface MediaSessionAndroid extends MediaSession {
 	 *            <td>{@link MediaComponentAndroid.VIDEO_PLAYER}</td>
 	 *            <td>{@link MediaComponentAndroid.PREVIEW_SURFACE}</td>
 	 *            <td>android.view.View</td>
-	 *            <td>Surface in which the preview images from the camera will be previewed</td>
+	 *            <td>Surface in which the preview images from the camera will
+	 *            be previewed</td>
 	 *            </tr>
 	 * 
 	 *            <tr>
@@ -141,12 +140,14 @@ public interface MediaSessionAndroid extends MediaSession {
 	 *            <tr>
 	 *            <td>{@link MediaComponentAndroid.DISPLAY_WIDTH}</td>
 	 *            <td>int</td>
-	 *            <td>Width of surface designated by {@link MediaComponentAndroid.VIEW_SURFACE}</td>
+	 *            <td>Width of surface designated by
+	 *            {@link MediaComponentAndroid.VIEW_SURFACE}</td>
 	 *            </tr>
 	 *            <tr>
 	 *            <td>{@link MediaComponentAndroid.DISPLAY_HEIGHT}</td>
 	 *            <td>int</td>
-	 *            <td>Height of surface designated by {@link MediaComponentAndroid.VIEW_SURFACE}</td>
+	 *            <td>Height of surface designated by
+	 *            {@link MediaComponentAndroid.VIEW_SURFACE}</td>
 	 *            </tr>
 	 *            <tr>
 	 *            <td>{@link MediaComponentAndroid.DISPLAY_ORIENTATION}</td>

@@ -11,9 +11,6 @@ import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
  * MediaComponent. They must be used in
  * createMediaComponent(Configuration<MediaComponent> predefinedConfig,
  * Parameters params)
- * 
- * @author mparis
- * 
  */
 public interface MediaComponentAndroid extends MediaComponent {
 

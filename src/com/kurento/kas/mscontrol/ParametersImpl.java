@@ -8,11 +8,6 @@ import java.util.Set;
 import com.kurento.commons.mscontrol.Parameter;
 import com.kurento.commons.mscontrol.Parameters;
 
-/**
- * 
- * @author mparis
- *
- */
 public class ParametersImpl implements Parameters {
 
 	Map<Parameter, Object> parameters;

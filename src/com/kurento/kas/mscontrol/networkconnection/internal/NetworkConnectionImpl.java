@@ -27,11 +27,6 @@ import com.kurento.kas.mscontrol.join.JoinableStreamBase;
 import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
 
-/**
- * 
- * @author mparis
- * 
- */
 public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	private static final long serialVersionUID = 1L;

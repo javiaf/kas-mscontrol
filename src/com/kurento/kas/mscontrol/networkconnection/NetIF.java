@@ -2,9 +2,6 @@ package com.kurento.kas.mscontrol.networkconnection;
 
 /**
  * NetIF indicate the network interface.
- * 
- * @author mparis
- * 
  */
 public enum NetIF {
 	WIFI(1500000), MOBILE(384000);

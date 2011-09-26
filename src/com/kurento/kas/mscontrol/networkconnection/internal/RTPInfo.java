@@ -8,11 +8,6 @@ import com.kurento.commons.sdp.enums.MediaType;
 import com.kurento.kas.media.AudioCodecType;
 import com.kurento.kas.media.VideoCodecType;
 
-/**
- * 
- * @author mparis
- * 
- */
 public class RTPInfo {
 
 	public final static String LOG_TAG = "RTPInfo";

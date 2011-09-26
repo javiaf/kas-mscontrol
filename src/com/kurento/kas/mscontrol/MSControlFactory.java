@@ -9,8 +9,6 @@ import com.kurento.kas.mscontrol.networkconnection.NetIF;
 /**
  * This factory creates MediaSessionAndroid from a set of parameters.
  * 
- * @author mparis
- * 
  */
 public class MSControlFactory {
 
