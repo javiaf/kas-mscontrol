@@ -73,7 +73,7 @@ Parameters.NO_PARAMETER
 	
 	
 *--------*-----------*----*-------*--------------*--------------------------------------------------*
-| <<Basic parameters>> | <<M/O>> | <<Type>> | <<Rank>> | <<Default value>> | <<Description>> |
+| <<Basic parameters>> | <<M/O>> | <<Type>> | <<Range>> | <<Default value>> | <<Description>> |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | NET_IF |  M | NetIF | [WIFI, MOBILE] | | Indicate if the network interface is WIFI or MOBILE. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
@@ -158,11 +158,11 @@ MediaSessionAndroid mediaSession = MSControlFactory.createMediaSession(params);
 
 	A <<<NetworkConnection>>> represents the component directly connected to the network. It has two basically functions:
 	
-		* Send the media received from its joinee through the net.
+		* Send the media received from its <<<joinee>>> through the net.
 		
 		* Send the media received from the net to all its <<<joinees>>>.
 
-	The concrete NetworkConnection implementation in this API has two stream types, a video and an audio streams.
+	The <<<NetworkConnection>>> implementation in this API has two stream types, a video and an audio streams.
 	Each one of them is instantiated, started and stopped by its container, in this case the <<<NetworkConnection>>>.
 
 	To create this component from a <<<MediaSession>>> we must do:
@@ -184,7 +184,7 @@ NetworkConnection NC = mediaSession.createNetworkConnection();
 		it is a <<<NetworkConnection>>>, and the data come from the network.
 	
 	Through the API we can create specifically four different media components using a <<<MediaSession>>> object as factory.
-	Each component need a concrete parameters to create it.
+	Each component need particular parameters to create it.
 	
 		* <<Audio Player Component:>> extract audio from the device microphone and give it to all his <<<joinees>>>.
 		To create this component from a <<<MediaSession>>> we must do:
@@ -193,7 +193,7 @@ NetworkConnection NC = mediaSession.createNetworkConnection();
 MediaComponentAndroid APC = mediaSession.createMediaComponent(MediaComponentAndroid.AUDIO_PLAYER, Parameters.NO_PARAMETER);
 +---
 		
-		* <<Audio Recorder Component:>> receive audio from his joinee and play it with the speaker.
+		* <<Audio Recorder Component:>> receive audio from his <<<joinee>>> and play it with the speaker.
 		To create this component from a <<<MediaSession>>> we must do:
 		
 +---	
@@ -237,7 +237,7 @@ MediaComponentAndroid VRC = mediaSession.createMediaComponent(MediaComponentAndr
 		
 	The common composite that we can use is join <<<MediaComponent>>> with <<<NetworkConnection>>>. Both are <<<Joinable>>> objects allowing us make dynamic compositions, we
 	can join and unjoin different types of <<<MediaComponent>>> with a <<<NetworkConnection>>> while it is started. For example, with this we can unjoin a component
-	that feed audio to NetworkConnection to simulate a mute.
+	that feed audio to <<<NetworkConnection>>> to simulate a mute.
 	Specially, each <<<MediaComponent>>> must be joined with its correspondent <<<NetworkConnection>>> stream and with the correct direction:
 	
 		* The Audio Player Component must be join join with <<<NetworkConnection>>> like:
