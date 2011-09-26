@@ -194,7 +194,7 @@ MediaComponentAndroid APC = mediaSession.createMediaComponent(MediaComponentAndr
 +---
 		
 		* <<Audio Recorder Component:>> receive audio from his joinee and play it with the speaker.
-		To create this component from a MediaSession we must do:
+		To create this component from a <<<MediaSession>>> we must do:
 		
 +---	
 Parameters params = new ParametersImpl();
@@ -203,7 +203,7 @@ MediaComponentAndroid ARC = mediaSession.createMediaComponent(MediaComponentAndr
 +---
 
 		* <<Video Player Component:>> extract video from the device camera and give it to all his <<<joinees>>>.
-		To create this component from a MediaSession we must do:
+		To create this component from a <<<MediaSession>>> we must do:
 
 +---
 View view = ...;
@@ -216,7 +216,7 @@ MediaComponentAndroid VPC = mediaSession.createMediaComponent( MediaComponentAnd
 							
 		
 		* <<Video Recorder Component:>> receive video from his <<<joinee>>> and play it into a display.
-		To create this component from a MediaSession we must do:
+		To create this component from a <<<MediaSession>>> we must do:
 
 +---
 View view = ...;
