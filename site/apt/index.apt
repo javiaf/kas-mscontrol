@@ -46,11 +46,11 @@ Kurento Android MSControl
 	which <<<Parameters>>> are correct for each specific component or factory. Also, in the distinct component sections of this document
 	there are some examples to show how this parameters must be used.
 	
-	Generally, we must instantiate an object of <<<ParametersImpl>>>, an implemented class provided by the API to can manage a set of parameters.
-	With this implementation we can add the parameters with their values with <<<put()>>> method.
+	Generally, we must get an instance of a Parameters object with static method <<<MSControlFactory.createParameters()>>> to can manage
+	a set of parameters and add them with their values with <<<put()>>> method.
 
 +---	
-Parameters params = new ParametersImpl();
+Parameters params = MSControlFactory.createParameters();
 Parameter param = ...;
 Object value = ...;
 params.put(param, value);
@@ -104,7 +104,7 @@ Parameters.NO_PARAMETER
 	An example:
 
 +---
-Parameters params = new ParametersImpl();
+Parameters params = MSControlFactory.createParameters();
 
 params.put(MediaSessionAndroid.NET_IF, NetIF.MOBILE);
 
@@ -197,7 +197,7 @@ MediaComponentAndroid APC = mediaSession.createMediaComponent(MediaComponentAndr
 		To create this component from a <<<MediaSession>>> we must do:
 		
 +---	
-Parameters params = new ParametersImpl();
+Parameters params = MSControlFactory.createParameters();
 params.put(MediaComponentAndroid.STREAM_TYPE, AudioManager.STREAM_MUSIC);
 MediaComponentAndroid ARC = mediaSession.createMediaComponent(MediaComponentAndroid.AUDIO_RECORDER, params);
 +---
@@ -208,7 +208,7 @@ MediaComponentAndroid ARC = mediaSession.createMediaComponent(MediaComponentAndr
 +---
 View view = ...;
 int orientation = ...;
-Parameters params = new ParametersImpl();
+Parameters params = MSControlFactory.createParameters();
 params.put(MediaComponentAndroid.PREVIEW_SURFACE, view);
 params.put(MediaComponentAndroid.DISPLAY_ORIENTATION, orientation);
 MediaComponentAndroid VPC = mediaSession.createMediaComponent( MediaComponentAndroid.VIDEO_PLAYER, params);
@@ -222,8 +222,8 @@ MediaComponentAndroid VPC = mediaSession.createMediaComponent( MediaComponentAnd
 View view = ...;
 int displayWidth = ...;
 int displayHeight = ...;
-Parameters params = new ParametersImpl();
-params = new ParametersImpl();
+Parameters params = MSControlFactory.createParameters();
+params = MSControlFactory.createParameters();
 params.put(MediaComponentAndroid.VIEW_SURFACE, view);
 params.put(MediaComponentAndroid.DISPLAY_WIDTH, displayWidth);
 params.put(MediaComponentAndroid.DISPLAY_HEIGHT, displayHeight);

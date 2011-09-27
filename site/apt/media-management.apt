@@ -18,19 +18,83 @@ Kurento Android media management
   management.
 
 
-* Frame adaptation buffer
+* Frame adaptation queue
 
-	Frame adaptation buffer: video conferencing applications require extremely
-	low latencies and hence a strict jitter control. The adaptation buffer
+	Video conferencing applications require extremely
+	low latencies and hence a strict jitter control. The adaptation queue
 	provides a trade-off between latency and video continuity while adjusting
-	bandwidth to interface capabilities.
+	bandwidth to network interface capabilities and obtain the target frame rate desired.
+	
+	Briefly, this algorithm must achieve the next goals:
+	
+		* Obtain the target frame rate desired.
+		
+		* Obtain the target bandwidth desired.
+		
+		* Obtain the lowest possible latency.
+		
+		* Reduce the maximum possible the jitter to obtain a good continuity in the video.
+		
+	
+	It is very important to know that the improvement of a feature can worsen another.
+	
+	To achieve these goals it is necessary solve some problems proceed from
+	the device features:
+	
+		* The component that provides frames from the camera (<<producer>>) doesn't
+		offer frames exactly periodically adjusting to the particular frame rate
+		given from the Android API, it sometimes offers frames more slowly and sometimes
+		it offers frames more rapidly.
+		
+		* The component that take these frames (<<consumer>>) and processes them
+		to encode and send them doesn't delay always the same time.
+	
+	
+	The algorithm is based in a queue in which the producer put frames and the consumer take them
+	if there is some frame, if not it is blocked until the producer puts a new frame.
+	Also, it is necessary to keep track of times that the consumer delays in process each frame.
+	
+	The queue has a N size to allow keep the last N frames received from the producer when it is faster than consumer.
+	The purpose of this is to prevent that the consumer has frames when it need take and process one although
+	the producer didn't put any because it at this moment is slower. With this the algorithm improve the jitter and
+	the resulting video will have a good continuity. On the contrary, we must try that N is small because with higher N
+	the latency is higher.
+	
+	The frame rate and the resulting bandwidth are directly related because the media encode configuration from a target frame rate
+	(frame_rate) and a target bandwidth(bit_rate) do that each encoded frame has a determinate size in bits. For example, 
+	if we want obtain 384000 bps(bits per second) with 15 fps(frames per second), each encoded frame must has 25600 bits:
+	
++---
+384000 bps / 15 fps = 25600 bpf (bits per frame)
++---
+	
+	It is aprox because it is so dependent of the type of video frame.
+	
+	So, to obtain the target bandwidth the algorithm must adjust the maximum possible the real frame rate with the
+	target frame rate, because the real bitrate will be obtained is:
+
++---
+real_bitrate = K * target_bitrate/targer_framerate * real_bitrate
++---
+	
+	where K is a correction factor because is so difficult obtain the exact real_bitrate equals target_bitrate.
+	
+	
+	To achieve this, in the case that the consumer works faster, the algorithm do that the consumer wait a time
+	before begin to process the next frame. This time is the appropriate to achieve the target bitrate, for which the last
+	N times associated to the last N frames sent is used, where N is equals the queue size.
+	
+	For these cases, the algorithm is robust but if the producer or the consumer are slower that the need time
+	to achieve target frame rate it can't get it, so the target frame rate must be decreased and the encode configuration
+	will change.
+	
 	
 	
 	
       
 * Optimal codec configuration
 
-	Optimal codec configuration: video quality can be enhanced with a proper
+	Video quality can be enhanced with a proper
 	codec parameterization based in available bandwidth, target frame rate
 	and frame size requested by user application. This algorithm is intended
 	to select the best initialization parameters to improve performance
