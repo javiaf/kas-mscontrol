@@ -5,6 +5,7 @@ import com.kurento.commons.mscontrol.Parameters;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.mscontrol.internal.MediaSessionImpl;
+import com.kurento.kas.mscontrol.internal.ParametersImpl;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
 
 /**
@@ -56,7 +57,12 @@ public class MSControlFactory {
 	 *            <td>{@link MediaSessionAndroid.MAX_BANDWIDTH}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
-	 *            <td>NET_IF.MOBILE: [150000, 384000] NET_IF.WIFI: [150000, 1500000]</td>
+	 *            <td>
+	 *            <ul>
+	 *            <li>NET_IF.MOBILE: [150000, 384000]</li>
+	 *            <li>NET_IF.WIFI: [150000, 1500000]</li>
+	 *            </ul>
+	 *            </td>
 	 *            <td>
 	 *            <ul>
 	 *            <li>NET_IF.MOBILE: 384000</li>
@@ -148,6 +154,15 @@ public class MSControlFactory {
 	public static MediaSessionAndroid createMediaSession(Parameters params)
 			throws MsControlException {
 		return new MediaSessionImpl(params);
+	}
+
+	/**
+	 * Create an empty Parameters map.
+	 * 
+	 * @return Parameters
+	 */
+	public static Parameters createParameters() {
+		return new ParametersImpl();
 	}
 
 }
