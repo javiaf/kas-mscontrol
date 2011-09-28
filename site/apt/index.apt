@@ -61,36 +61,36 @@ Parameters.NO_PARAMETER
 * MediaSessionAndroid
 	
 	A <<<MediaSessionAndroid>>> instance is created with method <<<createMediaSession()>>> 
-	of <<<MSControlFactory>>>. This method requires a set of <<<Parameters>>> to provide media information
-	and user preferences. Next table show supported parameters.
+	of <<<MSControlFactory>>>. This method requires a set of <<<Parameters>>> defined  in <<<MediaSessionAndroid>>> interface
+	to provide media information and user preferences. Next table show supported parameters.
 	
 	
 *--------*-----------*----*-------*--------------*--------------------------------------------------*
 | <<Basic parameters>> | <<M/O>> | <<Type>> | <<Range>> | <<Default value>> | <<Description>> |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| NET_IF |  M | NetIF | [WIFI, MOBILE] | | Active network interface to be used. Can be WIFI or MOBILE |
+| NET_IF |  M | NetIF | [WIFI, MOBILE] | | Active network interface to be used. Can be WIFI or MOBILE. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| LOCAL_ADDRESS | M | InetAddress | NA | |Local IP address of active interface|
+| LOCAL_ADDRESS | M | InetAddress | NA | |Local IP address of active interface. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| MAX_BANDWIDTH | O | Integer | NET_IF.MOBILE:\ [150000,\ 384000]\ | NET_IF.MOBILE:\ 384000\ | MAX. bandwidth to be used in bps(bits per second) |
+| MAX_BANDWIDTH | O | Integer | NET_IF.MOBILE:\ [150000,\ 384000]\ | NET_IF.MOBILE:\ 384000\ | MAX. bandwidth to be used in bps(bits per second). |
 |				|	|		  | NET_IF.WIFI:\ [150000,\ 1500000]	| NET_IF.WIFI:\ 1500000  |    	|	
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | STREAMS_MODES | O | Map\<MediaType,\ Mode\> | [SENDRECV, SENDONLY, RECVONLY] | SENDRECV | Connection mode for each media channel.|
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| AUDIO_CODECS   | O | List\<AudioCodectype\> | [AMR, MP2] | [AMR, MP2] |Enabled audio codecs  |
+| AUDIO_CODECS   | O | List\<AudioCodectype\> | [AMR, MP2] | [AMR, MP2] |Enabled audio codecs.  |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| VIDEO_CODECS   | O | List\<VideoCodectype\> | [H263, MPEG4]| [H263, MPEG4] |	Enabled video codecs |
+| VIDEO_CODECS   | O | List\<VideoCodectype\> | [H263, MPEG4]| [H263, MPEG4] |	Enabled video codecs. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | <<Advanced parameters>> |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| FRAME_SIZE | O | Dimension | NA | 352x288 | Frame size in pixels (width x height)  |
+| FRAME_SIZE | O | Dimension | NA | 352x288 | Frame size in pixels (width x height).  |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| MAX_FRAME_RATE | O |Integer|  [1, MAX_INT] | 15 |MAX. frame rate to be used |
+| MAX_FRAME_RATE | O |Integer|  [1, MAX_INT] | 15 |MAX. frame rate to be used. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| GOP_SIZE | O |Integer| [0, MAX_INT] | 6 | MAX. number of frames in a group of pictures, 0 for intra_only  |
+| GOP_SIZE | O |Integer| [0, MAX_INT] | 6 | MAX. number of frames in a group of pictures, 0 for intra_only.  |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| FRAMES_QUEUE_SIZE | O | Integer | [2, MAX_INT] | 2 | MAX number of frames will be buffered from the camera. |
-|					|	|		  |				 |	 |The bigger buffer size the bigger latency     |
+| FRAMES_QUEUE_SIZE | O | Integer | [2, MAX_INT] | 2 | MAX. number of frames will be buffered from the camera. |
+|					|	|		  |				 |	 |The bigger buffer size the bigger latency.     |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 (M: Mandatory; O: Optional)
 
@@ -142,14 +142,14 @@ MediaSessionAndroid mediaSession = MSControlFactory.createMediaSession(params);
 
 * NetworkConnection
 
-	A <<<NetworkConnection>>> represents the component directly connected to the network. It has 
+	A <<<NetworkConnection>>> represents the component directly connected to the network. It has
 	two basic functions:
 	
 		* Transmit media received from its <<<joinees>>> through the net.
 		
 		* Relay media received from the net to all its <<<joinees>>>.
 
-	The <<<NetworkConnection>>> implementation has two stream types: video and an audio.
+	The <<<NetworkConnection>>> implementation has two stream types: video and audio.
 	Each stream is automatically instantiated by the SIP User Agent, started after call setup
 	and stopped after call tear-down.
 
@@ -170,11 +170,11 @@ NetworkConnection NC = mediaSession.createNetworkConnection();
 		* A <<Player>> component  extracts media from its attached source and streams it out. If the
 		component is joined to a <<<NetworkConnection>>>, the stream is sent out through the network.
 	
-		* A <<Recorder>> component retrieves the media stream from a <<<Joinable>>> object to 
+		* A <<Recorder>> component retrieves the media stream from a <<<Joinable>>> object to
 		which it is joined. In the simplest case this is a <<<NetworkConnection>>>, and the
 		data comes from the network.
 	
-	The API provides four different media components that can be instantiated through the factory.
+	The API provides four different media components that can be instantiated through the factory
 	<<<MediaSessionAndroid>>>. Each component requires its particular configuration.
 	
 		* <<Audio Player Component:>> Extracts audio from the microphone and sends it to all its
@@ -226,14 +226,14 @@ MediaComponentAndroid VRC = mediaSession.createMediaComponent(MediaComponentAndr
 
 * Media composition
 		
-	The most common composite joins <<<MediaComponent>>> with <<<NetworkConnection>>>. Both 
-	are <<<Joinable>>> objects allowing dynamic compositions. It is possible to 
+	The most common composite joins <<<MediaComponent>>> with <<<NetworkConnection>>>. Both
+	are <<<Joinable>>> objects allowing dynamic compositions. It is possible to
 	join and unjoin different types of <<<MediaComponent>>> with a <<<NetworkConnection>>>,
-	even in started state. Example below show how to join and  unjoin a component
+	even in started state. For example, we can unjoin a component
 	that feed audio to <<<NetworkConnection>>> in order to simulate a mute.
 	Notice each <<<MediaComponent>>> supports a single media type (AUDIO/VIDEO). Special
-	care is required selecting appropriate media type and connection mode when joining 
-	to a <<<NetworkConnection>>>:
+	care is required selecting appropriate media type and connection mode when joining
+	to a <<<NetworkConnection>>> selecting the correct stream:
 	
 		* The Audio Player Component must be join join with <<<NetworkConnection>>> like:
 		
@@ -261,6 +261,8 @@ VPC.join(SEND, NC.getJoinableStream(video))
 +---
 VRC.join(RECV, NC.getJoinableStream(video))
 +---
+
+		[]
 	
 [./images/media-composition.png] Media Composition
 	
