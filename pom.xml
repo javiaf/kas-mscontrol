@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	
+
 	<groupId>com.kurento.kas</groupId>
 	<artifactId>kas-mscontrol</artifactId>
 	<version>1.0.0-RC-1</version>
@@ -9,7 +9,7 @@
 
 	<name>Kurento Android MSControl</name>
 	<description>MSControl implementation for Android.</description>
-	<url>http://repository.kurento.com/docs/kas-mscontrol</url>
+	<url>http://www.kurento.com/docs/kas-mscontrol</url>
 
 	<organization>
 		<name>Kurento</name>
@@ -102,6 +102,13 @@
 					<siteDirectory>${basedir}/site</siteDirectory>
 					<tempWebappDirectory>${basedir}/target/site</tempWebappDirectory>
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.wagon</groupId>
+						<artifactId>wagon-ssh</artifactId>
+						<version>1.0-beta-7</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
