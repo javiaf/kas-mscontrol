@@ -7,6 +7,7 @@ import com.kurento.commons.media.format.SessionSpec;
 import com.kurento.commons.sdp.enums.MediaType;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
+import com.kurento.kas.media.exception.CodecNotSupportedException;
 
 public class RTPInfo {
 
@@ -50,53 +51,46 @@ public class RTPInfo {
 		return audioPayloadType;
 	}
 
-	public RTPInfo(SessionSpec se) { // throws NoSuchMediaInfoException {
+	public RTPInfo(SessionSpec se) {
 		try {
 			this.dstIp = se.getOriginAddress();
-
 			for (MediaSpec ms : se.getMediaSpec()) {
 				Log.d(LOG_TAG, "ms: " + ms.toString());
 				if (ms.getMediaType().equals(MediaType.AUDIO)) {
-					Log.d(LOG_TAG, "audio");
 					this.dstAudioPort = ms.getPort();
-					Log.d(LOG_TAG, "dstAudioPort: " + dstAudioPort);
-					Log.d(LOG_TAG,
-							"encoding name: "
-									+ ms.getPayloadList().get(0)
-											.getEncodingName());
-					try {
-						this.audioCodecType = AudioCodecType
-								.getCodecTypeFromName(ms.getPayloadList()
-										.get(0).getEncodingName());
-					} catch (Exception e) {
-						Log.d(LOG_TAG, e.toString());
-						e.printStackTrace();
+					if (ms.getPayloadList() != null
+							&& ms.getPayloadList().size() > 0) {
+						String encodingName = ms.getPayloadList().get(0)
+								.getEncodingName();
+						try {
+							this.audioCodecType = AudioCodecType
+									.getCodecTypeFromName(encodingName);
+						} catch (CodecNotSupportedException e) {
+							Log.w(LOG_TAG, encodingName + " not supported.");
+						}
+						this.audioPayloadType = ms.getPayloadList().get(0)
+								.getPayload();
 					}
-					this.audioPayloadType = ms.getPayloadList().get(0)
-							.getPayload();
 				} else if (ms.getMediaType().equals(MediaType.VIDEO)) {
-					Log.d(LOG_TAG, "video");
 					this.dstVideoPort = ms.getPort();
-					Log.d(LOG_TAG, "dstVideoPort: " + dstVideoPort);
-					Log.d(LOG_TAG,
-							"encoding name: "
-									+ ms.getPayloadList().get(0)
-											.getEncodingName());
-					try {
-						this.videoCodecType = VideoCodecType
-								.getCodecTypeFromName(ms.getPayloadList()
-										.get(0).getEncodingName());
-					} catch (Exception e) {
-						Log.d(LOG_TAG, e.toString());
-						e.printStackTrace();
+					if (ms.getPayloadList() != null
+							&& ms.getPayloadList().size() > 0) {
+						String encodingName = ms.getPayloadList().get(0)
+								.getEncodingName();
+						try {
+							this.videoCodecType = VideoCodecType
+									.getCodecTypeFromName(encodingName);
+						} catch (CodecNotSupportedException e) {
+							Log.w(LOG_TAG, encodingName + " not supported.");
+						}
+						this.videoPayloadType = ms.getPayloadList().get(0)
+								.getPayload();
 					}
-					this.videoPayloadType = ms.getPayloadList().get(0)
-							.getPayload();
 				}
 			}
-		} catch (IndexOutOfBoundsException ioobe) {
-			// throw new NoSuchMediaInfoException(
-			// "No such media info in SessionSpec object");
+		} catch (Exception e) {
+			Log.e(LOG_TAG, "Error trying get RTP info from SDP");
+			e.printStackTrace();
 		}
 	}
 
