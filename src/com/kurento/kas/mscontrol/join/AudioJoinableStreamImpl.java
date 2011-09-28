@@ -56,7 +56,7 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements
 				audioInfo.setPayloadType(remoteRTPInfo.getAudioPayloadType());
 				audioInfo.setFrameSize(MediaTx.initAudio(audioInfo));
 				if (audioInfo.getFrameSize() < 0) {
-					Log.d(LOG_TAG, "Error in initAudio");
+					Log.e(LOG_TAG, "Error in initAudio");
 					MediaTx.finishAudio();
 					return;
 				}
