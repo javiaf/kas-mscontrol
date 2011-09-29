@@ -2,7 +2,7 @@ package com.kurento.kas.mscontrol.join;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import android.util.Log;
 
@@ -46,10 +46,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	private int QUEUE_SIZE = 2;
-	private LinkedBlockingDeque<Frame> framesQueue = new LinkedBlockingDeque<Frame>(
-			QUEUE_SIZE);
-	private LinkedBlockingDeque<Long> txTimes = new LinkedBlockingDeque<Long>(
-			QUEUE_SIZE);
+	private LinkedBlockingQueue<Frame> framesQueue = new LinkedBlockingQueue<Frame>(QUEUE_SIZE);
+	private LinkedBlockingQueue<Long> txTimes = new LinkedBlockingQueue<Long>(QUEUE_SIZE);
 
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
@@ -101,8 +99,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	@Override
 	public void putVideoFrame(byte[] data, int width, int height) {
 		if (framesQueue.size() >= QUEUE_SIZE)
-			framesQueue.pollLast();
-		framesQueue.offerFirst(new Frame(data, width, height));
+			framesQueue.poll();
+		framesQueue.offer(new Frame(data, width, height));
 	}
 
 	@Override
@@ -135,16 +133,16 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 			try {
 				for (int i = 0; i < QUEUE_SIZE; i++)
-					txTimes.offerFirst(new Long(0));
+					txTimes.offer(new Long(0));
 				for (;;) {
 					long t = System.currentTimeMillis();
-					long h = (t - txTimes.takeLast()) / QUEUE_SIZE;
+					long h = (t - txTimes.take()) / QUEUE_SIZE;
 					if (h < tFrame) {
 						long s = tFrame - h;
 						sleep(s);
 					}
-					frameProcessed = framesQueue.takeLast();
-					txTimes.offerFirst(t);
+					frameProcessed = framesQueue.take();
+					txTimes.offer(t);
 					MediaTx.putVideoFrame(frameProcessed.data,
 							frameProcessed.width, frameProcessed.height);
 				}
