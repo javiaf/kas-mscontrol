@@ -37,8 +37,7 @@ public class SdpPortManagerImpl implements SdpPortManager {
 
 	@Override
 	public NetworkConnection getContainer() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.resource;
 	}
 
 	@Override
