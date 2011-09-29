@@ -10,7 +10,7 @@
 	<body>
 		<links>
 			<item name="Kurento" href="http://www.kurento.com/" />
-			<item name="Kurento Commons MSControl" href="https://www.kurento.com/site/kc-mscontrol" />
+			<item name="Kurento Commons MSControl" href="../kc-mscontrol" />
 		</links>
 		<menu ref="reports" />
 		<menu name="Documentation">
