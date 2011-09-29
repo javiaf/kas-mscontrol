@@ -150,17 +150,21 @@ MediaSessionAndroid mediaSession = MSControlFactory.createMediaSession(params);
 		* Relay media received from the net to all its <<<joinees>>>.
 
 	The <<<NetworkConnection>>> implementation has two stream types: video and audio.
-	Each stream is automatically instantiated by the SIP User Agent, started after call setup
-	and stopped after call tear-down.
+	A <<<NetworkConnection>>> and its stream types is determined by a pair of Session Descriptions
+	obtained commonly after a negotiation performed by <<<SdpPortManager>>>: the <<<MediaServer>>> and the <<<UserAgent>>> SDP.
 
-	Next code shows how to instantiate a <<<NetworkConnection>>>. This is though half of the process
-	as connections requires a negotiation process with remote peer. Complete procedure is performed
-	by {{{../kas-sipua}Kurento SIP User Agent}} that manages connection life cycle associated to
-	call life cycle.
+	Next code shows how to instantiate a <<<NetworkConnection>>>.
 		
 +---
 NetworkConnection NC = mediaSession.createNetworkConnection();
-+---		
++---
+
+	To know more about <<<NetworkConnection>>> and <<<SdpPortManager>>> you can see {{{../kc-mscontrol}Kurento Commons MSControl}}
+	and more specially  {{{http://www.jcp.org/en/jsr/detail?id=309}JSR309}} documentation.
+
+
+
+
 
 
 * MediaComponentAndroid
