@@ -40,7 +40,6 @@ public class SdpPortManagerImpl implements SdpPortManager {
 
 	private static Log log = LogFactory.getLog(SdpPortManagerImpl.class);
 
-	private List<MediaSpec> combinedMediaList;
 	private NetworkConnectionBase resource;
 	private SessionSpec userAgentSDP; // this is remote session spec
 
@@ -121,7 +120,8 @@ public class SdpPortManagerImpl implements SdpPortManager {
 			SessionSpec[] intersectionSessions = SpecTools
 					.intersectSessionSpec(resource.generateSessionSpec(),
 							userAgentSDP);
-			combinedMediaList = intersectionSessions[1].getMediaSpec();
+			List<MediaSpec> combinedMediaList = intersectionSessions[1]
+					.getMediaSpec();
 
 			userAgentSDP.setMediaSpec(combinedMediaList);
 			resource.setRemoteSessionSpec(userAgentSDP);
@@ -164,8 +164,6 @@ public class SdpPortManagerImpl implements SdpPortManager {
 	public void processSdpAnswer(byte[] answer) throws SdpPortManagerException {
 		try {
 			userAgentSDP = new SessionSpec(new String(answer));
-
-			combinedMediaList = userAgentSDP.getMediaSpec();
 			resource.setRemoteSessionSpec(userAgentSDP);
 
 			localSpec = SpecTools.intersectSessionSpec(
@@ -189,7 +187,6 @@ public class SdpPortManagerImpl implements SdpPortManager {
 	@Override
 	public void rejectSdpOffer() throws SdpPortManagerException {
 		resource.release();
-		combinedMediaList = null;
 	}
 
 	/**
