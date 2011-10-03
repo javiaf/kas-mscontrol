@@ -34,6 +34,7 @@ import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
 import com.kurento.commons.mscontrol.networkconnection.SdpPortManager;
 import com.kurento.commons.mscontrol.networkconnection.SdpPortManagerEvent;
 import com.kurento.commons.mscontrol.networkconnection.SdpPortManagerException;
+import com.kurento.commons.sdp.enums.Mode;
 
 public class SdpPortManagerImpl implements SdpPortManager {
 
@@ -112,7 +113,7 @@ public class SdpPortManagerImpl implements SdpPortManager {
 	 */
 	@Override
 	public void processSdpOffer(byte[] offer) throws SdpPortManagerException {
-		log.debug("processSdpOffer");
+		log.info("processSdpOffer");
 		SdpPortManagerEventImpl event = null;
 
 		try {
@@ -122,20 +123,29 @@ public class SdpPortManagerImpl implements SdpPortManager {
 							userAgentSDP);
 			combinedMediaList = intersectionSessions[1].getMediaSpec();
 
-			if (combinedMediaList.isEmpty()) {
-				event = new SdpPortManagerEventImpl(null, this, null,
+			userAgentSDP.setMediaSpec(combinedMediaList);
+			resource.setRemoteSessionSpec(userAgentSDP);
+
+			localSpec = intersectionSessions[0];
+			String localAddress = resource.getLocalAddress().getHostAddress();
+			localSpec.setOriginAddress(localAddress);
+			localSpec.setRemoteHandler(localAddress);
+			resource.setLocalSessionSpec(localSpec);
+
+			boolean allInactive = true;
+			for (MediaSpec ms : combinedMediaList) {
+				if (!Mode.INACTIVE.equals(ms.getMode())) {
+					allInactive = false;
+					break;
+				}
+			}
+
+			// if combinedMediaList.isEmpty() then allInactive==true
+			if (allInactive) {
+				event = new SdpPortManagerEventImpl(null, this,
+						localSpec.getSessionDescription(),
 						SdpPortManagerEvent.SDP_NOT_ACCEPTABLE);
 			} else {
-				userAgentSDP.setMediaSpec(combinedMediaList);
-				resource.setRemoteSessionSpec(userAgentSDP);
-
-				localSpec = intersectionSessions[0];
-				String localAddress = resource.getLocalAddress()
-						.getHostAddress();
-				localSpec.setOriginAddress(localAddress);
-				localSpec.setRemoteHandler(localAddress);
-				resource.setLocalSessionSpec(localSpec);
-
 				event = new SdpPortManagerEventImpl(
 						SdpPortManagerEvent.ANSWER_GENERATED, this,
 						localSpec.getSessionDescription(),
@@ -147,7 +157,6 @@ public class SdpPortManagerImpl implements SdpPortManager {
 			log.error("Error processing SDPOffer", e);
 			throw new SdpPortManagerException("Error processing SDPOffer", e);
 		}
-
 		notifyEvent(event);
 	}
 
