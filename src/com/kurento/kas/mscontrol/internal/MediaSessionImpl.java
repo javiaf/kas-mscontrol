@@ -90,6 +90,15 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			throw new MsControlException(
 					"Parameter MediaSessionAndroid.LOCAL_ADDRESS must be instance of InetAddress");
 		InetAddress localAddress = (InetAddress) obj;
+		
+		obj = params.get(PUBLIC_ADDRESS);
+		if (obj == null) {
+			throw new MsControlException(
+					"Params must have MediaSessionAndroid.LOCAL_ADDRESS param");
+		} else if (!(obj instanceof InetAddress))
+			throw new MsControlException(
+					"Parameter MediaSessionAndroid.LOCAL_ADDRESS must be instance of InetAddress");
+		InetAddress publicAddress = (InetAddress) obj;
 
 		Integer maxBW = null;
 		obj = params.get(MAX_BANDWIDTH);
@@ -180,7 +189,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		else
 			framesQueueSize = (Integer) obj;
 
-		return new MediaSessionConfig(netIF, localAddress, maxBW,
+		return new MediaSessionConfig(netIF, localAddress, publicAddress, maxBW,
 				mediaTypeModes, audioCodecs, videoCodecs, frameSize,
 				maxFrameRate, gopSize, framesQueueSize);
 	}
