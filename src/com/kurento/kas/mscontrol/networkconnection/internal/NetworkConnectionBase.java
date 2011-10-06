@@ -46,5 +46,7 @@ public abstract class NetworkConnectionBase extends JoinableContainerImpl
 	public abstract void setRemoteSessionSpec(SessionSpec remote);
 
 	public abstract InetAddress getLocalAddress();
+	
+	public abstract InetAddress getPublicAddress();
 
 }

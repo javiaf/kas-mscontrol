@@ -1,6 +1,9 @@
 package com.kurento.kas.mscontrol.networkconnection.internal;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -26,6 +29,13 @@ import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
 import com.kurento.kas.mscontrol.join.JoinableStreamBase;
 import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
+
+import de.javawi.jstun.attribute.MessageAttributeException;
+import de.javawi.jstun.attribute.MessageAttributeParsingException;
+import de.javawi.jstun.header.MessageHeaderParsingException;
+import de.javawi.jstun.test.DiscoveryInfo;
+import de.javawi.jstun.test.DiscoveryTest;
+import de.javawi.jstun.util.UtilityException;
 
 public class NetworkConnectionImpl extends NetworkConnectionBase {
 
@@ -55,7 +65,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	@Override
 	public void setRemoteSessionSpec(SessionSpec arg0) {
 		this.remoteSessionSpec = arg0;
-		Log.d(LOG_TAG, "remoteSessionSpec:\n" + remoteSessionSpec);
+		Log.d(LOG_TAG, "** remoteSessionSpec:\n" + remoteSessionSpec);
 	}
 
 	public NetworkConnectionImpl(MediaSessionConfig mediaSessionConfig)
@@ -71,10 +81,6 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		audioProfiles = getAudioProfiles(this.mediaSessionConfig);
 		videoProfiles = getVideoProfiles(this.mediaSessionConfig);
 
-		if (videoPort == -1)
-			videoPort = MediaPortManager.takeVideoLocalPort();
-		if (audioPort == -1)
-			audioPort = MediaPortManager.takeAudioLocalPort();
 	}
 
 	@Override
@@ -100,9 +106,6 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			videoJoinableStreamImpl.stop();
 		if (audioJoinableStreamImpl != null)
 			audioJoinableStreamImpl.stop();
-
-		// MediaPortManager.releaseAudioLocalPort();
-		// MediaPortManager.releaseVideoLocalPort();
 	}
 
 	private void addPayloadSpec(List<PayloadSpec> videoList, String payloadStr,
@@ -117,8 +120,55 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		}
 	}
 
+	private void takeMediaPort() {
+		MediaPortManager.releaseAudioLocalPort();
+		MediaPortManager.releaseVideoLocalPort();
+
+		Log.d(LOG_TAG, "Video: Test Port ...." + getLocalAddress());
+		DiscoveryTest test = new DiscoveryTest(getLocalAddress(),
+				"stun.sipgate.net", 10000);
+		DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
+		try {
+			info = test.test();
+		} catch (Exception e) {
+			Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
+		}
+
+		MediaPortManager.takeVideoLocalPort(info.getLocalPort());
+		videoPort = info.getPublicPort();
+		Log.d(LOG_TAG,
+				"Video: Private IP:" + info.getLocalIP() + ":"
+						+ info.getLocalPort() + "\nPublic IP: "
+						+ info.getPublicIP() + ":" + info.getPublicPort()
+						+ "\nPort: Media = " + info.getLocalPort() + " SDP = "
+						+ videoPort);
+
+		
+		Log.d(LOG_TAG, "Audio : Test Port ...." + getLocalAddress());
+		test = new DiscoveryTest(getLocalAddress(), "stun.sipgate.net", 10000);
+		info = new DiscoveryInfo(getLocalAddress());
+		
+		try {
+			info = test.test();
+		} catch (Exception e) {
+			Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
+		}
+
+		MediaPortManager.takeAudioLocalPort(info.getLocalPort());
+		audioPort = info.getPublicPort();
+		Log.d(LOG_TAG,
+				"Audio: Private IP:" + info.getLocalIP() + ":"
+						+ info.getLocalPort() + "\nPublic IP: "
+						+ info.getPublicIP() + ":" + info.getPublicPort()
+						+ "\nAudio Port: Media = " + info.getLocalPort()
+						+ " SDP = " + audioPort);
+	}
+
 	@Override
 	public SessionSpec generateSessionSpec() {
+		
+		takeMediaPort();
+
 		int payload = 96;
 
 		// VIDEO
@@ -197,7 +247,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		SessionSpec session = new SessionSpec();
 		session.setMediaSpec(mediaList);
 
-		session.setOriginAddress(getLocalAddress().getHostAddress().toString());
+		session.setOriginAddress(getPublicAddress().getHostAddress().toString());
 		session.setRemoteHandler("0.0.0.0");
 		session.setSessionName("TestSession");
 
@@ -207,6 +257,11 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	@Override
 	public InetAddress getLocalAddress() {
 		return this.mediaSessionConfig.getLocalAddress();
+	}
+
+	@Override
+	public InetAddress getPublicAddress() {
+		return this.mediaSessionConfig.getPublicAddress();
 	}
 
 	private ArrayList<AudioProfile> getAudioProfiles(
