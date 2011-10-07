@@ -33,6 +33,20 @@ import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
  */
 public interface MediaSessionAndroid extends MediaSession {
 
+
+	/**
+	 * STUN_HOST to indicate the stun server name
+	 */
+	public static final Parameter STUN_HOST = new Parameter() {
+	};
+	
+
+	/**
+	 * STUN_PORT to indicate the stun server port
+	 */
+	public static final Parameter STUN_PORT = new Parameter() {
+	};
+	
 	/**
 	 * MediaSessionAndoid.NetIF to indicate if the network interface is WIFI or
 	 * MOBILE.

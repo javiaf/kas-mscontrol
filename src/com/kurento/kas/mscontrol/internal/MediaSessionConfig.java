@@ -32,6 +32,8 @@ import com.kurento.kas.mscontrol.networkconnection.NetIF;
 
 public class MediaSessionConfig implements Configuration<MediaSession> {
 
+	private String stunHost;
+	private Integer stunPort;
 	private NetIF netIF;
 	private InetAddress localAddress;
 	private InetAddress publicAddress;
@@ -46,6 +48,15 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	private Integer gopSize;
 	private Integer framesQueueSize;
 
+	
+	public String getStunHost() {
+		return stunHost;
+	}
+	
+	public Integer getStunPort() {
+		return stunPort;
+	}
+	
 	public NetIF getNetIF() {
 		return netIF;
 	}
@@ -94,7 +105,11 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 			Integer maxBW, Map<MediaType, Mode> mediaTypeModes,
 			ArrayList<AudioCodecType> audioCodecs,
 			ArrayList<VideoCodecType> videoCodecs, Dimension frameSize,
-			Integer maxFrameRate, Integer gopSize, Integer framesQueueSize) {
+			Integer maxFrameRate, Integer gopSize, Integer framesQueueSize, String stunHost, Integer stunPort) {
+		
+		this.stunHost = stunHost;
+		this.stunPort = stunPort;
+		
 		this.netIF = netIF;
 		this.localAddress = localAddress;
 		this.publicAddress= publicAddress;

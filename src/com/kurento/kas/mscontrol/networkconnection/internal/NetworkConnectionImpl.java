@@ -143,7 +143,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 		Log.d(LOG_TAG, "Video: Test Port ...." + getLocalAddress());
 		DiscoveryTest test = new DiscoveryTest(getLocalAddress(),
-				"stun.sipgate.net", 10000);
+				getStunHost(), getStunPort());
 		DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
 		try {
 			info = test.test();
@@ -160,11 +160,11 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 						+ "\nPort: Media = " + info.getLocalPort() + " SDP = "
 						+ videoPort);
 
-		
 		Log.d(LOG_TAG, "Audio : Test Port ...." + getLocalAddress());
-		test = new DiscoveryTest(getLocalAddress(), "stun.sipgate.net", 10000);
+		test = new DiscoveryTest(getLocalAddress(), getStunHost(),
+				getStunPort());
 		info = new DiscoveryInfo(getLocalAddress());
-		
+
 		try {
 			info = test.test();
 		} catch (Exception e) {
@@ -183,7 +183,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	@Override
 	public SessionSpec generateSessionSpec() {
-		
+
 		takeMediaPort();
 
 		int payload = 96;
@@ -279,6 +279,16 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	@Override
 	public InetAddress getPublicAddress() {
 		return this.mediaSessionConfig.getPublicAddress();
+	}
+
+	@Override
+	public String getStunHost() {
+		return this.mediaSessionConfig.getStunHost();
+	}
+
+	@Override
+	public Integer getStunPort() {
+		return this.mediaSessionConfig.getStunPort();
 	}
 
 	private ArrayList<AudioProfile> getAudioProfiles(

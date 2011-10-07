@@ -65,5 +65,9 @@ public abstract class NetworkConnectionBase extends JoinableContainerImpl
 	public abstract InetAddress getLocalAddress();
 	
 	public abstract InetAddress getPublicAddress();
+	
+	public abstract String getStunHost();
+	
+	public abstract Integer getStunPort();
 
 }

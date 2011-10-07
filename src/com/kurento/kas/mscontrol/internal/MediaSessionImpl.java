@@ -90,6 +90,25 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 
 		Object obj;
 
+		
+		obj = params.get(STUN_HOST);
+		if (obj == null)
+			throw new MsControlException(
+					"Params must have MediaSessionAndroid.STUN_HOST param");
+		if (!(obj instanceof String))
+			throw new MsControlException(
+					"Parameter MediaSessionAndroid.STUN_HOST must be instance of String");
+		String stunHost= (String) obj;
+		
+		obj = params.get(STUN_PORT);
+		if (obj == null)
+			throw new MsControlException(
+					"Params must have MediaSessionAndroid.STUN_PORT param");
+		if (!(obj instanceof Integer))
+			throw new MsControlException(
+					"Parameter MediaSessionAndroid.STUN_PORT must be instance of Integer");
+		Integer stunPort = (Integer) obj;
+		
 		obj = params.get(NET_IF);
 		if (obj == null)
 			throw new MsControlException(
@@ -111,10 +130,10 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		obj = params.get(PUBLIC_ADDRESS);
 		if (obj == null) {
 			throw new MsControlException(
-					"Params must have MediaSessionAndroid.LOCAL_ADDRESS param");
+					"Params must have MediaSessionAndroid.PUBLIC_ADDRESS param");
 		} else if (!(obj instanceof InetAddress))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.LOCAL_ADDRESS must be instance of InetAddress");
+					"Parameter MediaSessionAndroid.PUBLIC_ADDRESS must be instance of InetAddress");
 		InetAddress publicAddress = (InetAddress) obj;
 
 		Integer maxBW = null;
@@ -208,7 +227,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 
 		return new MediaSessionConfig(netIF, localAddress, publicAddress, maxBW,
 				mediaTypeModes, audioCodecs, videoCodecs, frameSize,
-				maxFrameRate, gopSize, framesQueueSize);
+				maxFrameRate, gopSize, framesQueueSize, stunHost, stunPort);
 	}
 
 }
