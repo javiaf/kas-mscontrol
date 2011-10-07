@@ -17,13 +17,11 @@
 
 package com.kurento.kas.mscontrol.networkconnection.internal;
 
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.Exchanger;
 
 import javax.sdp.SdpException;
 
@@ -47,12 +45,8 @@ import com.kurento.kas.mscontrol.join.JoinableStreamBase;
 import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
 
-import de.javawi.jstun.attribute.MessageAttributeException;
-import de.javawi.jstun.attribute.MessageAttributeParsingException;
-import de.javawi.jstun.header.MessageHeaderParsingException;
 import de.javawi.jstun.test.DiscoveryInfo;
 import de.javawi.jstun.test.DiscoveryTest;
-import de.javawi.jstun.util.UtilityException;
 
 public class NetworkConnectionImpl extends NetworkConnectionBase {
 
@@ -138,32 +132,46 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	}
 
 	private void takeMediaPort() {
+
+		final Exchanger<Integer> exchanger = new Exchanger<Integer>();
+
 		MediaPortManager.releaseAudioLocalPort();
 		MediaPortManager.releaseVideoLocalPort();
 
-		Log.d(LOG_TAG, "Video: Test Port ...." + getLocalAddress());
-		DiscoveryTest test = new DiscoveryTest(getLocalAddress(),
-				getStunHost(), getStunPort());
-		DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
-		try {
-			info = test.test();
-		} catch (Exception e) {
-			Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
-		}
+		new Thread(new Runnable() {
+			public void run() {
+				Log.d(LOG_TAG, "Video: Test Port ...." + getLocalAddress());
+				DiscoveryTest test = new DiscoveryTest(getLocalAddress(),
+						getStunHost(), getStunPort());
+				DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
+				try {
+					info = test.test();
+				} catch (Exception e) {
+					Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
+				}
 
-		MediaPortManager.takeVideoLocalPort(info.getLocalPort());
-		videoPort = info.getPublicPort();
-		Log.d(LOG_TAG,
-				"Video: Private IP:" + info.getLocalIP() + ":"
-						+ info.getLocalPort() + "\nPublic IP: "
-						+ info.getPublicIP() + ":" + info.getPublicPort()
-						+ "\nPort: Media = " + info.getLocalPort() + " SDP = "
-						+ videoPort);
-
+				MediaPortManager.takeVideoLocalPort(info.getLocalPort());
+				videoPort = info.getPublicPort();
+				Log.d(LOG_TAG,
+						"Video: Private IP:" + info.getLocalIP() + ":"
+								+ info.getLocalPort() + "\nPublic IP: "
+								+ info.getPublicIP() + ":"
+								+ info.getPublicPort() + "\nPort: Media = "
+								+ info.getLocalPort() + " SDP = " + videoPort);
+				try {
+					exchanger.exchange(null);
+				} catch (InterruptedException e) {
+					Log.d(LOG_TAG, "exchanger: " + e.toString());
+					e.printStackTrace();
+				}
+			}
+		}).start();
+		
+		
 		Log.d(LOG_TAG, "Audio : Test Port ...." + getLocalAddress());
-		test = new DiscoveryTest(getLocalAddress(), getStunHost(),
+		DiscoveryTest test = new DiscoveryTest(getLocalAddress(), getStunHost(),
 				getStunPort());
-		info = new DiscoveryInfo(getLocalAddress());
+		DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
 
 		try {
 			info = test.test();
@@ -173,12 +181,21 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 		MediaPortManager.takeAudioLocalPort(info.getLocalPort());
 		audioPort = info.getPublicPort();
+
 		Log.d(LOG_TAG,
 				"Audio: Private IP:" + info.getLocalIP() + ":"
 						+ info.getLocalPort() + "\nPublic IP: "
 						+ info.getPublicIP() + ":" + info.getPublicPort()
 						+ "\nAudio Port: Media = " + info.getLocalPort()
 						+ " SDP = " + audioPort);
+		try {
+			exchanger.exchange(null);
+		} catch (InterruptedException e) {
+			Log.d(LOG_TAG, "exchanger: " + e.toString());
+			e.printStackTrace();
+		}
+		
+		Log.d(LOG_TAG, "Port reserved, Audio:" + audioPort + "; Video: " + videoPort);
 	}
 
 	@Override
