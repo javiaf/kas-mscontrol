@@ -1,3 +1,20 @@
+/*
+ * Kurento Android MSControl: MSControl implementation for Android.
+ * Copyright (C) 2011  Tikal Technologies
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.kurento.kas.mscontrol.networkconnection.internal;
 
 import java.util.List;
@@ -17,12 +34,12 @@ import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
 import com.kurento.commons.mscontrol.networkconnection.SdpPortManager;
 import com.kurento.commons.mscontrol.networkconnection.SdpPortManagerEvent;
 import com.kurento.commons.mscontrol.networkconnection.SdpPortManagerException;
+import com.kurento.commons.sdp.enums.Mode;
 
 public class SdpPortManagerImpl implements SdpPortManager {
 
 	private static Log log = LogFactory.getLog(SdpPortManagerImpl.class);
 
-	private List<MediaSpec> combinedMediaList;
 	private NetworkConnectionBase resource;
 	private SessionSpec userAgentSDP; // this is remote session spec
 
@@ -37,8 +54,7 @@ public class SdpPortManagerImpl implements SdpPortManager {
 
 	@Override
 	public NetworkConnection getContainer() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.resource;
 	}
 
 	@Override
@@ -99,7 +115,7 @@ public class SdpPortManagerImpl implements SdpPortManager {
 	 */
 	@Override
 	public void processSdpOffer(byte[] offer) throws SdpPortManagerException {
-		log.debug("processSdpOffer");
+		log.info("processSdpOffer");
 		SdpPortManagerEventImpl event = null;
 
 		try {
@@ -107,14 +123,11 @@ public class SdpPortManagerImpl implements SdpPortManager {
 			SessionSpec[] intersectionSessions = SpecTools
 					.intersectSessionSpec(resource.generateSessionSpec(),
 							userAgentSDP);
-			combinedMediaList = intersectionSessions[1].getMediaSpec();
+			List<MediaSpec> combinedMediaList = intersectionSessions[1]
+					.getMediaSpec();
 
-			if (combinedMediaList.isEmpty()) {
-				event = new SdpPortManagerEventImpl(null, this, null,
-						SdpPortManagerEvent.SDP_NOT_ACCEPTABLE);
-			} else {
-				userAgentSDP.setMediaSpec(combinedMediaList);
-				resource.setRemoteSessionSpec(userAgentSDP);
+			userAgentSDP.setMediaSpec(combinedMediaList);
+			resource.setRemoteSessionSpec(userAgentSDP);
 
 				localSpec = intersectionSessions[0];
 				
@@ -124,6 +137,20 @@ public class SdpPortManagerImpl implements SdpPortManager {
 				localSpec.setRemoteHandler(publicAddress);
 				resource.setLocalSessionSpec(localSpec);
 
+			boolean allInactive = true;
+			for (MediaSpec ms : combinedMediaList) {
+				if (!Mode.INACTIVE.equals(ms.getMode())) {
+					allInactive = false;
+					break;
+				}
+			}
+
+			// if combinedMediaList.isEmpty() then allInactive==true
+			if (allInactive) {
+				event = new SdpPortManagerEventImpl(null, this,
+						localSpec.getSessionDescription(),
+						SdpPortManagerEvent.SDP_NOT_ACCEPTABLE);
+			} else {
 				event = new SdpPortManagerEventImpl(
 						SdpPortManagerEvent.ANSWER_GENERATED, this,
 						localSpec.getSessionDescription(),
@@ -135,7 +162,6 @@ public class SdpPortManagerImpl implements SdpPortManager {
 			log.error("Error processing SDPOffer", e);
 			throw new SdpPortManagerException("Error processing SDPOffer", e);
 		}
-
 		notifyEvent(event);
 	}
 
@@ -143,8 +169,6 @@ public class SdpPortManagerImpl implements SdpPortManager {
 	public void processSdpAnswer(byte[] answer) throws SdpPortManagerException {
 		try {
 			userAgentSDP = new SessionSpec(new String(answer));
-
-			combinedMediaList = userAgentSDP.getMediaSpec();
 			resource.setRemoteSessionSpec(userAgentSDP);
 
 			localSpec = SpecTools.intersectSessionSpec(localSpec, userAgentSDP)[0];
@@ -168,7 +192,6 @@ public class SdpPortManagerImpl implements SdpPortManager {
 	@Override
 	public void rejectSdpOffer() throws SdpPortManagerException {
 		resource.release();
-		combinedMediaList = null;
 	}
 
 	/**
