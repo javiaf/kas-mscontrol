@@ -373,9 +373,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		Integer height = null;
 		if (mediaSessionConfig.getFrameSize() != null) {
 			width = Math
-					.abs((int) mediaSessionConfig.getFrameSize().getWidth());
+					.abs((int) mediaSessionConfig.getFrameSize().width);
 			height = Math.abs((int) mediaSessionConfig.getFrameSize()
-					.getHeight());
+					.height);
 		}
 
 		for (VideoProfile vp : videoProfiles) {

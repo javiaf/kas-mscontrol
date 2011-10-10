@@ -127,7 +127,7 @@ public class MSControlFactory {
 	 *            <tr>
 	 *            <td>{@link MediaSessionAndroid.FRAME_SIZE}</td>
 	 *            <td>O</td>
-	 *            <td>Dimension</td>
+	 *            <td>Camera.Size</td>
 	 *            <td>NA</td>
 	 *            <td>352x288</td>
 	 *            <td>Indicate the frame size in pixels (width x height).</td>

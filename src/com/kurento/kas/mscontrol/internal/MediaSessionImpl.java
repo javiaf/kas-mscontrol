@@ -17,10 +17,11 @@
 
 package com.kurento.kas.mscontrol.internal;
 
-import java.awt.Dimension;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Map;
+
+import android.hardware.Camera.Size;
 
 import com.kurento.commons.mscontrol.Configuration;
 import com.kurento.commons.mscontrol.MsControlException;
@@ -185,15 +186,15 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 						e);
 			}
 
-		Dimension frameSize = null;
+		Size frameSize = null;
 		obj = params.get(FRAME_SIZE);
 		if (obj == null) {
 			// Por defecto
-		} else if (!(obj instanceof Dimension))
+		} else if (!(obj instanceof Size))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.FRAME_SIZE must be instance of Dimension");
+					"Parameter MediaSessionAndroid.FRAME_SIZE must be instance of Size");
 		else
-			frameSize = (Dimension) obj;
+			frameSize = (Size) obj;
 
 		Integer maxFrameRate = null;
 		obj = params.get(MAX_FRAME_RATE);

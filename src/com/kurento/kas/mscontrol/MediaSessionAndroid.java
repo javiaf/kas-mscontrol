@@ -92,7 +92,7 @@ public interface MediaSessionAndroid extends MediaSession {
 	};
 
 	/**
-	 * Dimension to indicate the frame size in pixels.
+	 * Camera.Size to indicate the frame size in pixels.
 	 */
 	public static final Parameter FRAME_SIZE = new Parameter() {
 	};

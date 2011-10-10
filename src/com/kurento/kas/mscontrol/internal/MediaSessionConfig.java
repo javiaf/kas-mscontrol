@@ -17,10 +17,11 @@
 
 package com.kurento.kas.mscontrol.internal;
 
-import java.awt.Dimension;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Map;
+
+import android.hardware.Camera.Size;
 
 import com.kurento.commons.mscontrol.Configuration;
 import com.kurento.commons.mscontrol.MediaSession;
@@ -43,7 +44,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	private ArrayList<AudioCodecType> audioCodecs;
 	private ArrayList<VideoCodecType> videoCodecs;
 
-	private Dimension frameSize;
+	private Size frameSize;
 	private Integer maxFrameRate;
 	private Integer gopSize;
 	private Integer framesQueueSize;
@@ -85,7 +86,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 		return videoCodecs;
 	}
 
-	public Dimension getFrameSize() {
+	public Size getFrameSize() {
 		return frameSize;
 	}
 
@@ -104,7 +105,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	protected MediaSessionConfig(NetIF netIF, InetAddress localAddress, InetAddress publicAddress,
 			Integer maxBW, Map<MediaType, Mode> mediaTypeModes,
 			ArrayList<AudioCodecType> audioCodecs,
-			ArrayList<VideoCodecType> videoCodecs, Dimension frameSize,
+			ArrayList<VideoCodecType> videoCodecs, Size frameSize,
 			Integer maxFrameRate, Integer gopSize, Integer framesQueueSize, String stunHost, Integer stunPort) {
 		
 		this.stunHost = stunHost;
