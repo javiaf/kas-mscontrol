@@ -9,96 +9,93 @@ Kurento Android media management
 
 * Introduction
   
-  Kurento Android SDK requires large amount of resources in terms of CPU time,
-  memory and bandwidth. Resources that are quite limited in mobile platforms.
-  This requires a careful design of process algorithms to achieve objective:
-  To relay audio and video on time with the best possible quality.
-  
-  Several algorithms have been implemented to handle different aspects of media
-  management.
+   There is a tradeoff between video quality and  computational resources 
+   required for media processing. This is specially true for mobile platforms,
+   where CPU, memory and bandwidth are very limited. 
+   
+   Assumed it is not possible to achieve desired media quality, the priority
+   becomes to optimize resources to get the maximum possible quality, although this
+   is a very fuzzy concept that requires better definition. Video quality can be 
+   quantitatively characterized through terms like the ones below:
+   	
+   	* Dimension
+   	* Quantization step
+   	* Sample rate
+   	* Transmission latency
+   	
+   Many others can be used. The important thing is that a limited amount of 
+   resources causes a tradeoff between above attributes and that makes necessary a
+   decision on what to prioritize.
 
 
 * Frame adaptation queue
 
-	Video conferencing applications require extremely
-	low latencies and hence a strict jitter control. The adaptation queue
-	provides a trade-off between latency and video continuity while adjusting
-	bandwidth to network interface capabilities and obtain the target frame rate desired.
+	Kurento Android SDK is specially conceived for conversational services, and consequently
+	latency becomes the main quality attribute. There is a natural tradeoff between latency and
+	sensitivity to jitter. It is easy to understand that when buffers are reduced in transmission
+	pipes, the stream is much more affected by delays in packets. This causes a quality degradation
+	in term of video continuity, as probability of frame loss increases.
 	
-	Briefly, this algorithm must achieve the next goals:
+	The frame adaptation queue is a FIFO buffer of <N> positions that discards oldest frames when full.
+	It is specially designed to achieve following objectives:
 	
-		* Obtain the target frame rate desired.
+		* Adapt generation and transmission frame rates
 		
-		* Obtain the target bandwidth desired.
+		* Reduce jitter effects to improve video continuity for a given latency.
 		
-		* Obtain the lowest possible latency.
+	The adaptation queue operates between the video source and sink. It receives frames from the camera
+	at generation rate and delivers to the network at target frame rate <Tfr>. There are two possible
+	operational modes
+	
+		* When generation rate is lower than target rate, the actual transmission rate will
+		equal generation. In this operation mode the queue is empty as frames are sent as they 
+		are received. Reception device is exposed completelly to jitter effect.
 		
-		* Reduce the maximum possible the jitter to obtain a good continuity in the video.
+		* When generation rate (<Gfr>) is higher than target rate, one frame each <Gfr/Tfr>	has to be 
+		discarded. In this operation mode the queue is full and latency increases by a value <N> á 1/Tfr.
+		Transmission time for next frame is calculated as 
 		
+			[<tn = 1/Tfr á N + t_(n-N)>]
+				* <tn>: Next transmission time
+				* <N>: Queue size
+				* <t_(n-N)>: Transmission time of frame <n-N>
+			
+		 It has been found that Android camera is quite an important source of jitter. Video is delivered
+		 at 30 frames per second, but with high variability. Above formula is actually a jitter low 
+		 pass filter that improves time slots variability and hence a smooth video stream with the frame
+		 rate required for transmission.
+
 	
-	It is very important to know that the improvement of a feature can worsen another.
+* Optimal codec configuration	
+
+	Based in the estimated bandwidth of the active interface it is possible to optimize video quality,
+	providing a proper set of codec parameters for a given target frame rate and frame size requested 
+	by user application. 
 	
-	To achieve these goals it is necessary solve some problems proceed from
-	the device features:
-	
-		* The component that provides frames from the camera (<<producer>>) doesn't
-		offer frames exactly periodically adjusting to the particular frame rate
-		given from the Android API, it sometimes offers frames more slowly and sometimes
-		it offers frames more rapidly.
-		
-		* The component that take these frames (<<consumer>>) and processes them
-		to encode and send them doesn't delay always the same time.
-	
-	
-	The algorithm is based in a queue in which the producer put frames and the consumer take them
-	if there is some frame, if not it is blocked until the producer puts a new frame.
-	Also, it is necessary to keep track of times that the consumer delays in process each frame.
-	
-	The queue has a N size to allow keep the last N frames received from the producer when it is faster than consumer.
-	The purpose of this is to prevent that the consumer has frames when it need take and process one although
-	the producer didn't put any because it at this moment is slower. With this the algorithm improve the jitter and
-	the resulting video will have a good continuity. On the contrary, we must try that N is small because with higher N
-	the latency is higher.
-	
-	The frame rate and the resulting bandwidth are directly related because the media encode configuration from a target frame rate
-	(frame_rate) and a target bandwidth(bit_rate) do that each encoded frame has a determinate size in bits. For example, 
-	if we want obtain 384000 bps(bits per second) with 15 fps(frames per second), each encoded frame must has 25600 bits:
+	Frame rate and  bandwidth are directly related through the frame size. This is the mechanism
+	used by codecs to determine the compression required per frame, based in a target <bit_rate> and
+	<frame_rate>. As an example, to obtain 384000 bps(bits per second) with 15 fps(frames per second),
+	encoded frames must have a medium size of 25600 bits
 	
 +---
 384000 bps / 15 fps = 25600 bpf (bits per frame)
 +---
 	
-	It is aprox because it is so dependent of the type of video frame.
-	
-	So, to obtain the target bandwidth the algorithm must adjust the maximum possible the real frame rate with the
-	target frame rate, because the real bitrate will be obtained is:
-
+	Codecs are configured with a target <frame_rate> and <bit_rate>, but codification is quite a difficult
+	task and this target values are just tentative values. Next equation provides a way to estimate the
+	real bit_rate of a stream.
 +---
-real_bitrate = K * target_bitrate/targer_framerate * real_bitrate
+real_bitrate = K * target_bitrate/targer_framerate * real_framerate
 +---
 	
-	where K is a correction factor because is so difficult obtain the exact real_bitrate equals target_bitrate.
+	<K> is a correction factor associated to compression behavior. Generate frames with a 
+	precise size to meet target bandwidth requires to much computational resources, so 
+	normally frames are smaller and hence real <bit_rate>.
 	
+	A <real_framerate> must also be considered, as it can happen that the codec is unable to generate
+	frames fast enough (in less than 1/<Tfr>).
 	
-	To achieve this, in the case that the consumer works faster, the algorithm do that the consumer wait a time
-	before begin to process the next frame. This time is the appropriate to achieve the target bitrate, for which the last
-	N times associated to the last N frames sent is used, where N is equals the queue size.
-	
-	For these cases, the algorithm is robust but if the producer or the consumer are slower that the need time
-	to achieve target frame rate it can't get it, so the target frame rate must be decreased and the encode configuration
-	will change.
-	
-	
-	
-	
-      
-* Optimal codec configuration
-
-	Video quality can be enhanced with a proper
-	codec parameterization based in available bandwidth, target frame rate
-	and frame size requested by user application. This algorithm is intended
-	to select the best initialization parameters to improve performance
-	
-	
-	
+	Kurento Android SDK dynamically measures <K> factor and real <frame_rate> and adjust target <frame_rate>
+	and target <bit_rate>, so the real <bit_rate> approaches the target one, improving this way the video
+	quality as resources are optimized.
 
