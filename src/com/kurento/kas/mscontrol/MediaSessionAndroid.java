@@ -98,9 +98,9 @@ public interface MediaSessionAndroid extends MediaSession {
 	};
 	
 	/**
-	 * Integer to indicate the frame heigth in pixels.
+	 * Integer to indicate the frame height in pixels.
 	 */
-	public static final Parameter FRAME_HEIGTH = new Parameter() {
+	public static final Parameter FRAME_HEIGHT = new Parameter() {
 	};
 
 	/**

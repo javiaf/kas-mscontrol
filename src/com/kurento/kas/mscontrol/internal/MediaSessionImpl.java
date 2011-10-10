@@ -197,12 +197,12 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			frameWidth = (Integer) obj;
 		
 		Integer frameHeight = null;
-		obj = params.get(FRAME_HEIGTH);
+		obj = params.get(FRAME_HEIGHT);
 		if (obj == null) {
 			// Por defecto
 		} else if (!(obj instanceof Integer))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.FRAME_HEIGTH must be instance of Integer");
+					"Parameter MediaSessionAndroid.FRAME_HEIGHT must be instance of Integer");
 		else
 			frameHeight = (Integer) obj;
 
