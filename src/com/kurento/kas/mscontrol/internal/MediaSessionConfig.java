@@ -44,20 +44,20 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	private ArrayList<AudioCodecType> audioCodecs;
 	private ArrayList<VideoCodecType> videoCodecs;
 
-	private Size frameSize;
+	private Integer frameWidth;
+	private Integer frameHeight;
 	private Integer maxFrameRate;
 	private Integer gopSize;
 	private Integer framesQueueSize;
 
-	
 	public String getStunHost() {
 		return stunHost;
 	}
-	
+
 	public Integer getStunPort() {
 		return stunPort;
 	}
-	
+
 	public NetIF getNetIF() {
 		return netIF;
 	}
@@ -65,7 +65,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	public InetAddress getLocalAddress() {
 		return localAddress;
 	}
-	
+
 	public InetAddress getPublicAddress() {
 		return publicAddress;
 	}
@@ -86,8 +86,12 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 		return videoCodecs;
 	}
 
-	public Size getFrameSize() {
-		return frameSize;
+	public Integer getFrameWidth() {
+		return frameWidth;
+	}
+
+	public Integer getFrameHeight() {
+		return frameHeight;
 	}
 
 	public Integer getMaxFrameRate() {
@@ -102,29 +106,31 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 		return framesQueueSize;
 	}
 
-	protected MediaSessionConfig(NetIF netIF, InetAddress localAddress, InetAddress publicAddress,
-			Integer maxBW, Map<MediaType, Mode> mediaTypeModes,
+	protected MediaSessionConfig(NetIF netIF, InetAddress localAddress,
+			InetAddress publicAddress, Integer maxBW,
+			Map<MediaType, Mode> mediaTypeModes,
 			ArrayList<AudioCodecType> audioCodecs,
-			ArrayList<VideoCodecType> videoCodecs, Size frameSize,
-			Integer maxFrameRate, Integer gopSize, Integer framesQueueSize, String stunHost, Integer stunPort) {
-		
+			ArrayList<VideoCodecType> videoCodecs, Integer frameWidth,
+			Integer frameHeight, Integer maxFrameRate, Integer gopSize,
+			Integer framesQueueSize, String stunHost, Integer stunPort) {
+
 		this.stunHost = stunHost;
 		this.stunPort = stunPort;
-		
+
 		this.netIF = netIF;
 		this.localAddress = localAddress;
-		this.publicAddress= publicAddress;
+		this.publicAddress = publicAddress;
 		this.maxBW = maxBW;
 
 		this.mediaTypeModes = mediaTypeModes;
 		this.audioCodecs = audioCodecs;
 		this.videoCodecs = videoCodecs;
 
-		this.frameSize = frameSize;
+		this.frameWidth = frameWidth;
+		this.frameHeight = frameHeight;
 		this.maxFrameRate = maxFrameRate;
 		this.gopSize = gopSize;
 		this.framesQueueSize = framesQueueSize;
 	}
-
 
 }

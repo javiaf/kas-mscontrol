@@ -166,11 +166,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				}
 			}
 		}).start();
-		
-		
+
 		Log.d(LOG_TAG, "Audio : Test Port ...." + getLocalAddress());
-		DiscoveryTest test = new DiscoveryTest(getLocalAddress(), getStunHost(),
-				getStunPort());
+		DiscoveryTest test = new DiscoveryTest(getLocalAddress(),
+				getStunHost(), getStunPort());
 		DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
 
 		try {
@@ -194,8 +193,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			Log.d(LOG_TAG, "exchanger: " + e.toString());
 			e.printStackTrace();
 		}
-		
-		Log.d(LOG_TAG, "Port reserved, Audio:" + audioPort + "; Video: " + videoPort);
+
+		Log.d(LOG_TAG, "Port reserved, Audio:" + audioPort + "; Video: "
+				+ videoPort);
 	}
 
 	@Override
@@ -371,11 +371,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 		Integer width = null;
 		Integer height = null;
-		if (mediaSessionConfig.getFrameSize() != null) {
-			width = Math
-					.abs((int) mediaSessionConfig.getFrameSize().width);
-			height = Math.abs((int) mediaSessionConfig.getFrameSize()
-					.height);
+		if (mediaSessionConfig.getFrameWidth() != null
+				&& mediaSessionConfig.getFrameHeight() != null) {
+			width = Math.abs((int) mediaSessionConfig.getFrameWidth());
+			height = Math.abs((int) mediaSessionConfig.getFrameHeight());
 		}
 
 		for (VideoProfile vp : videoProfiles) {

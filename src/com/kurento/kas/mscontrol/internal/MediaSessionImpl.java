@@ -186,15 +186,25 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 						e);
 			}
 
-		Size frameSize = null;
-		obj = params.get(FRAME_SIZE);
+		Integer frameWidth = null;
+		obj = params.get(FRAME_WIDTH);
 		if (obj == null) {
 			// Por defecto
 		} else if (!(obj instanceof Size))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.FRAME_SIZE must be instance of Size");
+					"Parameter MediaSessionAndroid.FRAME_WIDTH must be instance of Integer");
 		else
-			frameSize = (Size) obj;
+			frameWidth = (Integer) obj;
+		
+		Integer frameHeight = null;
+		obj = params.get(FRAME_HEIGTH);
+		if (obj == null) {
+			// Por defecto
+		} else if (!(obj instanceof Size))
+			throw new MsControlException(
+					"Parameter MediaSessionAndroid.FRAME_HEIGTH must be instance of Integer");
+		else
+			frameHeight = (Integer) obj;
 
 		Integer maxFrameRate = null;
 		obj = params.get(MAX_FRAME_RATE);
@@ -227,7 +237,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			framesQueueSize = (Integer) obj;
 
 		return new MediaSessionConfig(netIF, localAddress, publicAddress, maxBW,
-				mediaTypeModes, audioCodecs, videoCodecs, frameSize,
+				mediaTypeModes, audioCodecs, videoCodecs, frameWidth, frameHeight,
 				maxFrameRate, gopSize, framesQueueSize, stunHost, stunPort);
 	}
 

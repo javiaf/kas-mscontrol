@@ -83,7 +83,9 @@ Parameters.NO_PARAMETER
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | <<Advanced parameters>> |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| FRAME_SIZE | O | Camera.Size | NA | 352x288 | Frame size in pixels (width x height).  |
+| FRAME_WIDTH | O | Integer | NA | 352 | Frame width in pixels.  |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| FRAME_HEIGHT | O | Integer | NA | 288 | Frame height in pixels.  |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | MAX_FRAME_RATE | O |Integer|  [1, MAX_INT] | 15 |MAX. frame rate to be used. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
@@ -123,8 +125,10 @@ videoCodecs.add(VideoCodecType.H263);
 videoCodecs.add(VideoCodecType.MPEG4);
 params.put(MediaSessionAndroid.VIDEO_CODECS, videoCodecs);
 
-Camera.Size frameSize = ...;
-params.put(MediaSessionAndroid.FRAME_SIZE, frameSize);
+Integer frameWidth = ...;
+params.put(MediaSessionAndroid.FRAME_WIDTH, frameWidth);
+Integer frameHeight = ...;
+params.put(MediaSessionAndroid.FRAME_HEIGHT, frameHeight);
 
 int maxFR = 12;
 params.put(MediaSessionAndroid.MAX_FRAME_RATE, maxFR);
