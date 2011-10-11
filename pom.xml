@@ -17,6 +17,7 @@
 
 		<!-- Dependency versions -->
 		<kcMsControlVersion>1.0.0-RC-2-SNAPSHOT</kcMsControlVersion>
+		<kcMediaSpecVersion>1.0.0-RC-2-SNAPSHOT</kcMediaSpecVersion>
 	</properties>
 	
 	<organization>
@@ -69,7 +70,7 @@
 		<dependency>
 			<groupId>com.kurento.commons</groupId>
 			<artifactId>kc-mediaspec</artifactId>
-			<version>1.0.0-RC-1</version>
+			<version>${kcMediaSpecVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.kurento.commons</groupId>
