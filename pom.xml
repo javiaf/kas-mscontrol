@@ -11,6 +11,14 @@
 	<description>MSControl implementation for Android.</description>
 	<url>http://www.kurento.com/docs/kas-mscontrol/${project.version}</url>
 
+	<properties>
+		<project.build.sourceEncoding>UTF-8 </project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- Dependency versions -->
+		<kcMsControlVersion>1.0.0-RC-2-SNAPSHOT</kcMsControlVersion>
+	</properties>
+	
 	<organization>
 		<name>Kurento</name>
 		<url>http://www.kurento.com</url>
@@ -66,7 +74,7 @@
 		<dependency>
 			<groupId>com.kurento.commons</groupId>
 			<artifactId>kc-mscontrol</artifactId>
-			<version>1.0.0-RC-1</version>
+			<version>${kcMsControlVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.android</groupId>
