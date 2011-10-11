@@ -9,7 +9,7 @@
 
 	<name>Kurento Android MSControl</name>
 	<description>MSControl implementation for Android.</description>
-	<url>http://www.kurento.com/docs/kas-mscontrol</url>
+	<url>http://www.kurento.com/docs/kas-mscontrol/${project.version}</url>
 
 	<organization>
 		<name>Kurento</name>
