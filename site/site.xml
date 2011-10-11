@@ -11,9 +11,10 @@
 		<links>
 			<item name="Kurento" href="http://www.kurento.com/" />
 		</links>
-		<menu ref="reports" />
-		<menu name="Documentation">
+		<menu name="Kurento MsControl">
 			<item name="Media management" href="./media-management.html" />
 		</menu>
+		<menu ref="reports" />
+
 	</body>
 </project>
