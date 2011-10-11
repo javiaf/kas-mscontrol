@@ -2,7 +2,7 @@
 <project name="Kurento Android MSControl">
 	<bannerLeft>
 		<name>Kurento Project</name>
-		<src>http://www.kurento.com/kurento/sites/all/themes/bartikplus/logo.png
+		<src>http://www.kurento.com/sites/all/themes/bartikplus/logo.png
 		</src>
 		<href>http://www.kurento.com</href>
 	</bannerLeft>
@@ -10,7 +10,6 @@
 	<body>
 		<links>
 			<item name="Kurento" href="http://www.kurento.com/" />
-			<item name="Kurento Commons MSControl" href="../kc-mscontrol" />
 		</links>
 		<menu ref="reports" />
 		<menu name="Documentation">
