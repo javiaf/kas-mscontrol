@@ -18,10 +18,13 @@ Kurento Android media management
    is a very fuzzy concept that requires better definition. Video quality can be 
    quantitatively characterized through terms like the ones below:
    	
-   	* Dimension
-   	* Quantization step
-   	* Sample rate
-   	* Transmission latency
+   		* Dimension
+   		
+  	 	* Quantization step
+  	 	
+  	 	* Sample rate
+  	 	
+  	 	* Transmission latency
    	
    Many others can be used. The important thing is that a limited amount of 
    resources causes a tradeoff between above attributes and that makes necessary a
@@ -52,13 +55,17 @@ Kurento Android media management
 		are received. Reception device is exposed completelly to jitter effect.
 		
 		* When generation rate (<Gfr>) is higher than target rate, one frame each <Gfr/Tfr>	has to be 
-		discarded. In this operation mode the queue is full and latency increases by a value <N> á 1/Tfr.
+		discarded. In this operation mode the queue is full and latency increases by a value <N> * 1/Tfr.
 		Transmission time for next frame is calculated as 
 		
-			[<tn = 1/Tfr á N + t_(n-N)>]
+			[<tn = 1/Tfr * N + t_(n-N)>]
+			
 				* <tn>: Next transmission time
+				
 				* <N>: Queue size
+				
 				* <t_(n-N)>: Transmission time of frame <n-N>
+				
 			
 		 It has been found that Android camera is quite an important source of jitter. Video is delivered
 		 at 30 frames per second, but with high variability. Above formula is actually a jitter low 
@@ -77,13 +84,14 @@ Kurento Android media management
 	<frame_rate>. As an example, to obtain 384000 bps(bits per second) with 15 fps(frames per second),
 	encoded frames must have a medium size of 25600 bits
 	
-+---
++----
 384000 bps / 15 fps = 25600 bpf (bits per frame)
-+---
++----
 	
 	Codecs are configured with a target <frame_rate> and <bit_rate>, but codification is quite a difficult
 	task and this target values are just tentative values. Next equation provides a way to estimate the
 	real bit_rate of a stream.
+	
 +---
 real_bitrate = K * target_bitrate/targer_framerate * real_framerate
 +---

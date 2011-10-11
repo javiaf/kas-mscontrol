@@ -9,7 +9,7 @@ Kurento Android MSControl
 
 * Introduction
 
-	Kurento Android MSControl is a sub-API of {{{../kc-mscontrol/${kcMsControlVersion}}Kurento Commons MSControl}} adding 
+	Kurento Android MSControl is a sub-API of {{{../../kc-mscontrol/${kcMsControlVersion}}Kurento Commons MSControl}} adding 
 	Android specific features and media components.
 	
 [./images/kas-mscontrol.jpeg] kas-mscontrol API
@@ -34,7 +34,7 @@ Kurento Android MSControl
 	
 	<<<Parameters>>> is a set of [key,value] pairs used to configure media components created
 	by Kurento MSControl. They not only provide a very simple configuration mechanism, but
-	they also enable easy API extensions. {{{apidocs}Javadoc}} provides a complete usage reference, 
+	they also enable easy API extensions. {{{./apidocs}Javadoc}} provides a complete usage reference, 
 	with clear indication of supported <<<Parameter>>> and valid ranges.
 		
 	<<<Parameters>>> instances are created with method <<<createParameters()>>> of factory
@@ -146,7 +146,7 @@ MediaSessionAndroid mediaSession = MSControlFactory.createMediaSession(params);
 	responsible to create and setup <<<NetworkConnection>>> instances.	
 	
 	More information about <<<NetworkConnection>>> and <<<SdpPortManager>>> can be found
-	at  {{{../kc-mscontrol}Kurento Commons MSControl}} and within 
+	at  {{{../../kc-mscontrol/${kcMsControlVersion}}Kurento Commons MSControl}} and within 
 	{{{http://www.jcp.org/en/jsr/detail?id=309}JSR309 documentation}}.
 
 * MediaComponentAndroid
