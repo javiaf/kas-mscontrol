@@ -37,7 +37,6 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	private Integer stunPort;
 	private NetIF netIF;
 	private InetAddress localAddress;
-	private InetAddress publicAddress;
 	private Integer maxBW;
 
 	private Map<MediaType, Mode> mediaTypeModes;
@@ -64,10 +63,6 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 
 	public InetAddress getLocalAddress() {
 		return localAddress;
-	}
-
-	public InetAddress getPublicAddress() {
-		return publicAddress;
 	}
 
 	public Integer getMaxBW() {
@@ -107,7 +102,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	}
 
 	protected MediaSessionConfig(NetIF netIF, InetAddress localAddress,
-			InetAddress publicAddress, Integer maxBW,
+			Integer maxBW,
 			Map<MediaType, Mode> mediaTypeModes,
 			ArrayList<AudioCodecType> audioCodecs,
 			ArrayList<VideoCodecType> videoCodecs, Integer frameWidth,
@@ -119,7 +114,6 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 
 		this.netIF = netIF;
 		this.localAddress = localAddress;
-		this.publicAddress = publicAddress;
 		this.maxBW = maxBW;
 
 		this.mediaTypeModes = mediaTypeModes;

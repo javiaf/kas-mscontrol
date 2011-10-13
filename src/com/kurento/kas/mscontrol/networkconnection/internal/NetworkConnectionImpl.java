@@ -60,6 +60,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	private SessionSpec localSessionSpec;
 	private SessionSpec remoteSessionSpec;
+	
+	private InetAddress publicAddress;
 
 	private static int videoPort = -1;
 	private static int audioPort = -1;
@@ -91,7 +93,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		// Process MediaConfigure and determinate media profiles
 		audioProfiles = getAudioProfiles(this.mediaSessionConfig);
 		videoProfiles = getVideoProfiles(this.mediaSessionConfig);
-
+		
+		publicAddress = getLocalAddress();
 	}
 
 	@Override
@@ -194,6 +197,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			e.printStackTrace();
 		}
 
+		publicAddress = info.getPublicIP();
 		Log.d(LOG_TAG, "Port reserved, Audio:" + audioPort + "; Video: "
 				+ videoPort);
 	}
@@ -281,8 +285,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		SessionSpec session = new SessionSpec();
 		session.setMediaSpec(mediaList);
 
-		session.setOriginAddress(getPublicAddress().getHostAddress().toString());
-		session.setRemoteHandler("0.0.0.0");
+		session.setOriginAddress(publicAddress.getHostAddress().toString());
+		session.setRemoteHandler(publicAddress.getHostAddress().toString());
 		session.setSessionName("TestSession");
 
 		return session;
@@ -291,11 +295,6 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	@Override
 	public InetAddress getLocalAddress() {
 		return this.mediaSessionConfig.getLocalAddress();
-	}
-
-	@Override
-	public InetAddress getPublicAddress() {
-		return this.mediaSessionConfig.getPublicAddress();
 	}
 
 	@Override

@@ -59,12 +59,6 @@ public interface MediaSessionAndroid extends MediaSession {
 	 */
 	public static final Parameter LOCAL_ADDRESS = new Parameter() {
 	};
-	
-	/**
-	 * InetAddress to indicate the public IP address
-	 */
-	public static final Parameter PUBLIC_ADDRESS = new Parameter() {
-	};
 
 	/**
 	 * Integer to indicate the max bandwidth will be used in bps(bits per

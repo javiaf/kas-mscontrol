@@ -84,9 +84,6 @@ public class SdpPortManagerImpl implements SdpPortManager {
 		// This is important to not release media ports calling
 		// resource.generateSessionSpec() newly in processSdpAnswer
 		localSpec = resource.generateSessionSpec();
-		String publicAddress = resource.getPublicAddress().getHostAddress();
-		localSpec.setOriginAddress(publicAddress);
-		localSpec.setRemoteHandler(publicAddress);
 		SdpPortManagerEventImpl event = null;
 		try {
 			event = new SdpPortManagerEventImpl(
@@ -129,13 +126,9 @@ public class SdpPortManagerImpl implements SdpPortManager {
 			userAgentSDP.setMediaSpec(combinedMediaList);
 			resource.setRemoteSessionSpec(userAgentSDP);
 
-				localSpec = intersectionSessions[0];
-				
-				String publicAddress = resource.getPublicAddress()
-						.getHostAddress();
-				localSpec.setOriginAddress(publicAddress);
-				localSpec.setRemoteHandler(publicAddress);
-				resource.setLocalSessionSpec(localSpec);
+			localSpec = intersectionSessions[0];
+
+			resource.setLocalSessionSpec(localSpec);
 
 			boolean allInactive = true;
 			for (MediaSpec ms : combinedMediaList) {
@@ -172,11 +165,6 @@ public class SdpPortManagerImpl implements SdpPortManager {
 			resource.setRemoteSessionSpec(userAgentSDP);
 
 			localSpec = SpecTools.intersectSessionSpec(localSpec, userAgentSDP)[0];
-			resource.setLocalSessionSpec(localSpec);
-			
-			String publicAddress = resource.getPublicAddress().getHostAddress();
-			localSpec.setOriginAddress(publicAddress);
-			localSpec.setRemoteHandler(publicAddress);
 			resource.setLocalSessionSpec(localSpec);
 
 			notifyEvent(new SdpPortManagerEventImpl(
