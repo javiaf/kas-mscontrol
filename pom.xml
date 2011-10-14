@@ -5,7 +5,7 @@
 	<groupId>com.kurento.kas</groupId>
 	<artifactId>kas-mscontrol</artifactId>
 	<version>1.1.0-SNAPSHOT</version>
-	<packaging>apklib</packaging>
+	<packaging>jar</packaging>
 
 	<name>Kurento Android MSControl</name>
 	<description>MSControl implementation for Android.</description>
@@ -55,7 +55,7 @@
 			<groupId>com.kurento.kas</groupId>
 			<artifactId>kas-media</artifactId>
 			<version>1.1.0-SNAPSHOT</version>
-			<type>apklib</type>
+			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
