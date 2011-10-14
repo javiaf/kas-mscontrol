@@ -64,7 +64,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	private SessionSpec localSessionSpec;
 	private SessionSpec remoteSessionSpec;
-	
+
 	private InetAddress publicAddress;
 
 	private static int videoPort = -1;
@@ -150,65 +150,73 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		MediaPortManager.releaseAudioLocalPort();
 		MediaPortManager.releaseVideoLocalPort();
 
-		new Thread(new Runnable() {
-			public void run() {
-				Log.d(LOG_TAG, "Video: Test Port ...." + getLocalAddress());
-				DiscoveryTest test = new DiscoveryTest(getLocalAddress(),
-						getStunHost(), getStunPort());
-				DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
-				try {
-					info = test.test();
-				} catch (Exception e) {
-					Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
-				}
+		final String stunHost = getStunHost();
 
-				MediaPortManager.takeVideoLocalPort(info.getLocalPort());
-				videoPort = info.getPublicPort();
-				Log.d(LOG_TAG,
-						"Video: Private IP:" + info.getLocalIP() + ":"
-								+ info.getLocalPort() + "\nPublic IP: "
-								+ info.getPublicIP() + ":"
-								+ info.getPublicPort() + "\nPort: Media = "
-								+ info.getLocalPort() + " SDP = " + videoPort);
-				try {
-					exchanger.exchange(null);
-				} catch (InterruptedException e) {
-					Log.d(LOG_TAG, "exchanger: " + e.toString());
-					e.printStackTrace();
+		if (!stunHost.equals("")) {
+			final Integer stunPort = getStunPort();
+			
+			new Thread(new Runnable() {
+				public void run() {
+					Log.d(LOG_TAG, "Video: Test Port ...." + getLocalAddress());
+					DiscoveryTest test = new DiscoveryTest(getLocalAddress(),
+							stunHost, stunPort);
+					DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
+					try {
+						info = test.test();
+					} catch (Exception e) {
+						Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
+					}
+
+					MediaPortManager.takeVideoLocalPort(info.getLocalPort());
+					videoPort = info.getPublicPort();
+					Log.d(LOG_TAG, "Video: Private IP:" + info.getLocalIP()
+							+ ":" + info.getLocalPort() + "\nPublic IP: "
+							+ info.getPublicIP() + ":" + info.getPublicPort()
+							+ "\nPort: Media = " + info.getLocalPort()
+							+ " SDP = " + videoPort);
+					try {
+						exchanger.exchange(null);
+					} catch (InterruptedException e) {
+						Log.d(LOG_TAG, "exchanger: " + e.toString());
+						e.printStackTrace();
+					}
 				}
+			}).start();
+
+			Log.d(LOG_TAG, "Audio : Test Port ...." + getLocalAddress());
+			DiscoveryTest test = new DiscoveryTest(getLocalAddress(),
+					stunHost, stunPort);
+			DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
+
+			try {
+				info = test.test();
+			} catch (Exception e) {
+				Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
 			}
-		}).start();
 
-		Log.d(LOG_TAG, "Audio : Test Port ...." + getLocalAddress());
-		DiscoveryTest test = new DiscoveryTest(getLocalAddress(),
-				getStunHost(), getStunPort());
-		DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
+			MediaPortManager.takeAudioLocalPort(info.getLocalPort());
+			audioPort = info.getPublicPort();
 
-		try {
-			info = test.test();
-		} catch (Exception e) {
-			Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
+			Log.d(LOG_TAG,
+					"Audio: Private IP:" + info.getLocalIP() + ":"
+							+ info.getLocalPort() + "\nPublic IP: "
+							+ info.getPublicIP() + ":" + info.getPublicPort()
+							+ "\nAudio Port: Media = " + info.getLocalPort()
+							+ " SDP = " + audioPort);
+			try {
+				exchanger.exchange(null);
+			} catch (InterruptedException e) {
+				Log.d(LOG_TAG, "exchanger: " + e.toString());
+				e.printStackTrace();
+			}
+
+			publicAddress = info.getPublicIP();
+			Log.d(LOG_TAG, "Port reserved, Audio:" + audioPort + "; Video: "
+					+ videoPort);
+		}else {
+			audioPort = MediaPortManager.takeAudioLocalPort();
+			videoPort = MediaPortManager.takeVideoLocalPort();
 		}
-
-		MediaPortManager.takeAudioLocalPort(info.getLocalPort());
-		audioPort = info.getPublicPort();
-
-		Log.d(LOG_TAG,
-				"Audio: Private IP:" + info.getLocalIP() + ":"
-						+ info.getLocalPort() + "\nPublic IP: "
-						+ info.getPublicIP() + ":" + info.getPublicPort()
-						+ "\nAudio Port: Media = " + info.getLocalPort()
-						+ " SDP = " + audioPort);
-		try {
-			exchanger.exchange(null);
-		} catch (InterruptedException e) {
-			Log.d(LOG_TAG, "exchanger: " + e.toString());
-			e.printStackTrace();
-		}
-
-		publicAddress = info.getPublicIP();
-		Log.d(LOG_TAG, "Port reserved, Audio:" + audioPort + "; Video: "
-				+ videoPort);
 	}
 
 	@Override
@@ -230,7 +238,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				else if (VideoCodecType.H263.equals(vp.getVideoCodecType())) {
 					ArrayList<H263VideoProfile> profilesList = new ArrayList<H263VideoProfile>();
 					profilesList.add(new H263VideoProfile(vp.getWidth(), vp
-							.getHeight(), new Fraction(vp.getFrameRate()*1000, 1001)));
+							.getHeight(), new Fraction(
+							vp.getFrameRate() * 1000, 1001)));
 					H263FormatParameters h263fp = null;
 					try {
 						h263fp = new H263FormatParameters(profilesList);
