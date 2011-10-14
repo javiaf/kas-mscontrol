@@ -35,6 +35,9 @@ public class RTPInfo {
 	private int dstVideoPort;
 	private VideoCodecType videoCodecType;
 	private int videoPayloadType;
+	private int videoBandwidth;
+	private int frameWidth;
+	private int frameHeight;
 
 	private int dstAudioPort;
 	private AudioCodecType audioCodecType;
@@ -56,6 +59,18 @@ public class RTPInfo {
 		return videoPayloadType;
 	}
 
+	public int getVideoBandwidth() {
+		return videoBandwidth;
+	}
+
+	public int getFrameWidth() {
+		return frameWidth;
+	}
+
+	public int getFrameHeight() {
+		return frameHeight;
+	}
+
 	public int getDstAudioPort() {
 		return dstAudioPort;
 	}
@@ -69,6 +84,7 @@ public class RTPInfo {
 	}
 
 	public RTPInfo(SessionSpec se) {
+		Log.d(LOG_TAG, "sessionSpec:\n" + se);
 		try {
 			this.dstIp = se.getOriginAddress();
 			for (MediaSpec ms : se.getMediaSpec()) {
@@ -102,6 +118,7 @@ public class RTPInfo {
 						}
 						this.videoPayloadType = ms.getPayloadList().get(0)
 								.getPayload();
+						this.videoBandwidth = ms.getBandWidth();
 					}
 				}
 			}

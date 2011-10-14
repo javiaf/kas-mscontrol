@@ -63,8 +63,10 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	private int QUEUE_SIZE = 2;
-	private LinkedBlockingQueue<Frame> framesQueue = new LinkedBlockingQueue<Frame>(QUEUE_SIZE);
-	private LinkedBlockingQueue<Long> txTimes = new LinkedBlockingQueue<Long>(QUEUE_SIZE);
+	private LinkedBlockingQueue<Frame> framesQueue = new LinkedBlockingQueue<Frame>(
+			QUEUE_SIZE);
+	private LinkedBlockingQueue<Long> txTimes = new LinkedBlockingQueue<Long>(
+			QUEUE_SIZE);
 
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
@@ -91,6 +93,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					videoProfiles, videoCodecType);
 			if ((Mode.SENDRECV.equals(videoMode) || Mode.SENDONLY
 					.equals(videoMode)) && videoProfile != null) {
+				if (remoteRTPInfo.getVideoBandwidth() > 0)
+					videoProfile.setBitRate(remoteRTPInfo.getVideoBandwidth());
 				VideoInfoTx videoInfo = new VideoInfoTx(videoProfile);
 				videoInfo.setOut(remoteRTPInfo.getVideoRTPDir());
 				videoInfo.setPayloadType(remoteRTPInfo.getVideoPayloadType());

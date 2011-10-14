@@ -30,10 +30,14 @@ import android.util.Log;
 import com.kurento.commons.media.format.MediaSpec;
 import com.kurento.commons.media.format.PayloadSpec;
 import com.kurento.commons.media.format.SessionSpec;
+import com.kurento.commons.media.format.formatparameters.FormatParameters;
+import com.kurento.commons.media.format.formatparameters.impl.H263FormatParameters;
+import com.kurento.commons.media.format.formatparameters.impl.H263VideoProfile;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.join.JoinableStream.StreamType;
 import com.kurento.commons.sdp.enums.MediaType;
 import com.kurento.commons.sdp.enums.Mode;
+import com.kurento.commons.types.Fraction;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.ports.MediaPortManager;
@@ -69,6 +73,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	private VideoJoinableStreamImpl videoJoinableStreamImpl;
 	private AudioJoinableStreamImpl audioJoinableStreamImpl;
 
+	private int maxAudioBitrate;
+
 	@Override
 	public void setLocalSessionSpec(SessionSpec arg0) {
 		this.localSessionSpec = arg0;
@@ -92,8 +98,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 		// Process MediaConfigure and determinate media profiles
 		audioProfiles = getAudioProfiles(this.mediaSessionConfig);
-		videoProfiles = getVideoProfiles(this.mediaSessionConfig);
-		
+		this.maxAudioBitrate = getMaxAudioBitrate();
+		videoProfiles = getVideoProfiles(this.mediaSessionConfig,
+				maxAudioBitrate);
 		publicAddress = getLocalAddress();
 	}
 
@@ -123,11 +130,13 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	}
 
 	private void addPayloadSpec(List<PayloadSpec> videoList, String payloadStr,
-			MediaType mediaType, int port) {
+			MediaType mediaType, int port, FormatParameters formatParameters) {
 		try {
 			PayloadSpec payload = new PayloadSpec(payloadStr);
 			payload.setMediaType(mediaType);
 			payload.setPort(port);
+			if (formatParameters != null)
+				payload.setFormatParams(formatParameters);
 			videoList.add(payload);
 		} catch (SdpException e) {
 			e.printStackTrace();
@@ -217,15 +226,27 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			for (VideoProfile vp : videoProfiles) {
 				if (VideoCodecType.MPEG4.equals(vp.getVideoCodecType()))
 					addPayloadSpec(videoList, payload + " MP4V-ES/90000",
-							MediaType.VIDEO, videoPort);
-				else if (VideoCodecType.H263.equals(vp.getVideoCodecType()))
+							MediaType.VIDEO, videoPort, null);
+				else if (VideoCodecType.H263.equals(vp.getVideoCodecType())) {
+					ArrayList<H263VideoProfile> profilesList = new ArrayList<H263VideoProfile>();
+					profilesList.add(new H263VideoProfile(vp.getWidth(), vp
+							.getHeight(), new Fraction(vp.getFrameRate()*1000, 1001)));
+					H263FormatParameters h263fp = null;
+					try {
+						h263fp = new H263FormatParameters(profilesList);
+					} catch (SdpException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					addPayloadSpec(videoList, payload + " H263-1998/90000",
-							MediaType.VIDEO, videoPort);
+							MediaType.VIDEO, videoPort, h263fp);
+				}
 				payload++;
 			}
 
 			videoMedia = new MediaSpec();
 			videoMedia.setPayloadList(videoList);
+			videoMedia.setBandWidth(videoProfiles.get(0).getBitRate());
 
 			Mode videoMode = Mode.SENDRECV;
 			if (this.mediaSessionConfig.getMediaTypeModes() != null
@@ -266,6 +287,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 			audioMedia = new MediaSpec();
 			audioMedia.setPayloadList(audioList);
+			audioMedia.setBandWidth(maxAudioBitrate);
 
 			Mode audioMode = Mode.SENDRECV;
 			if (this.mediaSessionConfig.getMediaTypeModes() != null
@@ -307,6 +329,16 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		return this.mediaSessionConfig.getStunPort();
 	}
 
+	private int getMaxAudioBitrate() {
+		int maxAudioBitrate = 0;
+		for (AudioProfile ap : audioProfiles) {
+			if (ap.getBitRate() > maxAudioBitrate)
+				maxAudioBitrate = ap.getBitRate();
+		}
+
+		return maxAudioBitrate;
+	}
+
 	private ArrayList<AudioProfile> getAudioProfiles(
 			MediaSessionConfig mediaSessionConfig) {
 		ArrayList<AudioCodecType> audioCodecs = mediaSessionConfig
@@ -334,7 +366,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	}
 
 	private ArrayList<VideoProfile> getVideoProfiles(
-			MediaSessionConfig mediaSessionConfig) {
+			MediaSessionConfig mediaSessionConfig, int maxAudioBitrate) {
 		ArrayList<VideoCodecType> videoCodecs = mediaSessionConfig
 				.getVideoCodecs();
 		NetIF netIF = mediaSessionConfig.getNetIF();
@@ -344,12 +376,12 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		// Discard/Select phase
 		if (videoCodecs == null) {// Default: all codecs
 			for (VideoCodecType vct : VideoCodecType.values())
-				videoProfiles
-						.add(new VideoProfile(vct, netIF.getMaxBandwidth()));
+				videoProfiles.add(new VideoProfile(vct, netIF.getMaxBandwidth()
+						- maxAudioBitrate));
 		} else {
 			for (VideoCodecType vct : videoCodecs) {
-				videoProfiles
-						.add(new VideoProfile(vct, netIF.getMaxBandwidth()));
+				videoProfiles.add(new VideoProfile(vct, netIF.getMaxBandwidth()
+						- maxAudioBitrate));
 			}
 		}
 
@@ -378,7 +410,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 		for (VideoProfile vp : videoProfiles) {
 			if (maxBW != null)
-				vp.setBitRate(maxBW);
+				vp.setBitRate(maxBW - maxAudioBitrate);
 			if (maxFrameRate != null)
 				vp.setFrameRate(maxFrameRate);
 			if (maxGopSize != null)
