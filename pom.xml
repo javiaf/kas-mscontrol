@@ -181,9 +181,9 @@
 	</distributionManagement>
 
 	<scm>
-		<connection>scm:git:ssh://repository.kurento.com/git/kas-mscontrol</connection>
-		<developerConnection>scm:git:ssh://repository.kurento.com/git/kas-mscontrol</developerConnection>
-		<url>scm:git:ssh://repository.kurento.com/git/kas-mscontrol</url>
+		<connection>scm:http://kurento.googlecode.com</connection>
+		<developerConnection>scm:git:ssh://git@repository.kurento.com/kas/kas-mscontrol.git</developerConnection>
+                <url>https://repository.kurento.com/git/kurento-android-sdk/?p=kas-mscontrol.git</url>
 	</scm>
 
 	<licenses>
