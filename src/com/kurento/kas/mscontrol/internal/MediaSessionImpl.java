@@ -21,8 +21,6 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Map;
 
-import android.hardware.Camera.Size;
-
 import com.kurento.commons.mscontrol.Configuration;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
