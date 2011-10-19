@@ -162,8 +162,8 @@ public class SdpPortManagerImpl implements SdpPortManager {
 	public void processSdpAnswer(byte[] answer) throws SdpPortManagerException {
 		try {
 			userAgentSDP = new SessionSpec(new String(answer));
-			resource.setRemoteSessionSpec(userAgentSDP);
-
+			resource.setRemoteSessionSpec(SpecTools.intersectSessionSpec(
+					localSpec, userAgentSDP)[1]);
 			localSpec = SpecTools.intersectSessionSpec(localSpec, userAgentSDP)[0];
 			resource.setLocalSessionSpec(localSpec);
 
