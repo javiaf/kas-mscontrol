@@ -53,7 +53,7 @@ public class MSControlFactory {
 	 * 
 	 *            <tbody>
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid.NET_IF}</td>
+	 *            <td>{@link MediaSessionAndroid#NET_IF NET_IF}</td>
 	 *            <td>M</td>
 	 *            <td>{@link NetIF}</td>
 	 *            <td>[WIFI, MOBILE]</td>
@@ -62,7 +62,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid.LOCAL_ADDRESS}</td>
+	 *            <td>{@link MediaSessionAndroid#LOCAL_ADDRESS LOCAL_ADDRESS}</td>
 	 *            <td>M</td>
 	 *            <td>InetAddress</td>
 	 *            <td>NA</td>
@@ -71,36 +71,34 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid.MAX_BANDWIDTH}</td>
+	 *            <td>{@link MediaSessionAndroid#MAX_BANDWIDTH MAX_BANDWIDTH}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>
-	 *            <ul>
-	 *            <li>NET_IF.MOBILE: [150000, 384000]</li>
-	 *            <li>NET_IF.WIFI: [150000, 1500000]</li>
-	 *            </ul>
+	 *            - NET_IF.MOBILE: [150000, 384000]
+	 *            <br>
+	 *            - NET_IF.WIFI: [150000, 1500000]
 	 *            </td>
 	 *            <td>
-	 *            <ul>
-	 *            <li>NET_IF.MOBILE: 384000</li>
-	 *            <li>NET_IF.WIFI: 1500000</li>
-	 *            </ul>
+	 *            - NET_IF.MOBILE: 384000
+	 *            <br>
+	 *            - NET_IF.WIFI: 1500000
 	 *            </td>
 	 *            <td>Indicate the max bandwidth will be used in bps(bits per
 	 *            second).</td>
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid.STREAMS_MODES}</td>
+	 *            <td>{@link MediaSessionAndroid#STREAMS_MODES STREAMS_MODES}</td>
 	 *            <td>O</td>
-	 *            <td>HashMap&lt;{@link MediaType, Mode}&gt;</td>
+	 *            <td>HashMap&lt; MediaType, Mode&gt;</td>
 	 *            <td>[SENDRECV, SENDONLY, RECVONLY]</td>
 	 *            <td>SENDRECV</td>
 	 *            <td>Indicate the mode of each media stream.</td>
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid.AUDIO_CODECS}</td>
+	 *            <td>{@link MediaSessionAndroid#AUDIO_CODECS AUDIO_CODECS}</td>
 	 *            <td>O</td>
 	 *            <td>ArrayList&lt;{@link AudioCodecType}&gt;</td>
 	 *            <td>[AMR, MP2]</td>
@@ -109,7 +107,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid.VIDEO_CODECS}</td>
+	 *            <td>{@link MediaSessionAndroid#VIDEO_CODECS VIDEO_CODECS}</td>
 	 *            <td>O</td>
 	 *            <td>ArrayList&lt;{@link VideoCodecType}&gt;</td>
 	 *            <td>[H263, MPEG4]</td>
@@ -125,7 +123,11 @@ public class MSControlFactory {
 	 *            </thead> <tbody>
 	 * 
 	 *            <tr>
+<<<<<<< HEAD
 	 *            <td>{@link MediaSessionAndroid.FRAME_WIDTH}</td>
+=======
+	 *            <td>{@link MediaSessionAndroid#FRAME_SIZE FRAME_SIZE}</td>
+>>>>>>> release-1.0
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>NA</td>
@@ -143,7 +145,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid.MAX_FRAME_RATE}</td>
+	 *            <td>{@link MediaSessionAndroid#MAX_FRAME_RATE MAX_FRAME_RATE}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>[1, Integer.MAX_VALUE]</td>
@@ -152,7 +154,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid.GOP_SIZE}</td>
+	 *            <td>{@link MediaSessionAndroid#GOP_SIZE GOP_SIZE}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>[0, Integer.MAX_VALUE]</td>
@@ -162,7 +164,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid.FRAMES_QUEUE_SIZE}</td>
+	 *            <td>{@link MediaSessionAndroid#FRAMES_QUEUE_SIZE FRAMES_QUEUE_SIZE}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>[2, Integer.MAX_VALUE]</td>

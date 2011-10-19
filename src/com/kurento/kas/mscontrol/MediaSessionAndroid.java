@@ -28,7 +28,7 @@ import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
 /**
  * MediaSessionAndroid is an interface that extends MediaSession.<br>
  * 
- * Defines a set of parameters to config a MediaSession instance.
+ * Defines a set of parameters to configure a MediaSession instance.
  * 
  */
 public interface MediaSessionAndroid extends MediaSession {
@@ -123,13 +123,13 @@ public interface MediaSessionAndroid extends MediaSession {
 	 *            Defines the concrete MediaComponentAndroid to create. <br>
 	 *            Predefined Configurations are:
 	 *            <ul>
-	 *            <li>{@link MediaComponentAndroid.AUDIO_PLAYER}: create a
+	 *            <li>{@link MediaComponentAndroid#AUDIO_PLAYER AUDIO_PLAYER}: create a
 	 *            component that record audio from microphone.
-	 *            <li>{@link MediaComponentAndroid.AUDIO_RECORDER}: create a
+	 *            <li>{@link MediaComponentAndroid#AUDIO_RECORDER AUDIO_RECORDER}: create a
 	 *            component that play audio.
-	 *            <li>{@link MediaComponentAndroid.VIDEO_PLAYER}: create a
+	 *            <li>{@link MediaComponentAndroid#VIDEO_PLAYER VIDEO_PLAYER}: create a
 	 *            component that record video from camera.
-	 *            <li>{@link MediaComponentAndroid.VIDEO_RECORDER}: create a
+	 *            <li>{@link MediaComponentAndroid#VIDEO_RECORDER VIDEO_RECORDER}: create a
 	 *            component that show video in a display.
 	 *            </ul>
 	 * @param params
@@ -152,20 +152,20 @@ public interface MediaSessionAndroid extends MediaSession {
 	 *            </thead> <tbody>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaComponentAndroid.AUDIO_PLAYER}</td>
-	 *            <td colspan=3>{@link Parameters.NO_PARAMETER}</td>
+	 *            <td>{@link MediaComponentAndroid#AUDIO_PLAYER AUDIO_PLAYER}</td>
+	 *            <td colspan=3>{@link Parameters#NO_PARAMETER NO_PARAMETER}</td>
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaComponentAndroid.AUDIO_RECORDER}</td>
-	 *            <td>{@link MediaComponentAndroid.STREAM_TYPE}</td>
+	 *            <td>{@link MediaComponentAndroid#AUDIO_RECORDER AUDIO_RECORDER}</td>
+	 *            <td>{@link MediaComponentAndroid#STREAM_TYPE STREAM_TYPE}</td>
 	 *            <td>int (see android.media.AudioManager)</td>
 	 *            <td>Speaker that will be used.</td>
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaComponentAndroid.VIDEO_PLAYER}</td>
-	 *            <td>{@link MediaComponentAndroid.PREVIEW_SURFACE}</td>
+	 *            <td>{@link MediaComponentAndroid#VIDEO_PLAYER VIDEO_PLAYER}</td>
+	 *            <td>{@link MediaComponentAndroid#PREVIEW_SURFACE PREVIEW_SURFACE}</td>
 	 *            <td>android.view.View</td>
 	 *            <td>Surface in which the preview images from the camera will
 	 *            be previewed</td>
@@ -173,25 +173,25 @@ public interface MediaSessionAndroid extends MediaSession {
 	 * 
 	 *            <tr>
 	 *            <td rowspan=4 valign=top>
-	 *            {@link MediaComponentAndroid.VIDEO_RECORDER}</td>
-	 *            <td>{@link MediaComponentAndroid.VIEW_SURFACE}</td>
+	 *            {@link MediaComponentAndroid#VIDEO_RECORDER VIDEO_RECORDER}</td>
+	 *            <td>{@link MediaComponentAndroid#VIEW_SURFACE VIEW_SURFACE}</td>
 	 *            <td>android.view.View</td>
-	 *            <td>Surface in which the video receibed will be played.</td>
+	 *            <td>Surface in which the video received will be played.</td>
 	 *            </tr>
 	 *            <tr>
-	 *            <td>{@link MediaComponentAndroid.DISPLAY_WIDTH}</td>
+	 *            <td>{@link MediaComponentAndroid#DISPLAY_WIDTH DISPLAY_WIDTH}</td>
 	 *            <td>int</td>
 	 *            <td>Width of surface designated by
-	 *            {@link MediaComponentAndroid.VIEW_SURFACE}</td>
+	 *            {@link MediaComponentAndroid#VIEW_SURFACE VIEW_SURFACE}</td>
 	 *            </tr>
 	 *            <tr>
-	 *            <td>{@link MediaComponentAndroid.DISPLAY_HEIGHT}</td>
+	 *            <td>{@link MediaComponentAndroid#DISPLAY_HEIGHT DISPLAY_HEIGHT}</td>
 	 *            <td>int</td>
 	 *            <td>Height of surface designated by
-	 *            {@link MediaComponentAndroid.VIEW_SURFACE}</td>
+	 *            {@link MediaComponentAndroid#VIEW_SURFACE VIEW_SURFACE}</td>
 	 *            </tr>
 	 *            <tr>
-	 *            <td>{@link MediaComponentAndroid.DISPLAY_ORIENTATION}</td>
+	 *            <td>{@link MediaComponentAndroid#DISPLAY_ORIENTATION DISPLAY_ORIENTATION}</td>
 	 *            <td>int</td>
 	 *            <td>Orientation in which the video will be played.</td>
 	 *            </tr>
