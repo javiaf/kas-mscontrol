@@ -21,7 +21,9 @@ import android.util.Log;
 
 import com.kurento.commons.media.format.MediaSpec;
 import com.kurento.commons.media.format.SessionSpec;
+import com.kurento.commons.media.format.formatparameters.impl.H263FormatParameters;
 import com.kurento.commons.sdp.enums.MediaType;
+import com.kurento.commons.types.Fraction;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.exception.CodecNotSupportedException;
@@ -34,10 +36,11 @@ public class RTPInfo {
 
 	private int dstVideoPort;
 	private VideoCodecType videoCodecType;
-	private int videoPayloadType;
-	private int videoBandwidth;
-	private int frameWidth;
-	private int frameHeight;
+	private int videoPayloadType = -1;
+	private int videoBandwidth = -1;
+	private int frameWidth = -1;
+	private int frameHeight = -1;
+	private Fraction frameRate;
 
 	private int dstAudioPort;
 	private AudioCodecType audioCodecType;
@@ -69,6 +72,14 @@ public class RTPInfo {
 
 	public int getFrameHeight() {
 		return frameHeight;
+	}
+
+	public Fraction getFrameRate() {
+		return frameRate;
+	}
+
+	public void setFrameRate(Fraction frameRate) {
+		this.frameRate = frameRate;
 	}
 
 	public int getDstAudioPort() {
@@ -119,6 +130,27 @@ public class RTPInfo {
 						this.videoPayloadType = ms.getPayloadList().get(0)
 								.getPayload();
 						this.videoBandwidth = ms.getBandWidth();
+
+						if (VideoCodecType.H263.equals(this.videoCodecType)
+								&& ((H263FormatParameters) ms.getPayloadList()
+										.get(0).getFormatParameters())
+										.getProfilesList().size() > 0) {
+							this.frameWidth = ((H263FormatParameters) ms
+									.getPayloadList().get(0)
+									.getFormatParameters()).getProfilesList()
+									.get(0).getWidth();
+							this.frameHeight = ((H263FormatParameters) ms
+									.getPayloadList().get(0)
+									.getFormatParameters()).getProfilesList()
+									.get(0).getHeight();
+							this.frameRate = ((H263FormatParameters) ms
+									.getPayloadList().get(0)
+									.getFormatParameters()).getProfilesList()
+									.get(0).getMaxFrameRate();
+						}
+						Log.w(LOG_TAG, "frameWidth: " + frameWidth);
+						Log.w(LOG_TAG, "frameHeight: " + frameHeight);
+						Log.w(LOG_TAG, "frameRate: " + frameRate);
 					}
 				}
 			}
