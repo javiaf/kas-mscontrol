@@ -84,7 +84,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	@Override
 	public void setRemoteSessionSpec(SessionSpec arg0) {
 		this.remoteSessionSpec = arg0;
-		Log.d(LOG_TAG, "** remoteSessionSpec:\n" + remoteSessionSpec);
+		Log.d(LOG_TAG, "remoteSessionSpec:\n" + remoteSessionSpec);
 	}
 
 	public NetworkConnectionImpl(MediaSessionConfig mediaSessionConfig)
@@ -239,7 +239,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					ArrayList<H263VideoProfile> profilesList = new ArrayList<H263VideoProfile>();
 					profilesList.add(new H263VideoProfile(vp.getWidth(), vp
 							.getHeight(), new Fraction(
-							vp.getFrameRate() * 1000, 1001)));
+							vp.getFrameRateNum() * 1000, 1001)));
 					H263FormatParameters h263fp = null;
 					try {
 						h263fp = new H263FormatParameters(profilesList);
@@ -420,8 +420,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		for (VideoProfile vp : videoProfiles) {
 			if (maxBW != null)
 				vp.setBitRate(maxBW - maxAudioBitrate);
-			if (maxFrameRate != null)
-				vp.setFrameRate(maxFrameRate);
+			if (maxFrameRate != null) {
+				vp.setFrameRateNum(maxFrameRate);
+				vp.setFrameRateDen(1);
+			}
 			if (maxGopSize != null)
 				vp.setGopSize(maxGopSize);
 			if (width != null)

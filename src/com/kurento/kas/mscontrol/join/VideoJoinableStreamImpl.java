@@ -91,6 +91,18 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			VideoCodecType videoCodecType = remoteRTPInfo.getVideoCodecType();
 			VideoProfile videoProfile = getVideoProfileFromVideoCodecType(
 					videoProfiles, videoCodecType);
+			if (remoteRTPInfo.getFrameWidth() > 0
+					&& remoteRTPInfo.getFrameHeight() > 0) {
+				videoProfile.setWidth(remoteRTPInfo.getFrameWidth());
+				videoProfile.setHeight(remoteRTPInfo.getFrameHeight());
+			}
+			if (remoteRTPInfo.getFrameRate() != null) {
+				videoProfile.setFrameRateNum(remoteRTPInfo.getFrameRate()
+						.getNumerator());
+				videoProfile.setFrameRateDen(remoteRTPInfo.getFrameRate()
+						.getDenominator());
+			}
+
 			if ((Mode.SENDRECV.equals(videoMode) || Mode.SENDONLY
 					.equals(videoMode)) && videoProfile != null) {
 				if (remoteRTPInfo.getVideoBandwidth() > 0)
@@ -149,7 +161,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	private class VideoTxThread extends Thread {
 		@Override
 		public void run() {
-			int tFrame = 1000 / videoProfile.getFrameRate();
+			int tFrame = 1000 / (videoProfile.getFrameRateNum() / videoProfile
+					.getFrameRateDen());
 			Frame frameProcessed;
 
 			try {
