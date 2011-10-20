@@ -106,7 +106,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			if ((Mode.SENDRECV.equals(videoMode) || Mode.SENDONLY
 					.equals(videoMode)) && videoProfile != null) {
 				if (remoteRTPInfo.getVideoBandwidth() > 0)
-					videoProfile.setBitRate(remoteRTPInfo.getVideoBandwidth());
+					videoProfile.setBitRate(remoteRTPInfo.getVideoBandwidth()*1000);
 				VideoInfoTx videoInfo = new VideoInfoTx(videoProfile);
 				videoInfo.setOut(remoteRTPInfo.getVideoRTPDir());
 				videoInfo.setPayloadType(remoteRTPInfo.getVideoPayloadType());

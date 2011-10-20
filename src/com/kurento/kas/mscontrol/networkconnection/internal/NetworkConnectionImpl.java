@@ -154,7 +154,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 		if (!stunHost.equals("")) {
 			final Integer stunPort = getStunPort();
-			
+
 			new Thread(new Runnable() {
 				public void run() {
 					Log.d(LOG_TAG, "Video: Test Port ...." + getLocalAddress());
@@ -184,8 +184,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			}).start();
 
 			Log.d(LOG_TAG, "Audio : Test Port ...." + getLocalAddress());
-			DiscoveryTest test = new DiscoveryTest(getLocalAddress(),
-					stunHost, stunPort);
+			DiscoveryTest test = new DiscoveryTest(getLocalAddress(), stunHost,
+					stunPort);
 			DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
 
 			try {
@@ -213,7 +213,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			publicAddress = info.getPublicIP();
 			Log.d(LOG_TAG, "Port reserved, Audio:" + audioPort + "; Video: "
 					+ videoPort);
-		}else {
+		} else {
 			audioPort = MediaPortManager.takeAudioLocalPort();
 			videoPort = MediaPortManager.takeVideoLocalPort();
 		}
@@ -255,7 +255,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 			videoMedia = new MediaSpec();
 			videoMedia.setPayloadList(videoList);
-			videoMedia.setBandWidth(videoProfiles.get(0).getBitRate());
+
+			videoMedia.setBandWidth((int) Math.ceil(videoProfiles.get(0)
+					.getBitRate() / 1000.0));
 
 			Mode videoMode = Mode.SENDRECV;
 			if (this.mediaSessionConfig.getMediaTypeModes() != null
@@ -296,7 +298,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 			audioMedia = new MediaSpec();
 			audioMedia.setPayloadList(audioList);
-			audioMedia.setBandWidth(maxAudioBitrate);
+			audioMedia.setBandWidth((int) Math.ceil(maxAudioBitrate / 1000.0));
 
 			Mode audioMode = Mode.SENDRECV;
 			if (this.mediaSessionConfig.getMediaTypeModes() != null
