@@ -15,8 +15,9 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<!-- Dependency versions -->
-		<kcMsControlVersion>1.1.0-SNAPSHOT</kcMsControlVersion>
-		<kcMediaSpecVersion>1.1.0-SNAPSHOT</kcMediaSpecVersion>
+		<kasMediaVersion>1.1.0-RC-1</kasMediaVersion>
+		<kcMsControlVersion>1.0.0-RC-2</kcMsControlVersion>
+		<kcMediaSpecVersion>1.1.0-RC-1</kcMediaSpecVersion>
 	</properties>
 
 	<organization>
@@ -62,7 +63,7 @@
 		<dependency>
 			<groupId>com.kurento.kas</groupId>
 			<artifactId>kas-media</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
+			<version>${kasMediaVersion}</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
