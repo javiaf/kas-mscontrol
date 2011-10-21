@@ -123,11 +123,7 @@ public class MSControlFactory {
 	 *            </thead> <tbody>
 	 * 
 	 *            <tr>
-<<<<<<< HEAD
 	 *            <td>{@link MediaSessionAndroid.FRAME_WIDTH}</td>
-=======
-	 *            <td>{@link MediaSessionAndroid#FRAME_SIZE FRAME_SIZE}</td>
->>>>>>> release-1.0
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>NA</td>
