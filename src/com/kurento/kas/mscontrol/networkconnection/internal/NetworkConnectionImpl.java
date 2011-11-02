@@ -127,6 +127,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			videoJoinableStreamImpl.stop();
 		if (audioJoinableStreamImpl != null)
 			audioJoinableStreamImpl.stop();
+
+		MediaPortManager.releaseAudioLocalPort();
+		MediaPortManager.releaseVideoLocalPort();
 	}
 
 	private void addPayloadSpec(List<PayloadSpec> videoList, String payloadStr,
