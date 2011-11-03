@@ -46,6 +46,7 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 	private int screenHeight;
 	private RectF dirty2;
 	private Canvas canvas = new Canvas();
+	private Bitmap srcBitmap;
 
 	Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
@@ -103,8 +104,6 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 			if (canvas == null)
 				return;
 
-			// RectF dirty2 = new RectF(0, 0, screenWidth, screenHeight);
-
 			int heighAux = height;
 			int widthAux = width;
 
@@ -112,11 +111,16 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 			heighAux = (int) (aux * heighAux);
 			widthAux = (int) (aux * widthAux);
 
-			Bitmap srcBitmap = Bitmap.createBitmap(rgb, width, height,
+			srcBitmap = Bitmap.createBitmap(rgb, width, height,
 					Bitmap.Config.ARGB_8888);
 
 			dirty2 = new RectF(0, 0, widthAux, heighAux);
+
 			canvas.drawBitmap(srcBitmap, null, dirty2, null);
+			
+			srcBitmap.recycle();
+			srcBitmap = null;
+			dirty2 = null;
 			Canvas.freeGlCaches();
 			if (mSurfaceReceive == null)
 				return;
