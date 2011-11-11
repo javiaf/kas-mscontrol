@@ -18,12 +18,11 @@
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Random;
 
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.PreviewCallback;
-import android.hardware.Camera.Size;
 import android.os.Build.VERSION;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -52,6 +51,8 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	private int width;
 	private int height;
 	private int screenOrientation;
+
+	private byte[] dumyFrame;
 
 	public View getVideoSurfaceTx() {
 		return videoSurfaceTx;
@@ -103,15 +104,25 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	public void onPreviewFrame(byte[] data, Camera camera) {
 		if (data == null)
 			return;
+//		Log.d(LOG_TAG, "data.length: " + data.length);
 		// Send frame to subscribers
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof VideoSink)
-					((VideoSink) j).putVideoFrame(data, width, height);
+					((VideoSink) j).putVideoFrame(dumyFrame, width, height);
 		} catch (MsControlException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private void createDummyFrame() {
+		long t1 = System.currentTimeMillis();
+		Random rand = new Random(9999);
+		dumyFrame = new byte[this.width * this.height * 3 / 2]; // NV21
+		rand.nextBytes(dumyFrame);
+		long t2 = System.currentTimeMillis();
+		Log.d(LOG_TAG, "time generate dummy frame: " + (t2 - t1) + " ms");
 	}
 
 	@Override
@@ -127,6 +138,8 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 
 		this.width = videoProfile.getWidth();
 		this.height = videoProfile.getHeight();
+	
+		createDummyFrame();
 
 		mVideoView = (SurfaceView) videoSurfaceTx;
 
@@ -166,40 +179,40 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 				// parameters.set("camera-id", 2);
 				// mCamera.setParameters(parameters);
 
-				List<Size> sizes = parameters.getSupportedPreviewSizes();
-				// Video Preferences is support?
-				boolean isSupport = false;
-				int sizeSelected = -1;
-				for (int i = 0; i < sizes.size(); i++) {
-					if ((width == sizes.get(i).width)
-							&& (height == sizes.get(i).height)) {
-						isSupport = true;
-						break;
-					}
-					if (sizeSelected == -1) {
-						if (sizes.get(i).width <= width)
-							sizeSelected = i;
-					} else if ((sizes.get(i).width >= sizes.get(sizeSelected).width)
-							&& (sizes.get(i).width <= width))
-						sizeSelected = i;
-				}
-				if (sizeSelected == -1)
-					sizeSelected = 0;
-				if (!isSupport) {
-					width = sizes.get(sizeSelected).width;
-					height = sizes.get(sizeSelected).height;
-				}
-				parameters.setPreviewSize(width, height);
-				mCamera.setParameters(parameters);
-
-				String cad = "";
-				for (int i = 0; i < sizes.size(); i++)
-					cad += sizes.get(i).width + " x " + sizes.get(i).height
-							+ "\n";
-				Log.d(LOG_TAG, "getPreviewSize: "
-						+ parameters.getPreviewSize().width + " x "
-						+ parameters.getPreviewSize().height);
-				Log.d(LOG_TAG, "getSupportedPreviewSizes:\n" + cad);
+//				List<Size> sizes = parameters.getSupportedPreviewSizes();
+//				// Video Preferences is support?
+//				boolean isSupport = false;
+//				int sizeSelected = -1;
+//				for (int i = 0; i < sizes.size(); i++) {
+//					if ((width == sizes.get(i).width)
+//							&& (height == sizes.get(i).height)) {
+//						isSupport = true;
+//						break;
+//					}
+//					if (sizeSelected == -1) {
+//						if (sizes.get(i).width <= width)
+//							sizeSelected = i;
+//					} else if ((sizes.get(i).width >= sizes.get(sizeSelected).width)
+//							&& (sizes.get(i).width <= width))
+//						sizeSelected = i;
+//				}
+//				if (sizeSelected == -1)
+//					sizeSelected = 0;
+//				if (!isSupport) {
+//					width = sizes.get(sizeSelected).width;
+//					height = sizes.get(sizeSelected).height;
+//				}
+//				parameters.setPreviewSize(width, height);
+//				mCamera.setParameters(parameters);
+//
+//				String cad = "";
+//				for (int i = 0; i < sizes.size(); i++)
+//					cad += sizes.get(i).width + " x " + sizes.get(i).height
+//							+ "\n";
+//				Log.d(LOG_TAG, "getPreviewSize: "
+//						+ parameters.getPreviewSize().width + " x "
+//						+ parameters.getPreviewSize().height);
+//				Log.d(LOG_TAG, "getSupportedPreviewSizes:\n" + cad);
 
 				// int result = 0;
 				// if (VERSION.SDK_INT < 9) {
