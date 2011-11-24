@@ -63,14 +63,6 @@ public class AudioPlayerComponent extends MediaComponentBase {
 		return finalSize;
 	}
 
-	// private void releaseAudioRecord() {
-	// Log.d(LOG_TAG, "ReleaseAudio");
-	// if (audioRecord != null) {
-	// audioRecord.stop();
-	// audioRecord.release();
-	// audioRecord = null;
-	// }
-	// }
 
 	@Override
 	public void start() throws MsControlException {
@@ -102,6 +94,14 @@ public class AudioPlayerComponent extends MediaComponentBase {
 	public synchronized void stop() {
 		if (audioCapture != null)
 			audioCapture.stopRecording();
+	}
+
+	private synchronized void releaseAudioRecord() {
+		if (audioRecord != null) {
+			audioRecord.stop();
+			audioRecord.release();
+			audioRecord = null;
+		}
 	}
 
 	private class AudioCapture extends Thread {
@@ -152,8 +152,7 @@ public class AudioPlayerComponent extends MediaComponentBase {
 							((AudioSink) j).putAudioSamples(buffer,
 									bufferReadResult);
 				}
-				if (audioRecord != null)
-					audioRecord.stop();
+				releaseAudioRecord();
 			} catch (Throwable t) {
 				Log.e(LOG_TAG, "Recording error:" + t.toString());
 			}
