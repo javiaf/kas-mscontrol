@@ -101,6 +101,7 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 	public synchronized void stop() {
 		if (audioTrack != null) {
 			audioTrack.stop();
+			audioTrack.release();
 			audioTrack = null;
 			isRecording = false;
 		}
