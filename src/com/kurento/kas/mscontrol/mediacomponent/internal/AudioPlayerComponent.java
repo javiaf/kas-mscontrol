@@ -39,14 +39,14 @@ public class AudioPlayerComponent extends MediaComponentBase {
 
 	private AudioCapture audioCapture;
 
+	public AudioPlayerComponent() throws MsControlException {
+	}
+
 	@Override
-	public boolean isStarted() {
+	public synchronized boolean isStarted() {
 		if (audioCapture == null)
 			return false;
 		return audioCapture.isPlaying();
-	}
-
-	public AudioPlayerComponent() throws MsControlException {
 	}
 
 	/**
@@ -63,9 +63,8 @@ public class AudioPlayerComponent extends MediaComponentBase {
 		return finalSize;
 	}
 
-
 	@Override
-	public void start() throws MsControlException {
+	public synchronized void start() throws MsControlException {
 		AudioInfoTx audioInfo = null;
 		for (Joinable j : getJoinees(Direction.SEND))
 			if (j instanceof AudioJoinableStreamImpl) {
@@ -77,8 +76,8 @@ public class AudioPlayerComponent extends MediaComponentBase {
 		this.frameSize = audioInfo.getFrameSize();
 		int frequency = audioInfo.getAudioProfile().getSampleRate();
 
-		int minBufferSize = AudioRecord.getMinBufferSize(frequency,
-				channelConfiguration, audioEncoding);
+		int minBufferSize = AudioRecord.getMinBufferSize(frequency, channelConfiguration,
+				audioEncoding);
 
 		int bufferSize = calculateBufferSize(minBufferSize, this.frameSize);
 
@@ -149,8 +148,7 @@ public class AudioPlayerComponent extends MediaComponentBase {
 					int bufferReadResult = readFully(buffer, frameSize);
 					for (Joinable j : getJoinees(Direction.SEND))
 						if (j instanceof AudioSink)
-							((AudioSink) j).putAudioSamples(buffer,
-									bufferReadResult);
+							((AudioSink) j).putAudioSamples(buffer, bufferReadResult);
 				}
 				releaseAudioRecord();
 			} catch (Throwable t) {
