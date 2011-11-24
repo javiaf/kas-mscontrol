@@ -39,7 +39,7 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 	private boolean isRecording = false;
 
 	@Override
-	public boolean isStarted() {
+	public synchronized boolean isStarted() {
 		return isRecording;
 	}
 
@@ -54,17 +54,14 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 		this.streamType = streamType;
 	}
 
-
 	@Override
-	// public synchronized void putAudioSamplesRx(byte[] audio, int length) {
-	public void putAudioSamplesRx(byte[] audio, int length) {
+	public synchronized void putAudioSamplesRx(byte[] audio, int length) {
 		if (isRecording && audioTrack != null)
 			audioTrack.write(audio, 0, length);
 	}
 
 	@Override
-	public void start() throws MsControlException {
-
+	public synchronized void start() throws MsControlException {
 		AudioProfile audioProfile = null;
 		for (Joinable j : getJoinees(Direction.RECV))
 			if (j instanceof AudioJoinableStreamImpl) {
