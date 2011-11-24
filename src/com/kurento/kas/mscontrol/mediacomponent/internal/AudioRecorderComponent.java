@@ -19,7 +19,6 @@ package com.kurento.kas.mscontrol.mediacomponent.internal;
 
 import android.media.AudioFormat;
 import android.media.AudioTrack;
-import android.util.Log;
 
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
@@ -29,8 +28,8 @@ import com.kurento.kas.media.rx.AudioRx;
 import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
 
 public class AudioRecorderComponent extends MediaComponentBase implements AudioRx {
-	
-	private static final String LOG_TAG = "AudioReceive";
+
+	private static final String LOG_TAG = "AudioRecorder";
 
 	private int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
 	private int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
@@ -55,12 +54,6 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 		this.streamType = streamType;
 	}
 
-	// public void release() {
-	// Log.d(LOG_TAG, "Release");
-	// // MediaRx.stopAudioRx();
-	// if (audioTrack != null)
-	// audioTrack.release();
-	// }
 
 	@Override
 	// public synchronized void putAudioSamplesRx(byte[] audio, int length) {
@@ -71,8 +64,6 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 
 	@Override
 	public void start() throws MsControlException {
-		// TODO Create audioTrack in putAudioSamplesRx and receive sampleRate in
-		// it??
 
 		AudioProfile audioProfile = null;
 		for (Joinable j : getJoinees(Direction.RECV))
@@ -83,7 +74,6 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 			throw new MsControlException("Cannot ger audio profile.");
 
 		int frequency = audioProfile.getSampleRate();
-		Log.d(LOG_TAG, "Frequency = " + frequency);
 
 		int buffer_min = AudioTrack
 				.getMinBufferSize(frequency, channelConfiguration, audioEncoding);
