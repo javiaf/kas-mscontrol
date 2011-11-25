@@ -66,24 +66,25 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements
 			AudioCodecType audioCodecType = remoteRTPInfo.getAudioCodecType();
 			AudioProfile audioProfile = AudioProfile
 					.getAudioProfileFromAudioCodecType(audioCodecType);
-			if ((Mode.SENDRECV.equals(audioMode) || Mode.SENDONLY
-					.equals(audioMode)) && audioProfile != null) {
-				AudioInfoTx audioInfo = new AudioInfoTx(audioProfile);
+
+			if (audioProfile != null) {
+				this.audioInfo = new AudioInfoTx(audioProfile);
 				audioInfo.setOut(remoteRTPInfo.getAudioRTPDir());
 				audioInfo.setPayloadType(remoteRTPInfo.getAudioPayloadType());
-				audioInfo.setFrameSize(MediaTx.initAudio(audioInfo));
-				if (audioInfo.getFrameSize() < 0) {
-					Log.e(LOG_TAG, "Error in initAudio");
-					MediaTx.finishAudio();
-					return;
-				}
-				this.audioInfo = audioInfo;
-			}
 
-			if ((Mode.SENDRECV.equals(audioMode) || Mode.RECVONLY
-					.equals(audioMode))) {
-				this.audioRxThread = new AudioRxThread(this);
-				this.audioRxThread.start();
+				if (Mode.SENDRECV.equals(audioMode) || Mode.SENDONLY.equals(audioMode)) {
+					audioInfo.setFrameSize(MediaTx.initAudio(audioInfo));
+					if (audioInfo.getFrameSize() < 0) {
+						Log.e(LOG_TAG, "Error in initAudio");
+						MediaTx.finishAudio();
+						return;
+					}
+				}
+
+				if ((Mode.SENDRECV.equals(audioMode) || Mode.RECVONLY.equals(audioMode))) {
+					this.audioRxThread = new AudioRxThread(this);
+					this.audioRxThread.start();
+				}
 			}
 		}
 	}
