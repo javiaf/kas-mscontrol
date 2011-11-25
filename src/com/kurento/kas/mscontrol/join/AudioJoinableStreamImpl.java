@@ -37,8 +37,7 @@ import com.kurento.kas.media.tx.MediaTx;
 import com.kurento.kas.mscontrol.mediacomponent.internal.AudioSink;
 import com.kurento.kas.mscontrol.networkconnection.internal.RTPInfo;
 
-public class AudioJoinableStreamImpl extends JoinableStreamBase implements
-		AudioSink, AudioRx {
+public class AudioJoinableStreamImpl extends JoinableStreamBase implements AudioSink, AudioRx {
 
 	public final static String LOG_TAG = "AudioJoinableStream";
 
@@ -51,9 +50,8 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements
 		return audioInfo;
 	}
 
-	public AudioJoinableStreamImpl(JoinableContainer container,
-			StreamType type, SessionSpec remoteSessionSpec,
-			SessionSpec localSessionSpec) {
+	public AudioJoinableStreamImpl(JoinableContainer container, StreamType type,
+			SessionSpec remoteSessionSpec, SessionSpec localSessionSpec) {
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
 
@@ -123,10 +121,8 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements
 		@Override
 		public void run() {
 			Log.d(LOG_TAG, "startVideoRx");
-			if (!SpecTools.filterMediaByType(localSessionSpec, "audio")
-					.getMediaSpec().isEmpty()) {
-				String sdpAudio = SpecTools.filterMediaByType(localSessionSpec,
-						"audio").toString();
+			if (!SpecTools.filterMediaByType(localSessionSpec, "audio").getMediaSpec().isEmpty()) {
+				String sdpAudio = SpecTools.filterMediaByType(localSessionSpec, "audio").toString();
 				MediaRx.startAudioRx(sdpAudio, this.audioRx);
 			}
 		}
