@@ -249,6 +249,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					}
 					addPayloadSpec(videoList, payload + " H263-1998/90000",
 							MediaType.VIDEO, videoPort, h263fp);
+				} else if (VideoCodecType.H264.equals(vp.getVideoCodecType())) {
+					addPayloadSpec(videoList, payload + " H264/90000", MediaType.VIDEO, videoPort,
+							null);
 				}
 				payload++;
 			}
