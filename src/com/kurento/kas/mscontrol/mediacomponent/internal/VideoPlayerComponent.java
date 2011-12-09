@@ -47,11 +47,16 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	// private SurfaceHolder mHolder;
 
 	private Camera mCamera;
+	private int cameraFacing = 0;
 	private View videoSurfaceTx;
 
 	private int width;
 	private int height;
 	private int screenOrientation;
+	private SurfaceHolder mHolder2;
+	private Callback cb;
+	private static boolean isMholderCreated = false;
+	private boolean isReleased;
 
 	public View getVideoSurfaceTx() {
 		return videoSurfaceTx;
@@ -73,25 +78,45 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 
 		videoSurfaceTx = sv;
 		screenOrientation = (Integer) params.get(DISPLAY_ORIENTATION) * 90;
-
+		isReleased = false;
+		try {
+			cameraFacing = (Integer) params.get(CAMERA_FACING);
+		} catch (Exception e) {
+			cameraFacing = 0;
+		}
 		Log.d(LOG_TAG, "VideoPlayerComponent " + videoSurfaceTx.toString());
 
 	}
 
+	//TODO: Review orientation camera when you use front camera.
 	private Camera openFrontFacingCameraGingerbread() {
 		int cameraCount = 0;
 		Camera cam = null;
 		Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
 		cameraCount = Camera.getNumberOfCameras();
-		for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
-			Camera.getCameraInfo(camIdx, cameraInfo);
-			if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
-				try {
-					cam = Camera.open(camIdx);
-				} catch (RuntimeException e) {
-					Log.e(LOG_TAG,
-							"Camera failed to open: " + e.getLocalizedMessage()
-									+ " ; " + e.toString());
+		Log.d(LOG_TAG, "Num Camera is " + cameraCount
+				+ ". User wants Camera = " + cameraFacing);
+		// TODO: if only have one camera, open camera 0.
+		if (cameraCount == 1) {
+			try {
+				cam = Camera.open(0);
+			} catch (RuntimeException e) {
+				Log.e(LOG_TAG,
+						"Camera failed to open: " + e.getLocalizedMessage()
+								+ " ; " + e.toString());
+			}
+		} else {
+			for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
+				Camera.getCameraInfo(camIdx, cameraInfo);
+				if (cameraInfo.facing == cameraFacing) {// Camera.CameraInfo.CAMERA_FACING_BACK)
+					try {
+						cam = Camera.open(camIdx);
+					} catch (RuntimeException e) {
+						Log.e(LOG_TAG,
+								"Camera failed to open: "
+										+ e.getLocalizedMessage() + " ; "
+										+ e.toString());
+					}
 				}
 			}
 		}
@@ -129,147 +154,149 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		this.height = videoProfile.getHeight();
 
 		mVideoView = (SurfaceView) videoSurfaceTx;
+		Log.d(LOG_TAG, "Starting");
 
-		final SurfaceHolder mHolder2 = mVideoView.getHolder();
+		mHolder2 = mVideoView.getHolder();
 		mHolder2.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		mHolder2.addCallback(new Callback() {
 
+		if (isMholderCreated)
+			startCamera();
+
+		cb = new Callback() {
 			public void surfaceDestroyed(SurfaceHolder holder) {
 				Log.d(LOG_TAG, "Surface Destroy");
 				if (mCamera != null) {
 					mCamera.setPreviewCallback(null);
 					mCamera.stopPreview();
 					mCamera.release();
+					isMholderCreated = false;
 					mCamera = null;
 				}
 			}
 
 			public void surfaceCreated(SurfaceHolder holder) {
-
 				Log.d(LOG_TAG, "Surface Create");
-
-				if (mCamera == null) {
-					if (VERSION.SDK_INT < 9) {
-						mCamera = Camera.open();
-					} else
-						mCamera = openFrontFacingCameraGingerbread();
-				}
-				mCamera.setErrorCallback(new ErrorCallback() {
-					public void onError(int error, Camera camera) {
-						Log.e(LOG_TAG, "Camera error : " + error);
-					}
-				});
-
-				Log.d(LOG_TAG, "mCamera = " + mCamera.toString());
-				Camera.Parameters parameters = mCamera.getParameters();
-
-				// parameters.set("camera-id", 2);
-				// mCamera.setParameters(parameters);
-
-				List<Size> sizes = parameters.getSupportedPreviewSizes();
-				// Video Preferences is support?
-				boolean isSupport = false;
-				int sizeSelected = -1;
-				for (int i = 0; i < sizes.size(); i++) {
-					if ((width == sizes.get(i).width)
-							&& (height == sizes.get(i).height)) {
-						isSupport = true;
-						break;
-					}
-					if (sizeSelected == -1) {
-						if (sizes.get(i).width <= width)
-							sizeSelected = i;
-					} else if ((sizes.get(i).width >= sizes.get(sizeSelected).width)
-							&& (sizes.get(i).width <= width))
-						sizeSelected = i;
-				}
-				if (sizeSelected == -1)
-					sizeSelected = 0;
-				if (!isSupport) {
-					width = sizes.get(sizeSelected).width;
-					height = sizes.get(sizeSelected).height;
-				}
-				parameters.setPreviewSize(width, height);
-				mCamera.setParameters(parameters);
-
-				String cad = "";
-				for (int i = 0; i < sizes.size(); i++)
-					cad += sizes.get(i).width + " x " + sizes.get(i).height
-							+ "\n";
-				Log.d(LOG_TAG, "getPreviewSize: "
-						+ parameters.getPreviewSize().width + " x "
-						+ parameters.getPreviewSize().height);
-				Log.d(LOG_TAG, "getSupportedPreviewSizes:\n" + cad);
-
-				// int result = 0;
-				// if (VERSION.SDK_INT < 9) {
-				// result = (360 + 90 - screenOrientation) % 360;
-				// // mCamera.setDisplayOrientation(result);
-				//
-				// } else {
-				//
-				// android.hardware.Camera.CameraInfo info = new
-				// android.hardware.Camera.CameraInfo();
-				// android.hardware.Camera.getCameraInfo(0, info);
-				// int rotation = screenOrientation;
-				// int degrees = 0;
-				// switch (rotation) {
-				// case Surface.ROTATION_0:
-				// degrees = 0;
-				// break;
-				// case Surface.ROTATION_90:
-				// degrees = 90;
-				// break;
-				// case Surface.ROTATION_180:
-				// degrees = 180;
-				// break;
-				// case Surface.ROTATION_270:
-				// degrees = 270;
-				// break;
-				// }
-				//
-				// if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-				// result = (info.orientation + degrees) % 360;
-				// result = (360 - result) % 360; // compensate the mirror
-				// } else { // back-facing
-				// result = (info.orientation - degrees + 360) % 360;
-				// }
-				// Log.d(LOG_TAG, "info.orientation = " + info.orientation
-				// + "; Result-Orientation = " + result);
-				// mCamera.setDisplayOrientation(result);
-				//
-				// }
-				// parameters.setRotation(result);
-				// mCamera.setParameters(parameters);
-
-				try {
-
-					mCamera.setPreviewDisplay(mHolder2);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				try {
-					mCamera.startPreview();
-
-				} catch (Throwable e) {
-					Log.e(LOG_TAG, "Can't start camera preview");
-				}
-
+				isMholderCreated = true;
+				startCamera();
 			}
 
 			public void surfaceChanged(SurfaceHolder holder, int format,
 					int width, int height) {
-				mCamera.setPreviewCallback(VideoPlayerComponent.this);
+				Log.d(LOG_TAG, "Surface Changed");
+				// mCamera.setPreviewCallback(VideoPlayerComponent.this);
+			}
+		};
+
+		mHolder2.addCallback(cb);
+	}
+
+	private void startCamera() {
+		if (isReleased)
+			return;
+
+		Log.d(LOG_TAG, "Start Camera");
+		if (mCamera == null) {
+			if (VERSION.SDK_INT < 9) {
+				mCamera = Camera.open();
+			} else
+				mCamera = openFrontFacingCameraGingerbread();
+		}
+		mCamera.setErrorCallback(new ErrorCallback() {
+			public void onError(int error, Camera camera) {
+				Log.e(LOG_TAG, "Camera error : " + error);
 			}
 		});
 
-		// if (videoSurfaceTx != null) {
-		// mVideoView = (SurfaceView) videoSurfaceTx;
-		// mHolder = mVideoView.getHolder();
-		// mHolder.addCallback(this);
-		// mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		Log.d(LOG_TAG, "mCamera = " + mCamera.toString());
+		Camera.Parameters parameters = mCamera.getParameters();
+
+		List<Size> sizes = parameters.getSupportedPreviewSizes();
+		// Video Preferences is support?
+		boolean isSupport = false;
+		int sizeSelected = -1;
+		for (int i = 0; i < sizes.size(); i++) {
+			if ((width == sizes.get(i).width)
+					&& (height == sizes.get(i).height)) {
+				isSupport = true;
+				break;
+			}
+			if (sizeSelected == -1) {
+				if (sizes.get(i).width <= width)
+					sizeSelected = i;
+			} else if ((sizes.get(i).width >= sizes.get(sizeSelected).width)
+					&& (sizes.get(i).width <= width))
+				sizeSelected = i;
+		}
+		if (sizeSelected == -1)
+			sizeSelected = 0;
+		if (!isSupport) {
+			width = sizes.get(sizeSelected).width;
+			height = sizes.get(sizeSelected).height;
+		}
+		parameters.setPreviewSize(width, height);
+		mCamera.setParameters(parameters);
+
+		String cad = "";
+		for (int i = 0; i < sizes.size(); i++)
+			cad += sizes.get(i).width + " x " + sizes.get(i).height + "\n";
+		Log.d(LOG_TAG, "getPreviewSize: " + parameters.getPreviewSize().width
+				+ " x " + parameters.getPreviewSize().height);
+		Log.d(LOG_TAG, "getSupportedPreviewSizes:\n" + cad);
+
+		// int result = 0;
+		// if (VERSION.SDK_INT < 9) {
+		// result = (360 + 90 - screenOrientation) % 360;
+		// // mCamera.setDisplayOrientation(result);
+		//
+		// } else {
+		//
+		// android.hardware.Camera.CameraInfo info = new
+		// android.hardware.Camera.CameraInfo();
+		// android.hardware.Camera.getCameraInfo(0, info);
+		// int rotation = screenOrientation;
+		// int degrees = 0;
+		// switch (rotation) {
+		// case Surface.ROTATION_0:
+		// degrees = 0;
+		// break;
+		// case Surface.ROTATION_90:
+		// degrees = 90;
+		// break;
+		// case Surface.ROTATION_180:
+		// degrees = 180;
+		// break;
+		// case Surface.ROTATION_270:
+		// degrees = 270;
+		// break;
 		// }
-		// startRecording();
+		//
+		// if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+		// result = (info.orientation + degrees) % 360;
+		// result = (360 - result) % 360; // compensate the mirror
+		// } else { // back-facing
+		// result = (info.orientation - degrees + 360) % 360;
+		// }
+		// Log.d(LOG_TAG, "info.orientation = " + info.orientation
+		// + "; Result-Orientation = " + result);
+		// mCamera.setDisplayOrientation(result);
+		//
+		// }
+		// parameters.setRotation(result);
+		// mCamera.setParameters(parameters);
+
+		try {
+
+			mCamera.setPreviewDisplay(mHolder2);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			mCamera.startPreview();
+			mCamera.setPreviewCallback(VideoPlayerComponent.this);
+		} catch (Throwable e) {
+			Log.e(LOG_TAG, "Can't start camera preview");
+		}
+
 	}
 
 	@Override
@@ -278,6 +305,18 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		if (mCamera != null) {
 			mCamera.setPreviewCallback(null);
 			mCamera.stopPreview();
+			mCamera.release();
+			mCamera = null;
 		}
+		Log.d(LOG_TAG, "mCamera release all");
 	}
+
+	@Override
+	public void release() {
+		Log.d(LOG_TAG, "Release");
+		stop();
+		isReleased = true;
+		mHolder2.removeCallback(cb);
+	}
+
 }
