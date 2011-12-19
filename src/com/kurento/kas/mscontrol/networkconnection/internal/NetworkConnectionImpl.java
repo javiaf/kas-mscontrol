@@ -295,6 +295,19 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 						e.printStackTrace();
 					}
 					audioList.add(audioPayloadAMR);
+				} else if (AudioProfile.AAC.equals(ap)) {
+					PayloadSpec audioPayloadAAC = null;
+					try {
+						audioPayloadAAC = new PayloadSpec(payload
+								+ " MPEG4-GENERIC/44100/2");
+						audioPayloadAAC
+								.setFormatParams("profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3; config=121056E500");
+						audioPayloadAAC.setMediaType(MediaType.AUDIO);
+						audioPayloadAAC.setPort(audioPort);
+					} catch (SdpException e) {
+						e.printStackTrace();
+					}
+					audioList.add(audioPayloadAAC);
 				}
 				payload++;
 			}
