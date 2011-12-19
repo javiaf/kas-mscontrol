@@ -30,6 +30,7 @@ import com.kurento.commons.media.format.MediaSpec;
 import com.kurento.commons.media.format.SessionSpec;
 import com.kurento.commons.media.format.SpecTools;
 import com.kurento.commons.mscontrol.MediaEventListener;
+import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
 import com.kurento.commons.mscontrol.networkconnection.SdpPortManager;
 import com.kurento.commons.mscontrol.networkconnection.SdpPortManagerEvent;
@@ -83,13 +84,18 @@ public class SdpPortManagerImpl implements SdpPortManager {
 		// Use localSpec as temp to use later in processSdpAnswer
 		// This is important to not release media ports calling
 		// resource.generateSessionSpec() newly in processSdpAnswer
-		localSpec = resource.generateSessionSpec();
 		SdpPortManagerEventImpl event = null;
+
 		try {
+			localSpec = resource.generateSessionSpec();
 			event = new SdpPortManagerEventImpl(
 					SdpPortManagerEvent.OFFER_GENERATED, this,
 					localSpec.getSessionDescription(),
 					SdpPortManagerEvent.NO_ERROR);
+		} catch (MsControlException e) {
+			log.error(e.getMessage(), e);
+			event = new SdpPortManagerEventImpl(null, this, null,
+					SdpPortManagerEvent.RESOURCE_UNAVAILABLE);
 		} catch (SdpException e) {
 			event = new SdpPortManagerEventImpl(null, this, null,
 					SdpPortManagerEvent.RESOURCE_UNAVAILABLE);
@@ -149,13 +155,18 @@ public class SdpPortManagerImpl implements SdpPortManager {
 						localSpec.getSessionDescription(),
 						SdpPortManagerEvent.NO_ERROR);
 			}
+		} catch (MsControlException e) {
+			log.error(e.getMessage(), e);
+			event = new SdpPortManagerEventImpl(null, this, null,
+					SdpPortManagerEvent.RESOURCE_UNAVAILABLE);
 		} catch (SdpException e) {
 			event = new SdpPortManagerEventImpl(null, this, null,
 					SdpPortManagerEvent.SDP_NOT_ACCEPTABLE);
 			log.error("Error processing SDPOffer", e);
 			throw new SdpPortManagerException("Error processing SDPOffer", e);
+		} finally {
+			notifyEvent(event);
 		}
-		notifyEvent(event);
 	}
 
 	@Override
