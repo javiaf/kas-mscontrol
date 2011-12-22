@@ -70,7 +70,7 @@ Parameters.NO_PARAMETER
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | AUDIO_CODECS   | O | List\<AudioCodectype\> | [AMR, MP2] | [AMR, MP2] |Enabled audio codecs.  |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| VIDEO_CODECS   | O | List\<VideoCodectype\> | [H263, MPEG4]| [H263, MPEG4] |	Enabled video codecs. |
+| VIDEO_CODECS   | O | List\<VideoCodectype\> | [H263, MPEG4, H264]| [H263, MPEG4, H264] |	Enabled video codecs. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | <<Advanced parameters>> |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
@@ -85,6 +85,11 @@ Parameters.NO_PARAMETER
 | FRAMES_QUEUE_SIZE | O | Integer | [2, MAX_INT] | 2 | MAX. number of frames will be buffered from the camera. |
 |					|	|		  |				 |	 |The bigger buffer size the bigger latency.     |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
+| STUN_HOST | O | String | NA | "stun.xten.com" | Url to Server Stun |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| STUN_PORT | O | Integer | [2, MAX_INT] | 3478 | Port to Server Stun |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+
 (M: Mandatory; O: Optional)
 
 
@@ -130,6 +135,11 @@ params.put(MediaSessionAndroid.GOP_SIZE, gopSize);
 int maxQueueSize = 3;
 params.put(MediaSessionAndroid.FRAMES_QUEUE_SIZE, maxQueueSize);
 
+String stunHost = "xtun.stun.com";
+int stunPort = 3478;
+params.put(MediaSessionAndroid.STUN_HOST, stunHost);
+params.put(MediaSessionAndroid.STUN_PORT, stunPort);
+
 
 MediaSessionAndroid mediaSession = MSControlFactory.createMediaSession(params);
 +---
@@ -146,6 +156,9 @@ MediaSessionAndroid mediaSession = MSControlFactory.createMediaSession(params);
 	provides class <<<SdpPortManager>>>, able to handle SDP protocol, but requires an external protocol
 	to interchange SDP frames between peers.
 	
+	In this implementation, there is possibility to configure a <<<Stun Server>>> for not have problem with some NATs.
+	If the <<<Stun>>> is active, before negotiation process, the Stun confirms the public ip and ports to use on negotiation.
+
 	Kurento <<<UA>>> is able to manage SDP negotiation, and within Kurento Android SDK is the function
 	responsible to create and setup <<<NetworkConnection>>> instances.	
 	
@@ -194,9 +207,11 @@ MediaComponentAndroid ARC = mediaSession.createMediaComponent(MediaComponentAndr
 +---
 View view = ...;
 int orientation = ...;
+int cameraFacing = ...;
 Parameters params = MSControlFactory.createParameters();
 params.put(MediaComponentAndroid.PREVIEW_SURFACE, view);
 params.put(MediaComponentAndroid.DISPLAY_ORIENTATION, orientation);
+params.put(MediaComponentAndroid.CAMERA_FACING, cameraFacing);
 MediaComponentAndroid VPC = mediaSession.createMediaComponent( MediaComponentAndroid.VIDEO_PLAYER, params);
 +---			
 							
