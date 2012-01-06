@@ -68,6 +68,13 @@ public interface MediaSessionAndroid extends MediaSession {
 	};
 
 	/**
+	 * Integer to indicate the max delay for media reception in ms
+	 * (miliseconds).
+	 */
+	public static final Parameter MAX_DELAY = new Parameter() {
+	};
+
+	/**
 	 * HashMap&lt;MediaType, Mode&gt; to indicate the mode of each media stream.
 	 */
 	public static final Parameter STREAMS_MODES = new Parameter() {

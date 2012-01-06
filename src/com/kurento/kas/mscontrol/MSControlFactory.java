@@ -89,6 +89,15 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
+	 *            <td>{@link MediaSessionAndroid#MAX_DELAY}</td>
+	 *            <td>O</td>
+	 *            <td>Integer</td>
+	 *            <td>[0, Integer.MAX_VALUE]</td>
+	 *            <td>0</td>
+	 *            <td>Indicate the max delay for media reception in ms (miliseconds).</td>
+	 *            </tr>
+	 * 
+	 *            <tr>
 	 *            <td>{@link MediaSessionAndroid#STREAMS_MODES STREAMS_MODES}</td>
 	 *            <td>O</td>
 	 *            <td>HashMap&lt; MediaType, Mode&gt;</td>

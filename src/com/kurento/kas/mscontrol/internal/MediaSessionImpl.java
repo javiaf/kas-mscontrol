@@ -135,6 +135,16 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		else
 			maxBW = (Integer) obj;
 
+		Integer maxDelay = null;
+		obj = params.get(MAX_DELAY);
+		if (obj == null) {
+			maxDelay = 0;
+		} else if (!(obj instanceof Integer))
+			throw new MsControlException(
+					"Parameter MediaSessionAndroid.DELAY must be instance of Integer");
+		else
+			maxDelay = (Integer) obj;
+
 		Map<MediaType, Mode> mediaTypeModes = null;
 		obj = params.get(STREAMS_MODES);
 		if (obj == null) {
@@ -224,7 +234,12 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		else
 			framesQueueSize = (Integer) obj;
 
-		return new MediaSessionConfig(netIF, localAddress, maxBW,
+		MediaSessionConfig m = new MediaSessionConfig(netIF, localAddress,
+				maxBW, maxDelay, mediaTypeModes, audioCodecs, videoCodecs,
+				frameWidth, frameHeight, maxFrameRate, gopSize,
+				framesQueueSize, stunHost, stunPort);
+
+		return new MediaSessionConfig(netIF, localAddress, maxBW, maxDelay,
 				mediaTypeModes, audioCodecs, videoCodecs, frameWidth,
 				frameHeight, maxFrameRate, gopSize, framesQueueSize, stunHost,
 				stunPort);
