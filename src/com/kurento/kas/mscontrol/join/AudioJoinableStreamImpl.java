@@ -123,7 +123,7 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 
 		@Override
 		public void run() {
-			Log.d(LOG_TAG, "startVideoRx");
+			Log.d(LOG_TAG, "startAudioRx");
 			if (!SpecTools.filterMediaByType(localSessionSpec, "audio").getMediaSpec().isEmpty()) {
 				String sdpAudio = SpecTools.filterMediaByType(localSessionSpec, "audio").toString();
 				MediaRx.startAudioRx(sdpAudio, maxDelayRx, this.audioRx);
