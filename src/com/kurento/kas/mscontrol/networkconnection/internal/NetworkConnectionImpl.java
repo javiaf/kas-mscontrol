@@ -114,12 +114,14 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		// MediaException("SessionSpec corrupt");
 
 		audioJoinableStreamImpl = new AudioJoinableStreamImpl(this,
-				StreamType.audio, remoteSessionSpec, localSessionSpec);
+				StreamType.audio, remoteSessionSpec, localSessionSpec,
+				mediaSessionConfig.getMaxDelay());
 		this.streams[0] = audioJoinableStreamImpl;
 
 		videoJoinableStreamImpl = new VideoJoinableStreamImpl(this,
 				StreamType.video, this.videoProfiles, remoteSessionSpec,
-				localSessionSpec, mediaSessionConfig.getFramesQueueSize());
+				localSessionSpec, mediaSessionConfig.getMaxDelay(),
+				mediaSessionConfig.getFramesQueueSize());
 		this.streams[1] = videoJoinableStreamImpl;
 	}
 

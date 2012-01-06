@@ -75,7 +75,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	public VideoJoinableStreamImpl(JoinableContainer container,
 			StreamType type, ArrayList<VideoProfile> videoProfiles,
 			SessionSpec remoteSessionSpec, SessionSpec localSessionSpec,
-			Integer framesQueueSize) {
+			Integer maxDelayRx, Integer framesQueueSize) {
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
 		if (framesQueueSize != null && framesQueueSize > QUEUE_SIZE)
@@ -122,7 +122,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 			if ((Mode.SENDRECV.equals(videoMode) || Mode.RECVONLY
 					.equals(videoMode))) {
-				this.videoRxThread = new VideoRxThread(this);
+				this.videoRxThread = new VideoRxThread(this, maxDelayRx);
 				this.videoRxThread.start();
 			}
 		}
@@ -188,9 +188,12 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 	private class VideoRxThread extends Thread {
 		private VideoRx videoRx;
+		private int maxDelayRx;
 
-		public VideoRxThread(VideoRx videoRx) {
+		public VideoRxThread(VideoRx videoRx, int maxDelayRx) {
 			this.videoRx = videoRx;
+			this.maxDelayRx = maxDelayRx;
+			Log.d(LOG_TAG, "maxDelayRx: " + maxDelayRx);
 		}
 
 		@Override
@@ -200,7 +203,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					.getMediaSpec().isEmpty()) {
 				String sdpVideo = SpecTools.filterMediaByType(localSessionSpec,
 						"video").toString();
-				MediaRx.startVideoRx(sdpVideo, this.videoRx);
+				MediaRx.startVideoRx(sdpVideo, maxDelayRx, this.videoRx);
 			}
 		}
 	}

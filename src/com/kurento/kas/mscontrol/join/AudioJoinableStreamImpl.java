@@ -50,8 +50,9 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 		return audioInfo;
 	}
 
-	public AudioJoinableStreamImpl(JoinableContainer container, StreamType type,
-			SessionSpec remoteSessionSpec, SessionSpec localSessionSpec) {
+	public AudioJoinableStreamImpl(JoinableContainer container,
+			StreamType type, SessionSpec remoteSessionSpec,
+			SessionSpec localSessionSpec, Integer maxDelayRx) {
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
 
@@ -80,7 +81,7 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 				}
 
 				if ((Mode.SENDRECV.equals(audioMode) || Mode.RECVONLY.equals(audioMode))) {
-					this.audioRxThread = new AudioRxThread(this);
+					this.audioRxThread = new AudioRxThread(this, maxDelayRx);
 					this.audioRxThread.start();
 				}
 			}
@@ -113,9 +114,11 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 
 	private class AudioRxThread extends Thread {
 		private AudioRx audioRx;
+		private int maxDelayRx;
 
-		public AudioRxThread(AudioRx audioRx) {
+		public AudioRxThread(AudioRx audioRx, int maxDelayRx) {
 			this.audioRx = audioRx;
+			this.maxDelayRx = maxDelayRx;
 		}
 
 		@Override
@@ -123,7 +126,7 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 			Log.d(LOG_TAG, "startVideoRx");
 			if (!SpecTools.filterMediaByType(localSessionSpec, "audio").getMediaSpec().isEmpty()) {
 				String sdpAudio = SpecTools.filterMediaByType(localSessionSpec, "audio").toString();
-				MediaRx.startAudioRx(sdpAudio, this.audioRx);
+				MediaRx.startAudioRx(sdpAudio, maxDelayRx, this.audioRx);
 			}
 		}
 	}
