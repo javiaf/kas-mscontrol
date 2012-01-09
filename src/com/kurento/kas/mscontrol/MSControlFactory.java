@@ -93,7 +93,7 @@ public class MSControlFactory {
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>[0, Integer.MAX_VALUE]</td>
-	 *            <td>0</td>
+	 *            <td>200</td>
 	 *            <td>Indicate the max delay for media reception in ms (miliseconds).</td>
 	 *            </tr>
 	 * 

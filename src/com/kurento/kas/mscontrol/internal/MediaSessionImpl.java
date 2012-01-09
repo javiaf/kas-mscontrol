@@ -30,6 +30,7 @@ import com.kurento.commons.sdp.enums.MediaType;
 import com.kurento.commons.sdp.enums.Mode;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
+import com.kurento.kas.media.rx.MediaRx;
 import com.kurento.kas.mscontrol.MediaSessionAndroid;
 import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
 import com.kurento.kas.mscontrol.mediacomponent.internal.AudioPlayerComponent;
@@ -138,7 +139,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		Integer maxDelay = null;
 		obj = params.get(MAX_DELAY);
 		if (obj == null) {
-			maxDelay = 0;
+			maxDelay = MediaRx.DEFAULT_MAX_DELAY;
 		} else if (!(obj instanceof Integer))
 			throw new MsControlException(
 					"Parameter MediaSessionAndroid.DELAY must be instance of Integer");
