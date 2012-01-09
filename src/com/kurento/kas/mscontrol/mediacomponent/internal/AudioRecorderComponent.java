@@ -36,11 +36,9 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 	private AudioTrack audioTrack;
 	private int streamType;
 
-	private boolean isRecording = false;
-
 	@Override
 	public synchronized boolean isStarted() {
-		return isRecording;
+		return audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING;
 	}
 
 	public AudioRecorderComponent(Parameters params) throws MsControlException {
@@ -56,7 +54,8 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 
 	@Override
 	public synchronized void putAudioSamplesRx(byte[] audio, int length) {
-		if (isRecording && audioTrack != null)
+		if (audioTrack != null
+				&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING))
 			audioTrack.write(audio, 0, length);
 	}
 
@@ -80,7 +79,6 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 
 		if (audioTrack != null) {
 			audioTrack.play();
-			isRecording = true;
 		}
 	}
 
@@ -90,7 +88,6 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 			audioTrack.stop();
 			audioTrack.release();
 			audioTrack = null;
-			isRecording = false;
 		}
 	}
 
