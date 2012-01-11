@@ -169,12 +169,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 				new Thread(new Runnable() {
 					public void run() {
-						Log.d(LOG_TAG, "Video: Test Port ...."
-								+ getLocalAddress());
-						DiscoveryTest test = new DiscoveryTest(
-								getLocalAddress(), stunHost, stunPort);
-						DiscoveryInfo info = new DiscoveryInfo(
-								getLocalAddress());
+						Log.d(LOG_TAG, "Video: Test Port ...." + null);
+						DiscoveryTest test = new DiscoveryTest(null, stunHost,
+								stunPort);
+						DiscoveryInfo info = new DiscoveryInfo(null);
 						try {
 							info = test.test();
 						} catch (Exception e) {
@@ -200,10 +198,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					}
 				}).start();
 
-				Log.d(LOG_TAG, "Audio : Test Port ...." + getLocalAddress());
-				DiscoveryTest test = new DiscoveryTest(getLocalAddress(),
-						stunHost, stunPort);
-				DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
+				Log.d(LOG_TAG, "Audio : Test Port ...." + null);
+				DiscoveryTest test = new DiscoveryTest(null, stunHost, stunPort);
+				DiscoveryInfo info = new DiscoveryInfo(null);
 
 				try {
 					info = test.test();
@@ -242,6 +239,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	@Override
 	public SessionSpec generateSessionSpec() throws MsControlException {
 		takeMediaPort();
+
 		if (publicAddress == null)
 			throw new MsControlException("Error when retrieve public address.");
 
