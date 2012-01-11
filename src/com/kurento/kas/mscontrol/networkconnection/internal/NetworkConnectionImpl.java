@@ -242,6 +242,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	@Override
 	public SessionSpec generateSessionSpec() throws MsControlException {
 		takeMediaPort();
+		if (publicAddress == null)
+			throw new MsControlException("Error when retrieve public address.");
 
 		int payload = 96;
 
