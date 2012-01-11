@@ -105,6 +105,8 @@ public class SdpPortManagerImpl implements SdpPortManager {
 			throw new SdpPortManagerException(
 					"Error creating Session Description from resource media list",
 					e);
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			notifyEvent(event);
 		}
