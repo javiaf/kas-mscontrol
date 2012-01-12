@@ -327,6 +327,18 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 						e.printStackTrace();
 					}
 					audioList.add(audioPayloadAAC);
+				} else if (AudioProfile.PCMU.equals(ap)) {
+					PayloadSpec payloadAudioPCMU = new PayloadSpec();
+					payloadAudioPCMU.setMediaType(MediaType.AUDIO);
+					payloadAudioPCMU.setPort(audioPort);
+					payloadAudioPCMU.setPayload(0);
+					audioList.add(payloadAudioPCMU);
+				} else if (AudioProfile.PCMA.equals(ap)) {
+					PayloadSpec payloadAudioPCMA = new PayloadSpec();
+					payloadAudioPCMA.setMediaType(MediaType.AUDIO);
+					payloadAudioPCMA.setPort(audioPort);
+					payloadAudioPCMA.setPayload(8);
+					audioList.add(payloadAudioPCMA);
 				}
 				payload++;
 			}
