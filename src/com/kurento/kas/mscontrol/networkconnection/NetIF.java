@@ -23,7 +23,7 @@ package com.kurento.kas.mscontrol.networkconnection;
 public enum NetIF {
 	WIFI(3000000), MOBILE(384000);
 
-	public static final int MIN_BANDWITH = 150000;
+	public static final int MIN_BANDWITH = 50000;
 	private int maxBandwidth;
 
 	public int getMaxBandwidth() {
