@@ -17,8 +17,12 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
 import android.media.AudioFormat;
 import android.media.AudioTrack;
+import android.util.Log;
 
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
@@ -36,6 +40,21 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 	private AudioTrack audioTrack;
 	private int streamType;
 
+	private AudioTrackControl audioTrackControl = null;
+
+	private class AudioFrame {
+		private byte[] samples;
+		private int length;
+
+		public AudioFrame(byte[] samples, int length) {
+			this.samples = samples;
+			this.length = length;
+		}
+	}
+
+	private int QUEUE_SIZE = 5;
+	private BlockingQueue<AudioFrame> audioFramesQueue;
+
 	@Override
 	public synchronized boolean isStarted() {
 		return audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING;
@@ -50,13 +69,16 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 			throw new MsControlException(
 					"Params must have AudioRecorderComponent.STREAM_TYPE param.");
 		this.streamType = streamType;
+		this.audioFramesQueue = new ArrayBlockingQueue<AudioFrame>(QUEUE_SIZE);
 	}
 
 	@Override
 	public synchronized void putAudioSamplesRx(byte[] audio, int length) {
-		if (audioTrack != null
-				&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING))
-			audioTrack.write(audio, 0, length);
+		if (audioFramesQueue.size() >= QUEUE_SIZE) {
+			Log.w(LOG_TAG, "Drop audio frame");
+			audioFramesQueue.poll();
+		}
+		audioFramesQueue.offer(new AudioFrame(audio, length));
 	}
 
 	@Override
@@ -74,20 +96,48 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 		int buffer_min = AudioTrack
 				.getMinBufferSize(frequency, channelConfiguration, audioEncoding);
 
+		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
 		audioTrack = new AudioTrack(this.streamType, frequency, channelConfiguration,
 				audioEncoding, buffer_min, AudioTrack.MODE_STREAM);
 
 		if (audioTrack != null) {
 			audioTrack.play();
 		}
+		audioTrackControl = new AudioTrackControl();
+		audioTrackControl.start();
 	}
 
 	@Override
 	public synchronized void stop() {
+		if (audioTrackControl != null)
+			audioTrackControl.interrupt();
 		if (audioTrack != null) {
 			audioTrack.stop();
 			audioTrack.release();
 			audioTrack = null;
+		}
+	}
+
+	private class AudioTrackControl extends Thread {
+		@Override
+		public void run() {
+			try {
+				AudioFrame audioFrameProcessed;
+				long t1, t2;
+				for (;;) {
+					if (audioFramesQueue.isEmpty())
+						Log.w(LOG_TAG, "Audio frames queue is empty");
+
+					audioFrameProcessed = audioFramesQueue.take();
+					if (audioTrack != null
+							&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)) {
+						audioTrack.write(audioFrameProcessed.samples, 0,
+								audioFrameProcessed.length);
+					}
+				}
+			} catch (InterruptedException e) {
+				Log.d(LOG_TAG, "AudioTrackControl stopped");
+			}
 		}
 	}
 
