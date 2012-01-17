@@ -63,10 +63,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	private int QUEUE_SIZE = 2;
-	private LinkedBlockingQueue<Frame> framesQueue = new LinkedBlockingQueue<Frame>(
-			QUEUE_SIZE);
-	private LinkedBlockingQueue<Long> txTimes = new LinkedBlockingQueue<Long>(
-			QUEUE_SIZE);
+	private LinkedBlockingQueue<Frame> framesQueue;
+	private LinkedBlockingQueue<Long> txTimes;
 
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
@@ -81,6 +79,9 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		if (framesQueueSize != null && framesQueueSize > QUEUE_SIZE)
 			QUEUE_SIZE = framesQueueSize;
 		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
+
+		framesQueue = new LinkedBlockingQueue<Frame>(QUEUE_SIZE);
+		txTimes = new LinkedBlockingQueue<Long>(QUEUE_SIZE);
 
 		Map<MediaType, Mode> mediaTypesModes = SpecTools
 				.getModesOfFirstMediaTypes(localSessionSpec);
