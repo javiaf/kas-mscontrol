@@ -123,7 +123,6 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 		public void run() {
 			try {
 				AudioFrame audioFrameProcessed;
-				long t1, t2;
 				for (;;) {
 					if (audioFramesQueue.isEmpty())
 						Log.w(LOG_TAG, "Audio frames queue is empty");
