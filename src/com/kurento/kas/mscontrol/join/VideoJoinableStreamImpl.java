@@ -138,11 +138,11 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	@Override
-	public void putVideoFrameRx(int[] rgb, int width, int height) {
+	public void putVideoFrameRx(int[] rgb, int width, int height, int nFrame) {
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof VideoRx)
-					((VideoRx) j).putVideoFrameRx(rgb, width, height);
+					((VideoRx) j).putVideoFrameRx(rgb, width, height, nFrame);
 		} catch (MsControlException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
