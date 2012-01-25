@@ -17,10 +17,12 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.RectF;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -35,7 +37,7 @@ import com.kurento.kas.media.rx.VideoRx;
 public class VideoRecorderComponent extends MediaComponentBase implements
 		VideoRx {
 
-	private static final String LOG_TAG = "VideoRecorder";
+	private static final String LOG_TAG = "NDK-video-rx";
 
 	private SurfaceView mVideoReceiveView;
 	private SurfaceHolder mHolderReceive;
@@ -44,13 +46,27 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 
 	private int screenWidth;
 	private int screenHeight;
-	private RectF dirty2;
-	private Canvas canvas = new Canvas();
-	private Bitmap srcBitmap;
-
-	Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
 	private boolean isRecording = false;
+
+	private SurfaceControl surfaceControl = null;
+
+	private class VideoFrame {
+		private int[] rgb;
+		private int width;
+		private int height;
+		private int id;
+
+		public VideoFrame(int[] rgb, int width, int height, int id) {
+			this.rgb = rgb;
+			this.width = width;
+			this.height = height;
+			this.id = id;
+		}
+	}
+
+	private int QUEUE_SIZE = 5;
+	private BlockingQueue<VideoFrame> videoFramesQueue;
 
 	public View getVideoSurfaceRx() {
 		return videoSurfaceRx;
@@ -81,68 +97,180 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 		this.videoSurfaceRx = surface;
 		this.screenWidth = displayWidth;
 		this.screenHeight = displayHeight;// * 3 / 4;
-		dirty2 = new RectF(0, 0, screenWidth, screenHeight);
 		if (surface != null) {
 			mVideoReceiveView = (SurfaceView) videoSurfaceRx;
 			mHolderReceive = mVideoReceiveView.getHolder();
 			mSurfaceReceive = mHolderReceive.getSurface();
 		}
+
+		this.videoFramesQueue = new ArrayBlockingQueue<VideoFrame>(QUEUE_SIZE);
 	}
 
 	@Override
-	public void putVideoFrameRx(int[] rgb, int width, int height) {
-		if (!isRecording)
-			return;
-		if (rgb == null || rgb.length == 0)
-			return;
-
-		try {
-			if (mSurfaceReceive == null)
-				return;
-
-			canvas = mSurfaceReceive.lockCanvas(null);
-			if (canvas == null)
-				return;
-
-			int heighAux = height;
-			int widthAux = width;
-
-			double aux = (double) screenHeight / (double) heighAux;
-			heighAux = (int) (aux * heighAux);
-			widthAux = (int) (aux * widthAux);
-
-			srcBitmap = Bitmap.createBitmap(rgb, width, height,
-					Bitmap.Config.ARGB_8888);
-
-			dirty2 = new RectF(0, 0, widthAux, heighAux);
-
-			canvas.drawBitmap(srcBitmap, null, dirty2, null);
-			
-			srcBitmap.recycle();
-			srcBitmap = null;
-			dirty2 = null;
-			Canvas.freeGlCaches();
-			if (mSurfaceReceive == null)
-				return;
-			mSurfaceReceive.unlockCanvasAndPost(canvas);
-		} catch (IllegalArgumentException e) {
-			Log.e(LOG_TAG, "Exception: " + e.toString());
-			e.printStackTrace();
-		} catch (OutOfResourcesException e) {
-			// TODO Auto-generated catch block
-			Log.e(LOG_TAG, "Exception: " + e.toString());
-			e.printStackTrace();
+	public void putVideoFrameRx(int[] rgb, int width, int height, int nFrame) {
+		Log.d(LOG_TAG, "queue size: " + videoFramesQueue.size() + " nFrame: "
+				+ nFrame);
+		if (videoFramesQueue.size() >= QUEUE_SIZE) {
+			VideoFrame vf = videoFramesQueue.poll();
+			if (vf != null)
+				Log.w(LOG_TAG, "jitter_buffer_overflow: Drop audio frame "
+						+ vf.id);
 		}
+		videoFramesQueue.offer(new VideoFrame(rgb, width, height, nFrame));
 	}
 
 	@Override
 	public void start() {
+		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
+		surfaceControl = new SurfaceControl();
+		surfaceControl.start();
 		isRecording = true;
 	}
 
 	@Override
 	public void stop() {
+		if (surfaceControl != null)
+			surfaceControl.interrupt();
 		isRecording = false;
+	}
+
+	private class SurfaceControl extends Thread {
+		@Override
+		public void run() {
+			try {
+				if (mSurfaceReceive == null) {
+					Log.e(LOG_TAG, "mSurfaceReceive is null");
+					return;
+				}
+
+				VideoFrame videoFrameProcessed;
+				int[] rgb;
+				int width, height;
+				int lastHeight = 0;
+				int lastWidth = 0;
+
+				int heighAux, widthAux;
+				double aux;
+
+				long tStart, tEnd, t1, t2;
+				long i = 1;
+				long t;
+				long total = 0;
+
+				Canvas canvas = null;
+				Rect dirty = null;
+				Bitmap srcBitmap = null;
+
+				for (;;) {
+					if (videoFramesQueue.isEmpty())
+						Log.w(LOG_TAG,
+								"jitter_buffer_underflow: Video frames queue is empty");
+
+					videoFrameProcessed = videoFramesQueue.take();
+					Log.d(LOG_TAG, "play frame: " + videoFrameProcessed.id);
+					tStart = System.currentTimeMillis();
+
+					t1 = System.currentTimeMillis();
+					rgb = videoFrameProcessed.rgb;
+					width = videoFrameProcessed.width;
+					height = videoFrameProcessed.height;
+					t2 = System.currentTimeMillis();
+					t = t2 - t1;
+					Log.d(LOG_TAG, "copy video frame values time: " + t);
+
+					if (!isRecording)
+						continue;
+					if (rgb == null || rgb.length == 0)
+						continue;
+
+					try {
+						t1 = System.currentTimeMillis();
+						canvas = mSurfaceReceive.lockCanvas(null);
+						t2 = System.currentTimeMillis();
+						t = t2 - t1;
+						Log.d(LOG_TAG, "time lockCanvas: " + t + " canvas: "
+								+ canvas);
+						if (canvas == null)
+							continue;
+
+						if (height != lastHeight) {
+							if (width != lastWidth || srcBitmap == null) {
+								if (srcBitmap != null)
+									srcBitmap.recycle();
+								t1 = System.currentTimeMillis();
+								srcBitmap = Bitmap.createBitmap(width, height,
+										Bitmap.Config.ARGB_8888);
+								t2 = System.currentTimeMillis();
+								t = t2 - t1;
+								Log.d(LOG_TAG, "time createBitmap: " + t);
+
+								lastHeight = height;
+							}
+
+							aux = (double) screenHeight / (double) height;
+							heighAux = screenHeight;
+							widthAux = (int) (aux * width);
+							Log.d(LOG_TAG, "screenHeight: " + screenHeight
+									+ " height: " + height + " width: " + width);
+							Log.d(LOG_TAG, "aux: " + aux + " heighAux: "
+									+ heighAux + " widthAux: " + widthAux);
+
+							t1 = System.currentTimeMillis();
+							dirty = new Rect(0, 0, widthAux, heighAux);
+							t2 = System.currentTimeMillis();
+							t = t2 - t1;
+							Log.d(LOG_TAG, "time create dirty: " + t);
+
+							lastHeight = height;
+						}
+
+						// t1 = System.currentTimeMillis();
+						// srcBitmap = Bitmap.createBitmap(rgb, width, height,
+						// Bitmap.Config.ARGB_8888);
+						// t2 = System.currentTimeMillis();
+						// t = t2-t1;
+						// Log.d(LOG_TAG, "time createBitmap: " + t);
+						t1 = System.currentTimeMillis();
+						srcBitmap.setPixels(rgb, 0, width, 0, 0, width, height);
+						t2 = System.currentTimeMillis();
+						t = t2 - t1;
+						Log.d(LOG_TAG, "time setPixels: " + t);
+
+						t1 = System.currentTimeMillis();
+						canvas.drawBitmap(srcBitmap, null, dirty, null);
+						t2 = System.currentTimeMillis();
+						t = t2 - t1;
+						Log.d(LOG_TAG, "time drawBitmap: " + t);
+
+						t1 = System.currentTimeMillis();
+						// srcBitmap.recycle();
+						// srcBitmap = null;
+						// dirty = null;
+						Canvas.freeGlCaches();
+						mSurfaceReceive.unlockCanvasAndPost(canvas);
+						t2 = System.currentTimeMillis();
+						t = t2 - t1;
+						Log.d(LOG_TAG, "finish time: " + t);
+					} catch (IllegalArgumentException e) {
+						Log.e(LOG_TAG, "Exception: " + e.toString());
+						e.printStackTrace();
+					} catch (OutOfResourcesException e) {
+						// TODO Auto-generated catch block
+						Log.e(LOG_TAG, "Exception: " + e.toString());
+						e.printStackTrace();
+					}
+
+					tEnd = System.currentTimeMillis();
+					t = tEnd - tStart;
+					total += t;
+					Log.d(LOG_TAG, "frame played in: " + t + " ms. Average: "
+							+ (total / i));
+					i++;
+				}
+			} catch (InterruptedException e) {
+				Log.d(LOG_TAG, "SurfaceControl stopped");
+			}
+		}
 	}
 
 }
