@@ -204,7 +204,7 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 								t = t2 - t1;
 								Log.d(LOG_TAG, "time createBitmap: " + t);
 
-								lastHeight = height;
+								lastWidth = width;
 							}
 
 							aux = (double) screenHeight / (double) height;
