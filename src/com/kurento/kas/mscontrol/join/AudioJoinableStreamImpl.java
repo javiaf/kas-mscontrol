@@ -94,11 +94,11 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 	}
 
 	@Override
-	public void putAudioSamplesRx(byte[] audio, int length) {
+	public void putAudioSamplesRx(byte[] audio, int length, int nFrame) {
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof AudioRx)
-					((AudioRx) j).putAudioSamplesRx(audio, length);
+					((AudioRx) j).putAudioSamplesRx(audio, length, nFrame);
 		} catch (MsControlException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

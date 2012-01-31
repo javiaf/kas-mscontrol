@@ -45,10 +45,12 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 	private class AudioFrame {
 		private byte[] samples;
 		private int length;
+		private int id;
 
-		public AudioFrame(byte[] samples, int length) {
+		public AudioFrame(byte[] samples, int length, int id) {
 			this.samples = samples;
 			this.length = length;
+			this.id = id;
 		}
 	}
 
@@ -73,12 +75,14 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 	}
 
 	@Override
-	public synchronized void putAudioSamplesRx(byte[] audio, int length) {
+	public synchronized void putAudioSamplesRx(byte[] audio, int length, int nFrame) {
+		Log.d(LOG_TAG, "queue size: " + audioFramesQueue.size() + " length: " + length + " nFrame: " + nFrame);
 		if (audioFramesQueue.size() >= QUEUE_SIZE) {
-			Log.w(LOG_TAG, "Drop audio frame");
-			audioFramesQueue.poll();
+			AudioFrame af = audioFramesQueue.poll();
+			if (af != null)
+				Log.w(LOG_TAG, "jitter_buffer_overflow: Drop audio frame " + af.id);
 		}
-		audioFramesQueue.offer(new AudioFrame(audio, length));
+		audioFramesQueue.offer(new AudioFrame(audio, length, nFrame));
 	}
 
 	@Override
@@ -125,9 +129,10 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 				AudioFrame audioFrameProcessed;
 				for (;;) {
 					if (audioFramesQueue.isEmpty())
-						Log.w(LOG_TAG, "Audio frames queue is empty");
+						Log.w(LOG_TAG, "jitter_buffer_underflow: Audio frames queue is empty");
 
 					audioFrameProcessed = audioFramesQueue.take();
+					Log.i(LOG_TAG, "play frame: " + audioFrameProcessed.id);
 					if (audioTrack != null
 							&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)) {
 						audioTrack.write(audioFrameProcessed.samples, 0,
