@@ -17,8 +17,8 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import android.media.AudioFormat;
 import android.media.AudioTrack;
@@ -46,16 +46,23 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 		private byte[] samples;
 		private int length;
 		private int id;
+		private long timeArrive;
 
-		public AudioFrame(byte[] samples, int length, int id) {
+		public AudioFrame(byte[] samples, int length, int id, long timeArrive) {
 			this.samples = samples;
 			this.length = length;
 			this.id = id;
+			this.timeArrive = timeArrive;
 		}
 	}
 
-	private int QUEUE_SIZE = 5;
+	// private int QUEUE_SIZE = 5;
 	private BlockingQueue<AudioFrame> audioFramesQueue;
+
+	private static final long T_MIN = 20;
+	private static final long T_MAX = 2000;
+
+	private long initTime;
 
 	@Override
 	public synchronized boolean isStarted() {
@@ -71,18 +78,27 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 			throw new MsControlException(
 					"Params must have AudioRecorderComponent.STREAM_TYPE param.");
 		this.streamType = streamType;
-		this.audioFramesQueue = new ArrayBlockingQueue<AudioFrame>(QUEUE_SIZE);
+		this.audioFramesQueue = new LinkedBlockingQueue<AudioFrame>();
+		this.initTime = System.currentTimeMillis();
 	}
 
 	@Override
-	public synchronized void putAudioSamplesRx(byte[] audio, int length, int nFrame) {
-		Log.d(LOG_TAG, "queue size: " + audioFramesQueue.size() + " length: " + length + " nFrame: " + nFrame);
-		if (audioFramesQueue.size() >= QUEUE_SIZE) {
-			AudioFrame af = audioFramesQueue.poll();
-			if (af != null)
-				Log.w(LOG_TAG, "jitter_buffer_overflow: Drop audio frame " + af.id);
+	public synchronized void putAudioSamplesRx(byte[] audio, int length,
+			int nFrame) {
+		Log.d(LOG_TAG, "queue size: " + audioFramesQueue.size() + " length: "
+				+ length + " nFrame: " + nFrame);
+		long timeArrived = System.currentTimeMillis() - this.initTime;
+		long sum = 0;
+		for (AudioFrame af : audioFramesQueue) {
+			sum += Math.max(0, (timeArrived - af.timeArrive) - T_MIN);
 		}
-		audioFramesQueue.offer(new AudioFrame(audio, length, nFrame));
+
+		if (sum > T_MAX) {
+			Log.w(LOG_TAG, "Clear audio jitter buffer.");
+			audioFramesQueue.clear();
+		}
+		audioFramesQueue.offer(new AudioFrame(audio, length, nFrame,
+				timeArrived));
 	}
 
 	@Override
@@ -90,19 +106,20 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 		AudioProfile audioProfile = null;
 		for (Joinable j : getJoinees(Direction.RECV))
 			if (j instanceof AudioJoinableStreamImpl) {
-				audioProfile = ((AudioJoinableStreamImpl) j).getAudioInfoTx().getAudioProfile();
+				audioProfile = ((AudioJoinableStreamImpl) j).getAudioInfoTx()
+						.getAudioProfile();
 			}
 		if (audioProfile == null)
 			throw new MsControlException("Cannot ger audio profile.");
 
 		int frequency = audioProfile.getSampleRate();
 
-		int buffer_min = AudioTrack
-				.getMinBufferSize(frequency, channelConfiguration, audioEncoding);
+		int buffer_min = AudioTrack.getMinBufferSize(frequency,
+				channelConfiguration, audioEncoding);
 
-		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
-		audioTrack = new AudioTrack(this.streamType, frequency, channelConfiguration,
-				audioEncoding, buffer_min, AudioTrack.MODE_STREAM);
+		audioTrack = new AudioTrack(this.streamType, frequency,
+				channelConfiguration, audioEncoding, buffer_min,
+				AudioTrack.MODE_STREAM);
 
 		if (audioTrack != null) {
 			audioTrack.play();
@@ -132,7 +149,7 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 						Log.w(LOG_TAG, "jitter_buffer_underflow: Audio frames queue is empty");
 
 					audioFrameProcessed = audioFramesQueue.take();
-					Log.i(LOG_TAG, "play frame: " + audioFrameProcessed.id);
+					Log.d(LOG_TAG, "play frame: " + audioFrameProcessed.id);
 					if (audioTrack != null
 							&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)) {
 						audioTrack.write(audioFrameProcessed.samples, 0,
