@@ -44,7 +44,7 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 	private Surface mSurfaceReceive;
 	private View videoSurfaceRx;
 
-	private int screenWidth;
+	// private int screenWidth;
 	private int screenHeight;
 
 	private boolean isRecording = false;
@@ -95,13 +95,12 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 					"Params must have VideoRecorderComponent.DISPLAY_HEIGHT param");
 
 		this.videoSurfaceRx = surface;
-		this.screenWidth = displayWidth;
-		this.screenHeight = displayHeight;// * 3 / 4;
-		if (surface != null) {
-			mVideoReceiveView = (SurfaceView) videoSurfaceRx;
-			mHolderReceive = mVideoReceiveView.getHolder();
-			mSurfaceReceive = mHolderReceive.getSurface();
-		}
+		// this.screenWidth = displayWidth;
+		this.screenHeight = displayHeight;
+
+		mVideoReceiveView = (SurfaceView) videoSurfaceRx;
+		mHolderReceive = mVideoReceiveView.getHolder();
+		mSurfaceReceive = mHolderReceive.getSurface();
 
 		this.videoFramesQueue = new ArrayBlockingQueue<VideoFrame>(QUEUE_SIZE);
 	}
@@ -145,21 +144,19 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 
 				VideoFrame videoFrameProcessed;
 				int[] rgb;
-				int width, height;
+				int width, height, heighAux, widthAux;
 				int lastHeight = 0;
 				int lastWidth = 0;
-
-				int heighAux, widthAux;
 				double aux;
-
-				long tStart, tEnd, t1, t2;
-				long i = 1;
-				long t;
-				long total = 0;
 
 				Canvas canvas = null;
 				Rect dirty = null;
 				Bitmap srcBitmap = null;
+
+				long tStart, tEnd;
+				long i = 1;
+				long t;
+				long total = 0;
 
 				for (;;) {
 					if (videoFramesQueue.isEmpty())
@@ -170,13 +167,9 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 					Log.d(LOG_TAG, "play frame: " + videoFrameProcessed.id);
 					tStart = System.currentTimeMillis();
 
-					t1 = System.currentTimeMillis();
 					rgb = videoFrameProcessed.rgb;
 					width = videoFrameProcessed.width;
 					height = videoFrameProcessed.height;
-					t2 = System.currentTimeMillis();
-					t = t2 - t1;
-					Log.d(LOG_TAG, "copy video frame values time: " + t);
 
 					if (!isRecording)
 						continue;
@@ -184,12 +177,7 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 						continue;
 
 					try {
-						t1 = System.currentTimeMillis();
 						canvas = mSurfaceReceive.lockCanvas(null);
-						t2 = System.currentTimeMillis();
-						t = t2 - t1;
-						Log.d(LOG_TAG, "time lockCanvas: " + t + " canvas: "
-								+ canvas);
 						if (canvas == null)
 							continue;
 
@@ -197,67 +185,28 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 							if (width != lastWidth || srcBitmap == null) {
 								if (srcBitmap != null)
 									srcBitmap.recycle();
-								t1 = System.currentTimeMillis();
 								srcBitmap = Bitmap.createBitmap(width, height,
 										Bitmap.Config.ARGB_8888);
-								t2 = System.currentTimeMillis();
-								t = t2 - t1;
-								Log.d(LOG_TAG, "time createBitmap: " + t);
-
 								lastWidth = width;
 							}
 
 							aux = (double) screenHeight / (double) height;
 							heighAux = screenHeight;
 							widthAux = (int) (aux * width);
-							Log.d(LOG_TAG, "screenHeight: " + screenHeight
-									+ " height: " + height + " width: " + width);
-							Log.d(LOG_TAG, "aux: " + aux + " heighAux: "
-									+ heighAux + " widthAux: " + widthAux);
 
-							t1 = System.currentTimeMillis();
 							dirty = new Rect(0, 0, widthAux, heighAux);
-							t2 = System.currentTimeMillis();
-							t = t2 - t1;
-							Log.d(LOG_TAG, "time create dirty: " + t);
 
 							lastHeight = height;
 						}
 
-						// t1 = System.currentTimeMillis();
-						// srcBitmap = Bitmap.createBitmap(rgb, width, height,
-						// Bitmap.Config.ARGB_8888);
-						// t2 = System.currentTimeMillis();
-						// t = t2-t1;
-						// Log.d(LOG_TAG, "time createBitmap: " + t);
-						t1 = System.currentTimeMillis();
 						srcBitmap.setPixels(rgb, 0, width, 0, 0, width, height);
-						t2 = System.currentTimeMillis();
-						t = t2 - t1;
-						Log.d(LOG_TAG, "time setPixels: " + t);
-
-						t1 = System.currentTimeMillis();
 						canvas.drawBitmap(srcBitmap, null, dirty, null);
-						t2 = System.currentTimeMillis();
-						t = t2 - t1;
-						Log.d(LOG_TAG, "time drawBitmap: " + t);
-
-						t1 = System.currentTimeMillis();
-						// srcBitmap.recycle();
-						// srcBitmap = null;
-						// dirty = null;
 						Canvas.freeGlCaches();
 						mSurfaceReceive.unlockCanvasAndPost(canvas);
-						t2 = System.currentTimeMillis();
-						t = t2 - t1;
-						Log.d(LOG_TAG, "finish time: " + t);
 					} catch (IllegalArgumentException e) {
 						Log.e(LOG_TAG, "Exception: " + e.toString());
-						e.printStackTrace();
 					} catch (OutOfResourcesException e) {
-						// TODO Auto-generated catch block
 						Log.e(LOG_TAG, "Exception: " + e.toString());
-						e.printStackTrace();
 					}
 
 					tEnd = System.currentTimeMillis();
