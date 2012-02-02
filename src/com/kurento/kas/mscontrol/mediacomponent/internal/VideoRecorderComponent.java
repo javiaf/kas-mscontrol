@@ -65,7 +65,7 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 		}
 	}
 
-	private int QUEUE_SIZE = 5;
+	private int QUEUE_SIZE = 1;
 	private BlockingQueue<VideoFrame> videoFramesQueue;
 
 	public View getVideoSurfaceRx() {
@@ -112,7 +112,7 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 		if (videoFramesQueue.size() >= QUEUE_SIZE) {
 			VideoFrame vf = videoFramesQueue.poll();
 			if (vf != null)
-				Log.w(LOG_TAG, "jitter_buffer_overflow: Drop audio frame "
+				Log.w(LOG_TAG, "jitter_buffer_overflow: Drop video frame "
 						+ vf.id);
 		}
 		videoFramesQueue.offer(new VideoFrame(rgb, width, height, nFrame));
