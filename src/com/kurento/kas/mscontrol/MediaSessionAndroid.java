@@ -35,14 +35,14 @@ public interface MediaSessionAndroid extends MediaSession {
 
 
 	/**
-	 * STUN_HOST to indicate the stun server name
+	 * String to indicate the stun server name
 	 */
 	public static final Parameter STUN_HOST = new Parameter() {
 	};
 	
 
 	/**
-	 * STUN_PORT to indicate the stun server port
+	 * Integer to indicate the stun server port
 	 */
 	public static final Parameter STUN_PORT = new Parameter() {
 	};
