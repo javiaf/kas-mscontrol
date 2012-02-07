@@ -63,14 +63,16 @@ Parameters.NO_PARAMETER
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | LOCAL_ADDRESS | M | InetAddress | NA | |Local IP address of active interface. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| MAX_BANDWIDTH | O | Integer | NET_IF.MOBILE:\ [150000,\ 384000]\ | NET_IF.MOBILE:\ 384000\ | MAX. bandwidth to be used in bps(bits per second). |
-|				|	|		  | NET_IF.WIFI:\ [150000,\ 1500000]	| NET_IF.WIFI:\ 1500000  |    	|	
+| MAX_BANDWIDTH | O | Integer | NET_IF.MOBILE:\ [50000,\ 384000]\ | NET_IF.MOBILE:\ 384000\ | MAX. bandwidth to be used in bps(bits per second). |
+|				|	|		  | NET_IF.WIFI:\ [50000,\ 3000000]	| NET_IF.WIFI:\ 3000000  |    	|	
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | STREAMS_MODES | O | Map\<MediaType,\ Mode\> | [SENDRECV, SENDONLY, RECVONLY] | SENDRECV | Connection mode for each media channel.|
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| AUDIO_CODECS   | O | List\<AudioCodectype\> | [AMR, MP2] | [AMR, MP2] |Enabled audio codecs.  |
+| MAX_DELAY | O | Integer | [0, MAX_INT] | 200 | Indicate the max delay for media reception in ms (miliseconds). |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| VIDEO_CODECS   | O | List\<VideoCodectype\> | [H263, MPEG4, H264]| [H263, MPEG4, H264] |	Enabled video codecs. |
+| AUDIO_CODECS   | O | List\<AudioCodectype\> | [AMR, MP2, PCMU, PCMA] | [AMR, MP2, PCMU, PCMA] |Enabled audio codecs.  |
+*--------*-----------*----*-------*---------------*-------------------------------------------------+
+| VIDEO_CODECS   | O | List\<VideoCodectype\> | [H.263, MPEG4, H.264]| [H.263, MPEG4, H.264] |	Enabled video codecs. |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 | <<Advanced parameters>> |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
@@ -85,12 +87,12 @@ Parameters.NO_PARAMETER
 | FRAMES_QUEUE_SIZE | O | Integer | [2, MAX_INT] | 2 | MAX. number of frames will be buffered from the camera. |
 |					|	|		  |				 |	 |The bigger buffer size the bigger latency.     |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| STUN_HOST | O | String | NA | "stun.xten.com" | Url to Server Stun |
+| STUN_HOST | O | String | NA |  | Stun server URL |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
-| STUN_PORT | O | Integer | [2, MAX_INT] | 3478 | Port to Server Stun |
+| STUN_PORT | O | Integer | [1024, MAX_INT] | 3478 | Stun server port |
 *--------*-----------*----*-------*---------------*-------------------------------------------------+
 
-(M: Mandatory; O: Optional)
+	(M: Mandatory; O: Optional)
 
 
 	An example:

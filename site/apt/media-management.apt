@@ -107,3 +107,79 @@ real_bitrate = K * target_bitrate/targer_framerate * real_framerate
 	and target <bit_rate>, so the real <bit_rate> approaches the target one, improving this way the video
 	quality as resources are optimized.
 
+
+
+* Jitter buffers
+	
+	Media packets received do not arrive exactly periodically, someone can arrive before an others
+	can arrive after we expect, this is we must know essentially about jitter.
+	Variations in packet arrival time (jitter) is mainly produced by the packet switched networks,
+	although the postprocessing of the arrived packets can affect also in the jitter,
+	because decode and other operations are so expensive in time
+	(notice, for example, that decode a hard video frame spends more time than decode a simple video frame).
+	
+	Jitter affects seriously the audio and video quality, although the audio case is more sensible than video case,
+	because silences or stops in the audio reduce too much the quality, but in video play a frame few milliseconds
+	before or after is not too important.
+	
+	To reduce this problem we have designed and implemented jitter buffers to improve the audio and video quality.
+	The main idea of these buffers is to add latency to decrement or delete the jitter.
+	
+	Because jitter is introduced by the network and the postprocessing, we have situated the jitter buffers
+	as near as possible of players. With this we have designed the jitter buffer as a shared data area where
+	the process (producer) that retrieve RTP packets and decode them puts the decode frames into this area
+	and the process (consumer) that play the frames take these decoded frames from the shared area.
+	This is common for both audio and video buffers. Then we are going to explain the specific problems
+	that have audio and video management and how we have solved these problems.
+	
+	
+	* <<Audio jitter buffer>>
+	
+		In audio case, we must bear in mind the temporal influence (audio samples are a wave discretization and by themselves
+		have no meaning, they are temporarily related to can rebuild the original audio wave), while with the video case
+		this is no too important because video frames are as a instant photo and only we must know which frame is older to play it before.
+		
+		Audio jitter buffer is designed as a queue that blocks consumer if there are not any audio frame and wake up it
+		when producer puts a new audio frame. Whit this implementation we can be in two cases:
+		
+			* If consumer is faster than producer there will be a lot of stops playing audio and the quality will be so bad.
+			
+			An audio frame is a set of audio samples which we must know the sample rate to play them correctly.
+			With this and assuming that a audio frame has 20 ms of audio,
+			the producer must spends at most 20 ms processing the frame and putting it into the buffer and the consumer must
+			spend playing the audio frame exactly 20 ms. If these conditions are not met, the audio quality will be so bad
+			and it is impossible improve it.
+			
+			* If producer is faster than consumer the queue will grow up too much and it will stock a undesirable latency.
+			
+			To solve this problem, we have designed a mechanism that compute the time that each frame is into the buffer
+			assuming that each frame can have a delay of <t_min>. The amount time of all frames is compute when a new frame arrives
+			and if this value is greater than a value named <patience> then the buffer is cleared before the new frame is put
+			into the buffer.
+				
+				[<Summation(Max(t_i - t_min, 0)) \> patience  \=\>  clear buffer>]
+			
+				* <t_i>: audio frame i time in buffer.
+				
+				* <t_min>: permitted delay by audio frame.
+			
+				[]
+				
+			[]
+	
+[./images/audio-jitter-buffer.jpeg] Audio jitter buffer
+	
+	
+	
+	* <<Video jitter buffer>>
+	
+	In video case, we must bear in mind that the data size we must manage and process is much greater than in audio case, and we have
+	noticed that this increases too much the cost in time. For this reason, the video jitter buffer is oriented to not stock too delay
+	and we reuse the data structures which store video frames.
+	
+	After a lot of tests with some Android devices, we have implemented the video jitter buffer as a fixed queue of size 1 and
+	2 data structures are used to store video frames. These structures are shared by producer and consumer and this improve a lot
+	memory usage and device performance.
+
+
+[./images/video-jitter-buffer.jpeg] Video jitter buffer
