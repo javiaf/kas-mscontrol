@@ -33,7 +33,7 @@ import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
 
 public class AudioRecorderComponent extends MediaComponentBase implements AudioRx {
 
-	private static final String LOG_TAG = "AudioRecorder";
+	private static final String LOG_TAG = "NDK-audio-rx"; // "AudioRecorder";
 
 	private int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
 	private int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
