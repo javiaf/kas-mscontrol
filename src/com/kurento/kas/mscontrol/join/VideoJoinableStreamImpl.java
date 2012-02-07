@@ -166,6 +166,10 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					.getFrameRateDen());
 			Frame frameProcessed;
 
+			long tStart, tEnd, tEncode;
+			long tTotal = 0;
+			long n = 1;
+
 			try {
 				for (int i = 0; i < QUEUE_SIZE; i++)
 					txTimes.offer(new Long(0));
@@ -178,8 +182,15 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					}
 					frameProcessed = framesQueue.take();
 					txTimes.offer(t);
+					tStart = System.currentTimeMillis();
 					MediaTx.putVideoFrame(frameProcessed.data,
 							frameProcessed.width, frameProcessed.height);
+					tEnd = System.currentTimeMillis();
+					tEncode = tEnd - tStart;
+					tTotal += tEncode;
+					Log.i(LOG_TAG, "Encode/send RTP frame time: " + tEncode
+							+ "ms Average time: " + (tTotal / n) + " ms");
+					n++;
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "VideoTxThread stopped");
