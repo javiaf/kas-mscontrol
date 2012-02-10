@@ -201,7 +201,6 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 
 						srcBitmap.setPixels(rgb, 0, width, 0, 0, width, height);
 						canvas.drawBitmap(srcBitmap, null, dirty, null);
-						Canvas.freeGlCaches();
 						mSurfaceReceive.unlockCanvasAndPost(canvas);
 					} catch (IllegalArgumentException e) {
 						Log.e(LOG_TAG, "Exception: " + e.toString());
