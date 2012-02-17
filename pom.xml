@@ -3,7 +3,7 @@
 
 	<groupId>com.kurento.kas</groupId>
 	<artifactId>kas-mscontrol</artifactId>
-	<version>1.2.0-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Kurento Android MSControl</name>
@@ -15,8 +15,10 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<!-- Dependency versions -->
-		<kcMsControlVersion>1.1.0-SNAPSHOT</kcMsControlVersion>
-		<kcMediaSpecVersion>1.1.0-SNAPSHOT</kcMediaSpecVersion>
+		<kcMsControlVersion>1.1.0</kcMsControlVersion>
+		<kasMediaVersion>1.2.0</kasMediaVersion>
+		<kcMediaSpecVersion>1.2.0</kcMediaSpecVersion>
+		<kcStunVersion>1.0.0</kcStunVersion>
 	</properties>
 
 	<organization>
@@ -54,15 +56,14 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>1.1.1</version>
-			<scope>provided</scope>
+			<groupId>com.kurento.commons</groupId>
+			<artifactId>kc-mscontrol</artifactId>
+			<version>${kcMsControlVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.kurento.kas</groupId>
 			<artifactId>kas-media</artifactId>
-			<version>1.1.0-SNAPSHOT</version>
+			<version>${kasMediaVersion}</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
@@ -73,8 +74,16 @@
 		</dependency>
 		<dependency>
 			<groupId>com.kurento.commons</groupId>
-			<artifactId>kc-mscontrol</artifactId>
-			<version>${kcMsControlVersion}</version>
+			<artifactId>kc-stun</artifactId>
+			<version>${kcStunVersion}</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.android</groupId>
@@ -82,13 +91,7 @@
 			<version>2.3.3</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.kurento.commons</groupId>
-			<artifactId>kas-stun</artifactId>
-			<version>1.0.0-SNAPSHOT</version>
-			<type>jar</type>
-			<scope>compile</scope>
-		</dependency>
+
 	</dependencies>
 
 	<build>

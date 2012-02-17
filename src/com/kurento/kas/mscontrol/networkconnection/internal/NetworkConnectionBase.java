@@ -45,7 +45,7 @@ public abstract class NetworkConnectionBase extends JoinableContainerImpl
 	 * 
 	 * @return
 	 */
-	public abstract SessionSpec generateSessionSpec();
+	public abstract SessionSpec generateSessionSpec() throws MsControlException;
 
 	/**
 	 * Indicates own medias and ports assigned. Warning: It could has
@@ -63,9 +63,9 @@ public abstract class NetworkConnectionBase extends JoinableContainerImpl
 	public abstract void setRemoteSessionSpec(SessionSpec remote);
 
 	public abstract InetAddress getLocalAddress();
-	
+
 	public abstract String getStunHost();
-	
+
 	public abstract Integer getStunPort();
 
 }

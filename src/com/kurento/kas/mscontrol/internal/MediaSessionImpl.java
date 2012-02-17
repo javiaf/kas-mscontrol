@@ -30,6 +30,7 @@ import com.kurento.commons.sdp.enums.MediaType;
 import com.kurento.commons.sdp.enums.Mode;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
+import com.kurento.kas.media.rx.MediaRx;
 import com.kurento.kas.mscontrol.MediaSessionAndroid;
 import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
 import com.kurento.kas.mscontrol.mediacomponent.internal.AudioPlayerComponent;
@@ -89,7 +90,6 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 
 		Object obj;
 
-		
 		obj = params.get(STUN_HOST);
 		if (obj == null)
 			throw new MsControlException(
@@ -97,8 +97,8 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		if (!(obj instanceof String))
 			throw new MsControlException(
 					"Parameter MediaSessionAndroid.STUN_HOST must be instance of String");
-		String stunHost= (String) obj;
-		
+		String stunHost = (String) obj;
+
 		obj = params.get(STUN_PORT);
 		if (obj == null)
 			throw new MsControlException(
@@ -107,7 +107,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			throw new MsControlException(
 					"Parameter MediaSessionAndroid.STUN_PORT must be instance of Integer");
 		Integer stunPort = (Integer) obj;
-		
+
 		obj = params.get(NET_IF);
 		if (obj == null)
 			throw new MsControlException(
@@ -125,7 +125,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			throw new MsControlException(
 					"Parameter MediaSessionAndroid.LOCAL_ADDRESS must be instance of InetAddress");
 		InetAddress localAddress = (InetAddress) obj;
-		
+
 		Integer maxBW = null;
 		obj = params.get(MAX_BANDWIDTH);
 		if (obj == null) {
@@ -135,6 +135,16 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 					"Parameter MediaSessionAndroid.MAX_BANDWIDTH must be instance of Integer");
 		else
 			maxBW = (Integer) obj;
+
+		Integer maxDelay = null;
+		obj = params.get(MAX_DELAY);
+		if (obj == null) {
+			maxDelay = MediaRx.DEFAULT_MAX_DELAY;
+		} else if (!(obj instanceof Integer))
+			throw new MsControlException(
+					"Parameter MediaSessionAndroid.DELAY must be instance of Integer");
+		else
+			maxDelay = (Integer) obj;
 
 		Map<MediaType, Mode> mediaTypeModes = null;
 		obj = params.get(STREAMS_MODES);
@@ -184,7 +194,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 					"Parameter MediaSessionAndroid.FRAME_WIDTH must be instance of Integer");
 		else
 			frameWidth = (Integer) obj;
-		
+
 		Integer frameHeight = null;
 		obj = params.get(FRAME_HEIGHT);
 		if (obj == null) {
@@ -225,9 +235,15 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		else
 			framesQueueSize = (Integer) obj;
 
-		return new MediaSessionConfig(netIF, localAddress, maxBW,
-				mediaTypeModes, audioCodecs, videoCodecs, frameWidth, frameHeight,
-				maxFrameRate, gopSize, framesQueueSize, stunHost, stunPort);
+		MediaSessionConfig m = new MediaSessionConfig(netIF, localAddress,
+				maxBW, maxDelay, mediaTypeModes, audioCodecs, videoCodecs,
+				frameWidth, frameHeight, maxFrameRate, gopSize,
+				framesQueueSize, stunHost, stunPort);
+
+		return new MediaSessionConfig(netIF, localAddress, maxBW, maxDelay,
+				mediaTypeModes, audioCodecs, videoCodecs, frameWidth,
+				frameHeight, maxFrameRate, gopSize, framesQueueSize, stunHost,
+				stunPort);
 	}
 
 }

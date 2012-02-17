@@ -37,8 +37,7 @@ import com.kurento.kas.media.tx.MediaTx;
 import com.kurento.kas.mscontrol.mediacomponent.internal.AudioSink;
 import com.kurento.kas.mscontrol.networkconnection.internal.RTPInfo;
 
-public class AudioJoinableStreamImpl extends JoinableStreamBase implements
-		AudioSink, AudioRx {
+public class AudioJoinableStreamImpl extends JoinableStreamBase implements AudioSink, AudioRx {
 
 	public final static String LOG_TAG = "AudioJoinableStream";
 
@@ -53,7 +52,7 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements
 
 	public AudioJoinableStreamImpl(JoinableContainer container,
 			StreamType type, SessionSpec remoteSessionSpec,
-			SessionSpec localSessionSpec) {
+			SessionSpec localSessionSpec, Integer maxDelayRx) {
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
 
@@ -66,24 +65,25 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements
 			AudioCodecType audioCodecType = remoteRTPInfo.getAudioCodecType();
 			AudioProfile audioProfile = AudioProfile
 					.getAudioProfileFromAudioCodecType(audioCodecType);
-			if ((Mode.SENDRECV.equals(audioMode) || Mode.SENDONLY
-					.equals(audioMode)) && audioProfile != null) {
-				AudioInfoTx audioInfo = new AudioInfoTx(audioProfile);
+
+			if (audioProfile != null) {
+				this.audioInfo = new AudioInfoTx(audioProfile);
 				audioInfo.setOut(remoteRTPInfo.getAudioRTPDir());
 				audioInfo.setPayloadType(remoteRTPInfo.getAudioPayloadType());
-				audioInfo.setFrameSize(MediaTx.initAudio(audioInfo));
-				if (audioInfo.getFrameSize() < 0) {
-					Log.e(LOG_TAG, "Error in initAudio");
-					MediaTx.finishAudio();
-					return;
-				}
-				this.audioInfo = audioInfo;
-			}
 
-			if ((Mode.SENDRECV.equals(audioMode) || Mode.RECVONLY
-					.equals(audioMode))) {
-				this.audioRxThread = new AudioRxThread(this);
-				this.audioRxThread.start();
+				if (Mode.SENDRECV.equals(audioMode) || Mode.SENDONLY.equals(audioMode)) {
+					audioInfo.setFrameSize(MediaTx.initAudio(audioInfo));
+					if (audioInfo.getFrameSize() < 0) {
+						Log.e(LOG_TAG, "Error in initAudio");
+						MediaTx.finishAudio();
+						return;
+					}
+				}
+
+				if ((Mode.SENDRECV.equals(audioMode) || Mode.RECVONLY.equals(audioMode))) {
+					this.audioRxThread = new AudioRxThread(this, maxDelayRx);
+					this.audioRxThread.start();
+				}
 			}
 		}
 	}
@@ -94,11 +94,11 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	@Override
-	public void putAudioSamplesRx(byte[] audio, int length) {
+	public void putAudioSamplesRx(byte[] audio, int length, int nFrame) {
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof AudioRx)
-					((AudioRx) j).putAudioSamplesRx(audio, length);
+					((AudioRx) j).putAudioSamplesRx(audio, length, nFrame);
 		} catch (MsControlException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -114,19 +114,19 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements
 
 	private class AudioRxThread extends Thread {
 		private AudioRx audioRx;
+		private int maxDelayRx;
 
-		public AudioRxThread(AudioRx audioRx) {
+		public AudioRxThread(AudioRx audioRx, int maxDelayRx) {
 			this.audioRx = audioRx;
+			this.maxDelayRx = maxDelayRx;
 		}
 
 		@Override
 		public void run() {
-			Log.d(LOG_TAG, "startVideoRx");
-			if (!SpecTools.filterMediaByType(localSessionSpec, "audio")
-					.getMediaSpec().isEmpty()) {
-				String sdpAudio = SpecTools.filterMediaByType(localSessionSpec,
-						"audio").toString();
-				MediaRx.startAudioRx(sdpAudio, this.audioRx);
+			Log.d(LOG_TAG, "startAudioRx");
+			if (!SpecTools.filterMediaByType(localSessionSpec, "audio").getMediaSpec().isEmpty()) {
+				String sdpAudio = SpecTools.filterMediaByType(localSessionSpec, "audio").toString();
+				MediaRx.startAudioRx(sdpAudio, maxDelayRx, this.audioRx);
 			}
 		}
 	}

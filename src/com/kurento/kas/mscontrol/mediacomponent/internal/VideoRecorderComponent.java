@@ -17,10 +17,12 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.RectF;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
@@ -35,21 +37,36 @@ import com.kurento.kas.media.rx.VideoRx;
 public class VideoRecorderComponent extends MediaComponentBase implements
 		VideoRx {
 
-	private static final String LOG_TAG = "VideoRecorder";
+	private static final String LOG_TAG = "NDK-video-rx";
 
 	private SurfaceView mVideoReceiveView;
 	private SurfaceHolder mHolderReceive;
 	private Surface mSurfaceReceive;
 	private View videoSurfaceRx;
 
-	private int screenWidth;
+	// private int screenWidth;
 	private int screenHeight;
-	private RectF dirty2;
-	private Canvas canvas = new Canvas();
-
-	Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
 	private boolean isRecording = false;
+
+	private SurfaceControl surfaceControl = null;
+
+	private class VideoFrame {
+		private int[] rgb;
+		private int width;
+		private int height;
+		private int id;
+
+		public VideoFrame(int[] rgb, int width, int height, int id) {
+			this.rgb = rgb;
+			this.width = width;
+			this.height = height;
+			this.id = id;
+		}
+	}
+
+	private int QUEUE_SIZE = 1;
+	private BlockingQueue<VideoFrame> videoFramesQueue;
 
 	public View getVideoSurfaceRx() {
 		return videoSurfaceRx;
@@ -78,67 +95,130 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 					"Params must have VideoRecorderComponent.DISPLAY_HEIGHT param");
 
 		this.videoSurfaceRx = surface;
-		this.screenWidth = displayWidth;
-		this.screenHeight = displayHeight;// * 3 / 4;
-		dirty2 = new RectF(0, 0, screenWidth, screenHeight);
-		if (surface != null) {
-			mVideoReceiveView = (SurfaceView) videoSurfaceRx;
-			mHolderReceive = mVideoReceiveView.getHolder();
-			mSurfaceReceive = mHolderReceive.getSurface();
-		}
+		// this.screenWidth = displayWidth;
+		this.screenHeight = displayHeight;
+
+		mVideoReceiveView = (SurfaceView) videoSurfaceRx;
+		mHolderReceive = mVideoReceiveView.getHolder();
+		mSurfaceReceive = mHolderReceive.getSurface();
+
+		this.videoFramesQueue = new ArrayBlockingQueue<VideoFrame>(QUEUE_SIZE);
 	}
 
 	@Override
-	public void putVideoFrameRx(int[] rgb, int width, int height) {
-		if (!isRecording)
-			return;
-		if (rgb == null || rgb.length == 0)
-			return;
-
-		try {
-			if (mSurfaceReceive == null)
-				return;
-
-			canvas = mSurfaceReceive.lockCanvas(null);
-			if (canvas == null)
-				return;
-
-			// RectF dirty2 = new RectF(0, 0, screenWidth, screenHeight);
-
-			int heighAux = height;
-			int widthAux = width;
-
-			double aux = (double) screenHeight / (double) heighAux;
-			heighAux = (int) (aux * heighAux);
-			widthAux = (int) (aux * widthAux);
-
-			Bitmap srcBitmap = Bitmap.createBitmap(rgb, width, height,
-					Bitmap.Config.ARGB_8888);
-
-			dirty2 = new RectF(0, 0, widthAux, heighAux);
-			canvas.drawBitmap(srcBitmap, null, dirty2, null);
-			Canvas.freeGlCaches();
-			if (mSurfaceReceive == null)
-				return;
-			mSurfaceReceive.unlockCanvasAndPost(canvas);
-		} catch (IllegalArgumentException e) {
-			Log.e(LOG_TAG, "Exception: " + e.toString());
-			e.printStackTrace();
-		} catch (OutOfResourcesException e) {
-			// TODO Auto-generated catch block
-			Log.e(LOG_TAG, "Exception: " + e.toString());
-			e.printStackTrace();
+	public void putVideoFrameRx(int[] rgb, int width, int height, int nFrame) {
+		Log.d(LOG_TAG, "queue size: " + videoFramesQueue.size() + " nFrame: "
+				+ nFrame);
+		if (videoFramesQueue.size() >= QUEUE_SIZE) {
+			VideoFrame vf = videoFramesQueue.poll();
+			if (vf != null)
+				Log.w(LOG_TAG, "jitter_buffer_overflow: Drop video frame "
+						+ vf.id);
 		}
+		videoFramesQueue.offer(new VideoFrame(rgb, width, height, nFrame));
 	}
 
 	@Override
 	public void start() {
+		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
+		surfaceControl = new SurfaceControl();
+		surfaceControl.start();
 		isRecording = true;
 	}
 
 	@Override
 	public void stop() {
+		if (surfaceControl != null)
+			surfaceControl.interrupt();
 		isRecording = false;
+	}
+
+	private class SurfaceControl extends Thread {
+		@Override
+		public void run() {
+			try {
+				if (mSurfaceReceive == null) {
+					Log.e(LOG_TAG, "mSurfaceReceive is null");
+					return;
+				}
+
+				VideoFrame videoFrameProcessed;
+				int[] rgb;
+				int width, height, heighAux, widthAux;
+				int lastHeight = 0;
+				int lastWidth = 0;
+				double aux;
+
+				Canvas canvas = null;
+				Rect dirty = null;
+				Bitmap srcBitmap = null;
+
+				long tStart, tEnd;
+				long i = 1;
+				long t;
+				long total = 0;
+
+				for (;;) {
+					if (videoFramesQueue.isEmpty())
+						Log.w(LOG_TAG,
+								"jitter_buffer_underflow: Video frames queue is empty");
+
+					videoFrameProcessed = videoFramesQueue.take();
+					Log.d(LOG_TAG, "play frame: " + videoFrameProcessed.id);
+					tStart = System.currentTimeMillis();
+
+					rgb = videoFrameProcessed.rgb;
+					width = videoFrameProcessed.width;
+					height = videoFrameProcessed.height;
+
+					if (!isRecording)
+						continue;
+					if (rgb == null || rgb.length == 0)
+						continue;
+
+					try {
+						canvas = mSurfaceReceive.lockCanvas(null);
+						if (canvas == null)
+							continue;
+
+						if (height != lastHeight) {
+							if (width != lastWidth || srcBitmap == null) {
+								if (srcBitmap != null)
+									srcBitmap.recycle();
+								srcBitmap = Bitmap.createBitmap(width, height,
+										Bitmap.Config.ARGB_8888);
+								lastWidth = width;
+							}
+
+							aux = (double) screenHeight / (double) height;
+							heighAux = screenHeight;
+							widthAux = (int) (aux * width);
+
+							dirty = new Rect(0, 0, widthAux, heighAux);
+
+							lastHeight = height;
+						}
+
+						srcBitmap.setPixels(rgb, 0, width, 0, 0, width, height);
+						canvas.drawBitmap(srcBitmap, null, dirty, null);
+						mSurfaceReceive.unlockCanvasAndPost(canvas);
+					} catch (IllegalArgumentException e) {
+						Log.e(LOG_TAG, "Exception: " + e.toString());
+					} catch (OutOfResourcesException e) {
+						Log.e(LOG_TAG, "Exception: " + e.toString());
+					}
+
+					tEnd = System.currentTimeMillis();
+					t = tEnd - tStart;
+					total += t;
+					Log.d(LOG_TAG, "frame played in: " + t + " ms. Average: "
+							+ (total / i));
+					i++;
+				}
+			} catch (InterruptedException e) {
+				Log.d(LOG_TAG, "SurfaceControl stopped");
+			}
+		}
 	}
 
 }

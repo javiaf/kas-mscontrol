@@ -36,6 +36,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	private NetIF netIF;
 	private InetAddress localAddress;
 	private Integer maxBW;
+	private Integer maxDelay;
 
 	private Map<MediaType, Mode> mediaTypeModes;
 	private ArrayList<AudioCodecType> audioCodecs;
@@ -65,6 +66,10 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 
 	public Integer getMaxBW() {
 		return maxBW;
+	}
+
+	public Integer getMaxDelay() {
+		return maxDelay;
 	}
 
 	public Map<MediaType, Mode> getMediaTypeModes() {
@@ -100,7 +105,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	}
 
 	protected MediaSessionConfig(NetIF netIF, InetAddress localAddress,
-			Integer maxBW,
+			Integer maxBW, Integer maxDelay,
 			Map<MediaType, Mode> mediaTypeModes,
 			ArrayList<AudioCodecType> audioCodecs,
 			ArrayList<VideoCodecType> videoCodecs, Integer frameWidth,
@@ -113,6 +118,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 		this.netIF = netIF;
 		this.localAddress = localAddress;
 		this.maxBW = maxBW;
+		this.maxDelay = maxDelay;
 
 		this.mediaTypeModes = mediaTypeModes;
 		this.audioCodecs = audioCodecs;

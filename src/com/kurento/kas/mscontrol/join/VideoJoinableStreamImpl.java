@@ -63,10 +63,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	private int QUEUE_SIZE = 2;
-	private LinkedBlockingQueue<Frame> framesQueue = new LinkedBlockingQueue<Frame>(
-			QUEUE_SIZE);
-	private LinkedBlockingQueue<Long> txTimes = new LinkedBlockingQueue<Long>(
-			QUEUE_SIZE);
+	private LinkedBlockingQueue<Frame> framesQueue;
+	private LinkedBlockingQueue<Long> txTimes;
 
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
@@ -75,12 +73,15 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	public VideoJoinableStreamImpl(JoinableContainer container,
 			StreamType type, ArrayList<VideoProfile> videoProfiles,
 			SessionSpec remoteSessionSpec, SessionSpec localSessionSpec,
-			Integer framesQueueSize) {
+			Integer maxDelayRx, Integer framesQueueSize) {
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
 		if (framesQueueSize != null && framesQueueSize > QUEUE_SIZE)
 			QUEUE_SIZE = framesQueueSize;
 		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
+
+		framesQueue = new LinkedBlockingQueue<Frame>(QUEUE_SIZE);
+		txTimes = new LinkedBlockingQueue<Long>(QUEUE_SIZE);
 
 		Map<MediaType, Mode> mediaTypesModes = SpecTools
 				.getModesOfFirstMediaTypes(localSessionSpec);
@@ -122,7 +123,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 			if ((Mode.SENDRECV.equals(videoMode) || Mode.RECVONLY
 					.equals(videoMode))) {
-				this.videoRxThread = new VideoRxThread(this);
+				this.videoRxThread = new VideoRxThread(this, maxDelayRx);
 				this.videoRxThread.start();
 			}
 		}
@@ -137,11 +138,11 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	@Override
-	public void putVideoFrameRx(int[] rgb, int width, int height) {
+	public void putVideoFrameRx(int[] rgb, int width, int height, int nFrame) {
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof VideoRx)
-					((VideoRx) j).putVideoFrameRx(rgb, width, height);
+					((VideoRx) j).putVideoFrameRx(rgb, width, height, nFrame);
 		} catch (MsControlException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -165,6 +166,10 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					.getFrameRateDen());
 			Frame frameProcessed;
 
+			long tStart, tEnd, tEncode;
+			long tTotal = 0;
+			long n = 1;
+
 			try {
 				for (int i = 0; i < QUEUE_SIZE; i++)
 					txTimes.offer(new Long(0));
@@ -177,8 +182,15 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					}
 					frameProcessed = framesQueue.take();
 					txTimes.offer(t);
+					tStart = System.currentTimeMillis();
 					MediaTx.putVideoFrame(frameProcessed.data,
 							frameProcessed.width, frameProcessed.height);
+					tEnd = System.currentTimeMillis();
+					tEncode = tEnd - tStart;
+					tTotal += tEncode;
+					Log.i(LOG_TAG, "Encode/send RTP frame time: " + tEncode
+							+ "ms Average time: " + (tTotal / n) + " ms");
+					n++;
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "VideoTxThread stopped");
@@ -188,9 +200,12 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 	private class VideoRxThread extends Thread {
 		private VideoRx videoRx;
+		private int maxDelayRx;
 
-		public VideoRxThread(VideoRx videoRx) {
+		public VideoRxThread(VideoRx videoRx, int maxDelayRx) {
 			this.videoRx = videoRx;
+			this.maxDelayRx = maxDelayRx;
+			Log.d(LOG_TAG, "maxDelayRx: " + maxDelayRx);
 		}
 
 		@Override
@@ -200,7 +215,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					.getMediaSpec().isEmpty()) {
 				String sdpVideo = SpecTools.filterMediaByType(localSessionSpec,
 						"video").toString();
-				MediaRx.startVideoRx(sdpVideo, this.videoRx);
+				MediaRx.startVideoRx(sdpVideo, maxDelayRx, this.videoRx);
 			}
 		}
 	}

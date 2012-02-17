@@ -112,12 +112,14 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		// MediaException("SessionSpec corrupt");
 
 		audioJoinableStreamImpl = new AudioJoinableStreamImpl(this,
-				StreamType.audio, remoteSessionSpec, localSessionSpec);
+				StreamType.audio, remoteSessionSpec, localSessionSpec,
+				mediaSessionConfig.getMaxDelay());
 		this.streams[0] = audioJoinableStreamImpl;
 
 		videoJoinableStreamImpl = new VideoJoinableStreamImpl(this,
 				StreamType.video, this.videoProfiles, remoteSessionSpec,
-				localSessionSpec, mediaSessionConfig.getFramesQueueSize());
+				localSessionSpec, mediaSessionConfig.getMaxDelay(),
+				mediaSessionConfig.getFramesQueueSize());
 		this.streams[1] = videoJoinableStreamImpl;
 	}
 
@@ -143,86 +145,96 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		}
 	}
 
-	private void takeMediaPort() {
+	private void takeMediaPort() throws MsControlException {
+		synchronized (NetworkConnectionImpl.class) {
+			Log.d(LOG_TAG, "takeMediaPortThreadSafe");
+			int audioRemainder = MediaPortManager.releaseAudioLocalPort();
+			int videoRemainder = MediaPortManager.releaseVideoLocalPort();
 
-		final Exchanger<Integer> exchanger = new Exchanger<Integer>();
+			if ((audioRemainder > 0) || (videoRemainder > 0))
+				throw new MsControlException(
+						"Can not take ports, they are in use.");
 
-		MediaPortManager.releaseAudioLocalPort();
-		MediaPortManager.releaseVideoLocalPort();
+			final Exchanger<Integer> exchanger = new Exchanger<Integer>();
+			final String stunHost = getStunHost();
 
-		final String stunHost = getStunHost();
+			if (!stunHost.equals("")) {
+				final Integer stunPort = getStunPort();
 
-		if (!stunHost.equals("")) {
-			final Integer stunPort = getStunPort();
+				new Thread(new Runnable() {
+					public void run() {
+						Log.d(LOG_TAG, "Video: Test Port ...." + null);
+						DiscoveryTest test = new DiscoveryTest(null, stunHost,
+								stunPort);
+						DiscoveryInfo info = new DiscoveryInfo(null);
+						try {
+							info = test.test();
+						} catch (Exception e) {
+							Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
+						}
 
-			new Thread(new Runnable() {
-				public void run() {
-					Log.d(LOG_TAG, "Video: Test Port ...." + getLocalAddress());
-					DiscoveryTest test = new DiscoveryTest(getLocalAddress(),
-							stunHost, stunPort);
-					DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
-					try {
-						info = test.test();
-					} catch (Exception e) {
-						Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
+						MediaPortManager.takeVideoLocalPort(info.getLocalPort());
+						videoPort = info.getPublicPort();
+						Log.d(LOG_TAG,
+								"Video: Private IP:" + info.getLocalIP() + ":"
+										+ info.getLocalPort() + "\nPublic IP: "
+										+ info.getPublicIP() + ":"
+										+ info.getPublicPort()
+										+ "\nPort: Media = "
+										+ info.getLocalPort() + " SDP = "
+										+ videoPort);
+						try {
+							exchanger.exchange(null);
+						} catch (InterruptedException e) {
+							Log.d(LOG_TAG, "exchanger: " + e.toString());
+							e.printStackTrace();
+						}
 					}
+				}).start();
 
-					MediaPortManager.takeVideoLocalPort(info.getLocalPort());
-					videoPort = info.getPublicPort();
-					Log.d(LOG_TAG, "Video: Private IP:" + info.getLocalIP()
-							+ ":" + info.getLocalPort() + "\nPublic IP: "
-							+ info.getPublicIP() + ":" + info.getPublicPort()
-							+ "\nPort: Media = " + info.getLocalPort()
-							+ " SDP = " + videoPort);
-					try {
-						exchanger.exchange(null);
-					} catch (InterruptedException e) {
-						Log.d(LOG_TAG, "exchanger: " + e.toString());
-						e.printStackTrace();
-					}
+				Log.d(LOG_TAG, "Audio : Test Port ...." + null);
+				DiscoveryTest test = new DiscoveryTest(null, stunHost, stunPort);
+				DiscoveryInfo info = new DiscoveryInfo(null);
+
+				try {
+					info = test.test();
+				} catch (Exception e) {
+					Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
 				}
-			}).start();
 
-			Log.d(LOG_TAG, "Audio : Test Port ...." + getLocalAddress());
-			DiscoveryTest test = new DiscoveryTest(getLocalAddress(), stunHost,
-					stunPort);
-			DiscoveryInfo info = new DiscoveryInfo(getLocalAddress());
+				MediaPortManager.takeAudioLocalPort(info.getLocalPort());
+				audioPort = info.getPublicPort();
 
-			try {
-				info = test.test();
-			} catch (Exception e) {
-				Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
+				Log.d(LOG_TAG,
+						"Audio: Private IP:" + info.getLocalIP() + ":"
+								+ info.getLocalPort() + "\nPublic IP: "
+								+ info.getPublicIP() + ":"
+								+ info.getPublicPort()
+								+ "\nAudio Port: Media = "
+								+ info.getLocalPort() + " SDP = " + audioPort);
+				try {
+					exchanger.exchange(null);
+				} catch (InterruptedException e) {
+					Log.d(LOG_TAG, "exchanger: " + e.toString());
+					e.printStackTrace();
+				}
+
+				publicAddress = info.getPublicIP();
+				Log.d(LOG_TAG, "Port reserved, Audio:" + audioPort
+						+ "; Video: " + videoPort);
+			} else {
+				audioPort = MediaPortManager.takeAudioLocalPort();
+				videoPort = MediaPortManager.takeVideoLocalPort();
 			}
-
-			MediaPortManager.takeAudioLocalPort(info.getLocalPort());
-			audioPort = info.getPublicPort();
-
-			Log.d(LOG_TAG,
-					"Audio: Private IP:" + info.getLocalIP() + ":"
-							+ info.getLocalPort() + "\nPublic IP: "
-							+ info.getPublicIP() + ":" + info.getPublicPort()
-							+ "\nAudio Port: Media = " + info.getLocalPort()
-							+ " SDP = " + audioPort);
-			try {
-				exchanger.exchange(null);
-			} catch (InterruptedException e) {
-				Log.d(LOG_TAG, "exchanger: " + e.toString());
-				e.printStackTrace();
-			}
-
-			publicAddress = info.getPublicIP();
-			Log.d(LOG_TAG, "Port reserved, Audio:" + audioPort + "; Video: "
-					+ videoPort);
-		} else {
-			audioPort = MediaPortManager.takeAudioLocalPort();
-			videoPort = MediaPortManager.takeVideoLocalPort();
 		}
 	}
 
 	@Override
-	public SessionSpec generateSessionSpec() {
-
+	public SessionSpec generateSessionSpec() throws MsControlException {
 		takeMediaPort();
+
+		if (publicAddress == null)
+			throw new MsControlException("Error when retrieve public address.");
 
 		int payload = 96;
 
@@ -249,6 +261,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					}
 					addPayloadSpec(videoList, payload + " H263-1998/90000",
 							MediaType.VIDEO, videoPort, h263fp);
+				} else if (VideoCodecType.H264.equals(vp.getVideoCodecType())) {
+					addPayloadSpec(videoList, payload + " H264/90000",
+							MediaType.VIDEO, videoPort, null);
 				}
 				payload++;
 			}
@@ -292,6 +307,31 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 						e.printStackTrace();
 					}
 					audioList.add(audioPayloadAMR);
+				} else if (AudioProfile.AAC.equals(ap)) {
+					PayloadSpec audioPayloadAAC = null;
+					try {
+						audioPayloadAAC = new PayloadSpec(payload
+								+ " MPEG4-GENERIC/44100/2");
+						audioPayloadAAC
+								.setFormatParams("profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3; config=121056E500");
+						audioPayloadAAC.setMediaType(MediaType.AUDIO);
+						audioPayloadAAC.setPort(audioPort);
+					} catch (SdpException e) {
+						e.printStackTrace();
+					}
+					audioList.add(audioPayloadAAC);
+				} else if (AudioProfile.PCMU.equals(ap)) {
+					PayloadSpec payloadAudioPCMU = new PayloadSpec();
+					payloadAudioPCMU.setMediaType(MediaType.AUDIO);
+					payloadAudioPCMU.setPort(audioPort);
+					payloadAudioPCMU.setPayload(0);
+					audioList.add(payloadAudioPCMU);
+				} else if (AudioProfile.PCMA.equals(ap)) {
+					PayloadSpec payloadAudioPCMA = new PayloadSpec();
+					payloadAudioPCMA.setMediaType(MediaType.AUDIO);
+					payloadAudioPCMA.setPort(audioPort);
+					payloadAudioPCMA.setPayload(8);
+					audioList.add(payloadAudioPCMA);
 				}
 				payload++;
 			}

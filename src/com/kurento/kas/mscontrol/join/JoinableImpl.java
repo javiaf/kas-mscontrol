@@ -29,10 +29,18 @@ public class JoinableImpl implements Joinable {
 
 	private static final Log log = LogFactory.getLog(JoinableImpl.class);
 
-	protected ArrayList<LocalConnection> connections = new ArrayList<LocalConnection>();
+	private ArrayList<LocalConnection> connections = new ArrayList<LocalConnection>();
+
+	protected synchronized void addConnection(LocalConnection conn) {
+		this.connections.add(conn);
+	}
+
+	protected synchronized void removeConnection(LocalConnection conn) {
+		this.connections.remove(conn);
+	}
 
 	@Override
-	public Joinable[] getJoinees() throws MsControlException {
+	public synchronized Joinable[] getJoinees() throws MsControlException {
 		int i = 0;
 		Joinable[] joinees = new Joinable[connections.size()];
 
@@ -43,7 +51,7 @@ public class JoinableImpl implements Joinable {
 	}
 
 	@Override
-	public Joinable[] getJoinees(Direction direction) throws MsControlException {
+	public synchronized Joinable[] getJoinees(Direction direction) throws MsControlException {
 		int i = 0;
 		Joinable[] joinees = new Joinable[connections.size()];
 
@@ -58,8 +66,7 @@ public class JoinableImpl implements Joinable {
 	}
 
 	@Override
-	public void join(Direction direction, Joinable other)
-			throws MsControlException {
+	public synchronized void join(Direction direction, Joinable other) throws MsControlException {
 		if (other == null)
 			throw new MsControlException("other is null.");
 
@@ -73,8 +80,7 @@ public class JoinableImpl implements Joinable {
 		}
 
 		if (connection != null) {// Delete join to re-join
-			((JoinableImpl) connection.getOther().getJoinable()).connections
-					.remove(connection.getOther());
+			((JoinableImpl) other).removeConnection(connection.getOther());
 			this.connections.remove(connection);
 		}
 
@@ -92,11 +98,11 @@ public class JoinableImpl implements Joinable {
 		connection1.join(connection2);
 
 		this.connections.add(connection1);
-		((JoinableImpl) other).connections.add(connection2);
+		((JoinableImpl) other).addConnection(connection2);
 	}
 
 	@Override
-	public void unjoin(Joinable other) throws MsControlException {
+	public synchronized void unjoin(Joinable other) throws MsControlException {
 		LocalConnection connection = null;
 		for (LocalConnection conn : connections) {
 			if (conn.getJoinable().equals(other)) {
@@ -108,8 +114,7 @@ public class JoinableImpl implements Joinable {
 		if (connection == null)
 			throw new MsControlException("No connected: " + other);
 
-		((JoinableImpl) connection.getOther().getJoinable()).connections
-				.remove(connection.getOther());
+		((JoinableImpl) other).removeConnection(connection.getOther());
 		this.connections.remove(connection);
 	}
 

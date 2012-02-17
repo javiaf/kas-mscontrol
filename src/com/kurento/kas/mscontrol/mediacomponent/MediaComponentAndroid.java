@@ -56,7 +56,11 @@ public interface MediaComponentAndroid extends MediaComponent {
 	public static final Configuration<MediaComponent> VIDEO_PLAYER = new Configuration<MediaComponent>() {
 	};
 
-	// public static final Parameter CAMERA = new Parameter(){};
+	/**
+	 * Parameter whose value must be an int as Camera_Facing_Back or Camera_Facing_Front
+	 */
+	public static final Parameter CAMERA_FACING = new Parameter(){};
+	
 	/**
 	 * Parameter whose value must be an Android View to preview the camera
 	 * video.

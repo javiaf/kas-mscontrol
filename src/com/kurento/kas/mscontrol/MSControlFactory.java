@@ -75,17 +75,23 @@ public class MSControlFactory {
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>
-	 *            - NET_IF.MOBILE: [150000, 384000]
-	 *            <br>
-	 *            - NET_IF.WIFI: [150000, 1500000]
-	 *            </td>
+	 *            - NET_IF.MOBILE: [50000, 384000] <br>
+	 *            - NET_IF.WIFI: [50000, 3000000]</td>
 	 *            <td>
-	 *            - NET_IF.MOBILE: 384000
-	 *            <br>
-	 *            - NET_IF.WIFI: 1500000
-	 *            </td>
+	 *            - NET_IF.MOBILE: 384000 <br>
+	 *            - NET_IF.WIFI: 3000000</td>
 	 *            <td>Indicate the max bandwidth will be used in bps(bits per
 	 *            second).</td>
+	 *            </tr>
+	 * 
+	 *            <tr>
+	 *            <td>{@link MediaSessionAndroid#MAX_DELAY MAX_DELAY}</td>
+	 *            <td>O</td>
+	 *            <td>Integer</td>
+	 *            <td>[0, {@link Integer#MAX_VALUE}]</td>
+	 *            <td>200</td>
+	 *            <td>Indicate the max delay for media reception in ms
+	 *            (miliseconds).</td>
 	 *            </tr>
 	 * 
 	 *            <tr>
@@ -101,8 +107,8 @@ public class MSControlFactory {
 	 *            <td>{@link MediaSessionAndroid#AUDIO_CODECS AUDIO_CODECS}</td>
 	 *            <td>O</td>
 	 *            <td>ArrayList&lt;{@link AudioCodecType}&gt;</td>
-	 *            <td>[AMR, MP2]</td>
-	 *            <td>[AMR, MP2]</td>
+	 *            <td>[AMR, MP2, PCMU, PCMA]</td>
+	 *            <td>[AMR, MP2, PCMU, PCMA]</td>
 	 *            <td>Indicate the audio codecs supported.</td>
 	 *            </tr>
 	 * 
@@ -110,8 +116,8 @@ public class MSControlFactory {
 	 *            <td>{@link MediaSessionAndroid#VIDEO_CODECS VIDEO_CODECS}</td>
 	 *            <td>O</td>
 	 *            <td>ArrayList&lt;{@link VideoCodecType}&gt;</td>
-	 *            <td>[H263, MPEG4]</td>
-	 *            <td>[H263, MPEG4]</td>
+	 *            <td>[H263, MPEG4, H.264]</td>
+	 *            <td>[H263, MPEG4, H.264]</td>
 	 *            <td>Indicate the video codecs supported.</td>
 	 *            </tr>
 	 *            </tbody>
@@ -123,16 +129,16 @@ public class MSControlFactory {
 	 *            </thead> <tbody>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid.FRAME_WIDTH}</td>
+	 *            <td>{@link MediaSessionAndroid#FRAME_WIDTH FRAME_WIDTH}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>NA</td>
 	 *            <td>352</td>
 	 *            <td>Indicate the frame width in pixels.</td>
 	 *            </tr>
-	 *            
+	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid.FRAME_HEIGHT}</td>
+	 *            <td>{@link MediaSessionAndroid#FRAME_HEIGHT FRAME_HEIGHT}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>NA</td>
@@ -144,7 +150,7 @@ public class MSControlFactory {
 	 *            <td>{@link MediaSessionAndroid#MAX_FRAME_RATE MAX_FRAME_RATE}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
-	 *            <td>[1, Integer.MAX_VALUE]</td>
+	 *            <td>[1, {@link Integer#MAX_VALUE}]</td>
 	 *            <td>15</td>
 	 *            <td>Indicate the max frame rate will be used.</td>
 	 *            </tr>
@@ -153,20 +159,39 @@ public class MSControlFactory {
 	 *            <td>{@link MediaSessionAndroid#GOP_SIZE GOP_SIZE}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
-	 *            <td>[0, Integer.MAX_VALUE]</td>
+	 *            <td>[0, {@link Integer#MAX_VALUE}]</td>
 	 *            <td>6</td>
 	 *            <td>Indicate the max number of frames in a group of pictures,
 	 *            or 0 for intra_only.</td>
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#FRAMES_QUEUE_SIZE FRAMES_QUEUE_SIZE}</td>
+	 *            <td>{@link MediaSessionAndroid#FRAMES_QUEUE_SIZE
+	 *            FRAMES_QUEUE_SIZE}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
-	 *            <td>[2, Integer.MAX_VALUE]</td>
+	 *            <td>[2, {@link Integer#MAX_VALUE}]</td>
 	 *            <td>2</td>
 	 *            <td>Indicate the number of frames will be buffered from the
 	 *            camera.</td>
+	 *            </tr>
+	 * 
+	 *            <tr>
+	 *            <td>{@link MediaSessionAndroid#STUN_HOST STUN_HOST}</td>
+	 *            <td>O</td>
+	 *            <td>String</td>
+	 *            <td>NA</td>
+	 *            <td></td>
+	 *            <td>Stun server URL.</td>
+	 *            </tr>
+	 * 
+	 *            <tr>
+	 *            <td>{@link MediaSessionAndroid#STUN_PORT STUN_PORT}</td>
+	 *            <td>O</td>
+	 *            <td>Integer</td>
+	 *            <td>[1024, {@link Integer#MAX_VALUE}]</td>
+	 *            <td>3478</td>
+	 *            <td>Stun server port.</td>
 	 *            </tr>
 	 * 
 	 *            </tbody>
