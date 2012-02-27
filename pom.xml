@@ -18,7 +18,7 @@
 		<kcMsControlVersion>1.1.0</kcMsControlVersion>
 		<kasMediaVersion>1.2.0</kasMediaVersion>
 		<kcMediaSpecVersion>1.2.0</kcMediaSpecVersion>
-		<kcStunVersion>1.0.0</kcStunVersion>
+		<kcStunVersion>1.0.1-SNAPSHOT</kcStunVersion>
 	</properties>
 
 	<organization>
