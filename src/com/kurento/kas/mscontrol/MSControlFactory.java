@@ -212,7 +212,7 @@ public class MSControlFactory {
 	 *            <td>{@link MediaSessionAndroid#STUN_PORT STUN_PORT}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
-	 *            <td>[1024, {@link Integer#MAX_VALUE}]</td>
+	 *            <td>[1024, 65535]</td>
 	 *            <td>3478</td>
 	 *            <td>Stun server port.</td>
 	 *            </tr>
