@@ -113,6 +113,17 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
+	 *            <td>{@link MediaSessionAndroid#AUDIO_LOCAL_PORT_RANGE
+	 *            AUDIO_LOCAL_PORT_RANGE}</td>
+	 *            <td>O</td>
+	 *            <td>{@link PortRange}</td>
+	 *            <td>NA</td>
+	 *            <td></td>
+	 *            <td>Indicate local port interval to select an audio port. If
+	 *            it is not set a random free port will be selected.</td>
+	 *            </tr>
+	 * 
+	 *            <tr>
 	 *            <td>{@link MediaSessionAndroid#VIDEO_CODECS VIDEO_CODECS}</td>
 	 *            <td>O</td>
 	 *            <td>ArrayList&lt;{@link VideoCodecType}&gt;</td>
@@ -120,6 +131,18 @@ public class MSControlFactory {
 	 *            <td>[H263, MPEG4, H.264]</td>
 	 *            <td>Indicate the video codecs supported.</td>
 	 *            </tr>
+	 * 
+	 *            <tr>
+	 *            <td>{@link MediaSessionAndroid#VIDEO_LOCAL_PORT_RANGE
+	 *            VIDEO_LOCAL_PORT_RANGE}</td>
+	 *            <td>O</td>
+	 *            <td>{@link PortRange}</td>
+	 *            <td>NA</td>
+	 *            <td></td>
+	 *            <td>Indicate local port interval to select a video port. If it
+	 *            is not set a random free port will be selected.</td>
+	 *            </tr>
+	 * 
 	 *            </tbody>
 	 * 
 	 *            <thead>

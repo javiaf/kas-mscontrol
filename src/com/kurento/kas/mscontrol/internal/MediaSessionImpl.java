@@ -38,6 +38,7 @@ import com.kurento.kas.mscontrol.mediacomponent.internal.AudioRecorderComponent;
 import com.kurento.kas.mscontrol.mediacomponent.internal.VideoPlayerComponent;
 import com.kurento.kas.mscontrol.mediacomponent.internal.VideoRecorderComponent;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
+import com.kurento.kas.mscontrol.networkconnection.PortRange;
 import com.kurento.kas.mscontrol.networkconnection.internal.NetworkConnectionImpl;
 
 public class MediaSessionImpl implements MediaSessionAndroid {
@@ -172,6 +173,16 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 						e);
 			}
 
+		PortRange audioPortRange = null;
+		obj = params.get(AUDIO_LOCAL_PORT_RANGE);
+		if (obj == null) {
+			// Por defecto
+		} else if (!(obj instanceof PortRange))
+			throw new MsControlException(
+					"Parameter MediaSessionAndroid.AUDIO_LOCAL_PORT_RANGE must be instance of PortRange");
+		else
+			audioPortRange = (PortRange) obj;
+
 		ArrayList<VideoCodecType> videoCodecs = null;
 		obj = params.get(VIDEO_CODECS);
 		if (obj == null) {
@@ -184,6 +195,16 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 						"Parameter MediaSessionAndroid.VIDEO_CODECS must be instance of ArrayList<VideoCodecType>",
 						e);
 			}
+
+		PortRange videoPortRange = null;
+		obj = params.get(VIDEO_LOCAL_PORT_RANGE);
+		if (obj == null) {
+			// Por defecto
+		} else if (!(obj instanceof PortRange))
+			throw new MsControlException(
+					"Parameter MediaSessionAndroid.VIDEO_LOCAL_PORT_RANGE must be instance of PortRange");
+		else
+			videoPortRange = (PortRange) obj;
 
 		Integer frameWidth = null;
 		obj = params.get(FRAME_WIDTH);
@@ -235,15 +256,9 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		else
 			framesQueueSize = (Integer) obj;
 
-		MediaSessionConfig m = new MediaSessionConfig(netIF, localAddress,
-				maxBW, maxDelay, mediaTypeModes, audioCodecs, videoCodecs,
-				frameWidth, frameHeight, maxFrameRate, gopSize,
-				framesQueueSize, stunHost, stunPort);
-
 		return new MediaSessionConfig(netIF, localAddress, maxBW, maxDelay,
-				mediaTypeModes, audioCodecs, videoCodecs, frameWidth,
-				frameHeight, maxFrameRate, gopSize, framesQueueSize, stunHost,
-				stunPort);
+				mediaTypeModes, audioCodecs, audioPortRange, videoCodecs,
+				videoPortRange, frameWidth, frameHeight, maxFrameRate, gopSize,
+				framesQueueSize, stunHost, stunPort);
 	}
-
 }
