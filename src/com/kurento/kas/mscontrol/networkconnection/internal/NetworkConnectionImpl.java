@@ -181,6 +181,23 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 									stunHost, stunPort);
 							try {
 								info = test.test();
+
+								int port = MediaPortManager
+										.takeVideoLocalPort(info.getLocalPort());
+								if (port < 0)
+									continue;
+
+								videoPort = info.getPublicPort();
+								Log.d(LOG_TAG,
+										"Video: Private IP:"
+												+ info.getLocalIP() + ":"
+												+ info.getLocalPort()
+												+ "\nPublic IP: "
+												+ info.getPublicIP() + ":"
+												+ info.getPublicPort()
+												+ "\nPort: Media = "
+												+ info.getLocalPort()
+												+ " SDP = " + videoPort);
 								break;
 							} catch (Exception e) {
 								Log.w(LOG_TAG,
@@ -192,20 +209,6 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 						if (info == null)
 							Log.e(LOG_TAG, "Can not take video port.");
-						else {
-							MediaPortManager.takeVideoLocalPort(info
-									.getLocalPort());
-							videoPort = info.getPublicPort();
-							Log.d(LOG_TAG,
-									"Video: Private IP:" + info.getLocalIP()
-											+ ":" + info.getLocalPort()
-											+ "\nPublic IP: "
-											+ info.getPublicIP() + ":"
-											+ info.getPublicPort()
-											+ "\nPort: Media = "
-											+ info.getLocalPort() + " SDP = "
-											+ videoPort);
-						}
 
 						try {
 							exchanger.exchange(null);
@@ -233,6 +236,23 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 							stunPort);
 					try {
 						info = test.test();
+
+						int port = MediaPortManager.takeAudioLocalPort(info
+								.getLocalPort());
+						if (port < 0)
+							continue;
+
+						audioPort = info.getPublicPort();
+						publicAddress = info.getPublicIP();
+
+						Log.d(LOG_TAG,
+								"Audio: Private IP:" + info.getLocalIP() + ":"
+										+ info.getLocalPort() + "\nPublic IP: "
+										+ info.getPublicIP() + ":"
+										+ info.getPublicPort()
+										+ "\nAudio Port: Media = "
+										+ info.getLocalPort() + " SDP = "
+										+ audioPort);
 						break;
 					} catch (Exception e) {
 						Log.w(LOG_TAG,
@@ -243,17 +263,6 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 				if (info == null)
 					Log.e(LOG_TAG, "Can not take audio port.");
-				else {
-					MediaPortManager.takeAudioLocalPort(info.getLocalPort());
-					audioPort = info.getPublicPort();
-					publicAddress = info.getPublicIP();
-
-					Log.d(LOG_TAG, "Audio: Private IP:" + info.getLocalIP()
-							+ ":" + info.getLocalPort() + "\nPublic IP: "
-							+ info.getPublicIP() + ":" + info.getPublicPort()
-							+ "\nAudio Port: Media = " + info.getLocalPort()
-							+ " SDP = " + audioPort);
-				}
 
 				try {
 					exchanger.exchange(null);
