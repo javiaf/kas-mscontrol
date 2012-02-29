@@ -16,7 +16,7 @@
 
 		<!-- Dependency versions -->
 		<kcMsControlVersion>1.1.0</kcMsControlVersion>
-		<kasMediaVersion>1.2.0</kasMediaVersion>
+		<kasMediaVersion>1.2.1-SNAPSHOT</kasMediaVersion>
 		<kcMediaSpecVersion>1.2.0</kcMediaSpecVersion>
 		<kcStunVersion>1.0.1-SNAPSHOT</kcStunVersion>
 	</properties>
