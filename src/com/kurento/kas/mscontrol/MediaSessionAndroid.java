@@ -33,20 +33,18 @@ import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
  */
 public interface MediaSessionAndroid extends MediaSession {
 
-
 	/**
 	 * String to indicate the stun server name
 	 */
 	public static final Parameter STUN_HOST = new Parameter() {
 	};
-	
 
 	/**
 	 * Integer to indicate the stun server port
 	 */
 	public static final Parameter STUN_PORT = new Parameter() {
 	};
-	
+
 	/**
 	 * MediaSessionAndoid.NetIF to indicate if the network interface is WIFI or
 	 * MOBILE.
@@ -87,9 +85,21 @@ public interface MediaSessionAndroid extends MediaSession {
 	};
 
 	/**
+	 * PortRange to indicate local port interval to select an audio port.
+	 */
+	public static final Parameter AUDIO_LOCAL_PORT_RANGE = new Parameter() {
+	};
+
+	/**
 	 * ArrayList&lt;VideoCodecType&gt; to indicate the video codecs supported.
 	 */
 	public static final Parameter VIDEO_CODECS = new Parameter() {
+	};
+
+	/**
+	 * PortRange to indicate local port interval to select a video port.
+	 */
+	public static final Parameter VIDEO_LOCAL_PORT_RANGE = new Parameter() {
 	};
 
 	/**
@@ -97,7 +107,7 @@ public interface MediaSessionAndroid extends MediaSession {
 	 */
 	public static final Parameter FRAME_WIDTH = new Parameter() {
 	};
-	
+
 	/**
 	 * Integer to indicate the frame height in pixels.
 	 */

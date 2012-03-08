@@ -48,6 +48,7 @@ import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
 import com.kurento.kas.mscontrol.join.JoinableStreamBase;
 import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
+import com.kurento.kas.mscontrol.networkconnection.PortRange;
 
 import de.javawi.jstun.test.DiscoveryInfo;
 import de.javawi.jstun.test.DiscoveryTest;
@@ -163,26 +164,52 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 				new Thread(new Runnable() {
 					public void run() {
-						Log.d(LOG_TAG, "Video: Test Port ...." + null);
-						DiscoveryTest test = new DiscoveryTest(null, stunHost,
-								stunPort);
-						DiscoveryInfo info = new DiscoveryInfo(null);
-						try {
-							info = test.test();
-						} catch (Exception e) {
-							Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
+						int minPort = 0;
+						int maxPort = 0;
+						PortRange videoPortRange = mediaSessionConfig
+								.getVideoPortRange();
+						if (videoPortRange != null) {
+							minPort = videoPortRange.getMinPort();
+							maxPort = videoPortRange.getMaxPort();
 						}
 
-						MediaPortManager.takeVideoLocalPort(info.getLocalPort());
-						videoPort = info.getPublicPort();
-						Log.d(LOG_TAG,
-								"Video: Private IP:" + info.getLocalIP() + ":"
-										+ info.getLocalPort() + "\nPublic IP: "
-										+ info.getPublicIP() + ":"
-										+ info.getPublicPort()
-										+ "\nPort: Media = "
-										+ info.getLocalPort() + " SDP = "
-										+ videoPort);
+						Log.d(LOG_TAG, "Video: Test Port. Min port: " + minPort
+								+ " Max port: " + maxPort);
+						DiscoveryInfo info = null;
+						for (int i = minPort; i <= maxPort; i++) {
+							DiscoveryTest test = new DiscoveryTest(null, i,
+									stunHost, stunPort);
+							try {
+								info = test.test();
+
+								int port = MediaPortManager
+										.takeVideoLocalPort(info.getLocalPort());
+								if (port < 0)
+									continue;
+
+								videoPort = info.getPublicPort();
+								Log.d(LOG_TAG,
+										"Video: Private IP:"
+												+ info.getLocalIP() + ":"
+												+ info.getLocalPort()
+												+ "\nPublic IP: "
+												+ info.getPublicIP() + ":"
+												+ info.getPublicPort()
+												+ "\nPort: Media = "
+												+ info.getLocalPort()
+												+ " SDP = " + videoPort);
+								break;
+							} catch (Exception e) {
+								Log.w(LOG_TAG,
+										"Take video port " + i + " "
+												+ e.toString());
+								info = null;
+							}
+						}
+
+						if (info == null)
+							Log.e(LOG_TAG, "Can not take video port.");
+
 						try {
 							exchanger.exchange(null);
 						} catch (InterruptedException e) {
@@ -192,26 +219,51 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					}
 				}).start();
 
-				Log.d(LOG_TAG, "Audio : Test Port ...." + null);
-				DiscoveryTest test = new DiscoveryTest(null, stunHost, stunPort);
-				DiscoveryInfo info = new DiscoveryInfo(null);
-
-				try {
-					info = test.test();
-				} catch (Exception e) {
-					Log.e(LOG_TAG, "TakeMediaPort: " + e.toString());
+				int minPort = 0;
+				int maxPort = 0;
+				PortRange audioPortRange = mediaSessionConfig
+						.getAudioPortRange();
+				if (audioPortRange != null) {
+					minPort = audioPortRange.getMinPort();
+					maxPort = audioPortRange.getMaxPort();
 				}
 
-				MediaPortManager.takeAudioLocalPort(info.getLocalPort());
-				audioPort = info.getPublicPort();
+				Log.d(LOG_TAG, "Audio: Test Port. Min port: " + minPort
+						+ " Max port: " + maxPort);
+				DiscoveryInfo info = null;
+				for (int i = minPort; i <= maxPort; i++) {
+					DiscoveryTest test = new DiscoveryTest(null, i, stunHost,
+							stunPort);
+					try {
+						info = test.test();
 
-				Log.d(LOG_TAG,
-						"Audio: Private IP:" + info.getLocalIP() + ":"
-								+ info.getLocalPort() + "\nPublic IP: "
-								+ info.getPublicIP() + ":"
-								+ info.getPublicPort()
-								+ "\nAudio Port: Media = "
-								+ info.getLocalPort() + " SDP = " + audioPort);
+						int port = MediaPortManager.takeAudioLocalPort(info
+								.getLocalPort());
+						if (port < 0)
+							continue;
+
+						audioPort = info.getPublicPort();
+						publicAddress = info.getPublicIP();
+
+						Log.d(LOG_TAG,
+								"Audio: Private IP:" + info.getLocalIP() + ":"
+										+ info.getLocalPort() + "\nPublic IP: "
+										+ info.getPublicIP() + ":"
+										+ info.getPublicPort()
+										+ "\nAudio Port: Media = "
+										+ info.getLocalPort() + " SDP = "
+										+ audioPort);
+						break;
+					} catch (Exception e) {
+						Log.w(LOG_TAG,
+								"Take audio port " + i + " " + e.toString());
+						info = null;
+					}
+				}
+
+				if (info == null)
+					Log.e(LOG_TAG, "Can not take audio port.");
+
 				try {
 					exchanger.exchange(null);
 				} catch (InterruptedException e) {
@@ -219,7 +271,6 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					e.printStackTrace();
 				}
 
-				publicAddress = info.getPublicIP();
 				Log.d(LOG_TAG, "Port reserved, Audio:" + audioPort
 						+ "; Video: " + videoPort);
 			} else {

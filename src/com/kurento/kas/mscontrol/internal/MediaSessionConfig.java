@@ -28,11 +28,13 @@ import com.kurento.commons.sdp.enums.Mode;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
+import com.kurento.kas.mscontrol.networkconnection.PortRange;
 
 public class MediaSessionConfig implements Configuration<MediaSession> {
 
 	private String stunHost;
 	private Integer stunPort;
+
 	private NetIF netIF;
 	private InetAddress localAddress;
 	private Integer maxBW;
@@ -40,7 +42,9 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 
 	private Map<MediaType, Mode> mediaTypeModes;
 	private ArrayList<AudioCodecType> audioCodecs;
+	private PortRange audioPortRange;
 	private ArrayList<VideoCodecType> videoCodecs;
+	private PortRange videoPortRange;
 
 	private Integer frameWidth;
 	private Integer frameHeight;
@@ -80,8 +84,16 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 		return audioCodecs;
 	}
 
+	public PortRange getAudioPortRange() {
+		return audioPortRange;
+	}
+
 	public ArrayList<VideoCodecType> getVideoCodecs() {
 		return videoCodecs;
+	}
+
+	public PortRange getVideoPortRange() {
+		return videoPortRange;
 	}
 
 	public Integer getFrameWidth() {
@@ -107,10 +119,11 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	protected MediaSessionConfig(NetIF netIF, InetAddress localAddress,
 			Integer maxBW, Integer maxDelay,
 			Map<MediaType, Mode> mediaTypeModes,
-			ArrayList<AudioCodecType> audioCodecs,
-			ArrayList<VideoCodecType> videoCodecs, Integer frameWidth,
-			Integer frameHeight, Integer maxFrameRate, Integer gopSize,
-			Integer framesQueueSize, String stunHost, Integer stunPort) {
+			ArrayList<AudioCodecType> audioCodecs, PortRange audioPortRange,
+			ArrayList<VideoCodecType> videoCodecs, PortRange videoPortRange,
+			Integer frameWidth, Integer frameHeight, Integer maxFrameRate,
+			Integer gopSize, Integer framesQueueSize, String stunHost,
+			Integer stunPort) {
 
 		this.stunHost = stunHost;
 		this.stunPort = stunPort;
@@ -122,7 +135,9 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 
 		this.mediaTypeModes = mediaTypeModes;
 		this.audioCodecs = audioCodecs;
+		this.audioPortRange = audioPortRange;
 		this.videoCodecs = videoCodecs;
+		this.videoPortRange = videoPortRange;
 
 		this.frameWidth = frameWidth;
 		this.frameHeight = frameHeight;
