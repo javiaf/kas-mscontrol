@@ -25,6 +25,7 @@ import com.kurento.commons.mscontrol.Configuration;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
 import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
+import com.kurento.commons.mscontrol.mediamixer.MediaMixer;
 import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
 import com.kurento.commons.sdp.enums.MediaType;
 import com.kurento.commons.sdp.enums.Mode;
@@ -58,8 +59,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 	}
 
 	@Override
-	public NetworkConnection createNetworkConnection()
-			throws MsControlException {
+	public NetworkConnection createNetworkConnection() throws MsControlException {
 		return new NetworkConnectionImpl(mediaSessionConfig);
 	}
 
@@ -257,8 +257,28 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			framesQueueSize = (Integer) obj;
 
 		return new MediaSessionConfig(netIF, localAddress, maxBW, maxDelay,
-				mediaTypeModes, audioCodecs, audioPortRange, videoCodecs,
-				videoPortRange, frameWidth, frameHeight, maxFrameRate, gopSize,
-				framesQueueSize, stunHost, stunPort);
+				mediaTypeModes, audioCodecs, audioPortRange, videoCodecs, videoPortRange,
+				frameWidth, frameHeight, maxFrameRate, gopSize, framesQueueSize,
+				stunHost, stunPort);
+	}
+
+	@Override
+	public NetworkConnection createNetworkConnection(
+			Configuration<NetworkConnection> predefinedConfig) throws MsControlException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public MediaMixer createMediaMixer(Configuration<MediaMixer> predefinedConfig,
+			Parameters params) throws MsControlException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public MediaMixer createMediaMixer() throws MsControlException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
