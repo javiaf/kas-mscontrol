@@ -180,7 +180,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 							DiscoveryTest test = new DiscoveryTest(null, i,
 									stunHost, stunPort);
 							try {
-								info = test.test();
+								info = test.testPublicPorts();
 
 								int port = MediaPortManager
 										.takeVideoLocalPort(info.getLocalPort());
@@ -235,7 +235,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					DiscoveryTest test = new DiscoveryTest(null, i, stunHost,
 							stunPort);
 					try {
-						info = test.test();
+						info = test.testPublicPorts();
 
 						int port = MediaPortManager.takeAudioLocalPort(info
 								.getLocalPort());
