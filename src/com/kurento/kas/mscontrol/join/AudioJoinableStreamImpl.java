@@ -31,6 +31,7 @@ import com.kurento.commons.sdp.enums.Mode;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.profiles.AudioProfile;
 import com.kurento.kas.media.rx.AudioRx;
+import com.kurento.kas.media.rx.AudioSamples;
 import com.kurento.kas.media.rx.MediaRx;
 import com.kurento.kas.media.tx.AudioInfoTx;
 import com.kurento.kas.media.tx.MediaTx;
@@ -94,11 +95,11 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 	}
 
 	@Override
-	public void putAudioSamplesRx(byte[] audio, int length, int nFrame) {
+	public void putAudioSamplesRx(AudioSamples audioSamples) {
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof AudioRx)
-					((AudioRx) j).putAudioSamplesRx(audio, length, nFrame);
+					((AudioRx) j).putAudioSamplesRx(audioSamples);
 		} catch (MsControlException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

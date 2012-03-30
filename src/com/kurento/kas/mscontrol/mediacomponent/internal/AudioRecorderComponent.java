@@ -29,6 +29,7 @@ import com.kurento.commons.mscontrol.Parameters;
 import com.kurento.commons.mscontrol.join.Joinable;
 import com.kurento.kas.media.profiles.AudioProfile;
 import com.kurento.kas.media.rx.AudioRx;
+import com.kurento.kas.media.rx.AudioSamples;
 import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
 
 public class AudioRecorderComponent extends MediaComponentBase implements AudioRx {
@@ -43,15 +44,11 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 	private AudioTrackControl audioTrackControl = null;
 
 	private class AudioFrame {
-		private byte[] samples;
-		private int length;
-		private int id;
+		private AudioSamples audioSamples;
 		private long timeArrive;
 
-		public AudioFrame(byte[] samples, int length, int id, long timeArrive) {
-			this.samples = samples;
-			this.length = length;
-			this.id = id;
+		public AudioFrame(AudioSamples audioSamples, long timeArrive) {
+			this.audioSamples = audioSamples;
 			this.timeArrive = timeArrive;
 		}
 	}
@@ -83,10 +80,8 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 	}
 
 	@Override
-	public synchronized void putAudioSamplesRx(byte[] audio, int length,
-			int nFrame) {
-		Log.d(LOG_TAG, "queue size: " + audioFramesQueue.size() + " length: "
-				+ length + " nFrame: " + nFrame);
+	public synchronized void putAudioSamplesRx(AudioSamples audioSamples) {
+		Log.d(LOG_TAG, "queue size: " + audioFramesQueue.size());
 		long timeArrived = System.currentTimeMillis() - this.initTime;
 		long sum = 0;
 		for (AudioFrame af : audioFramesQueue) {
@@ -97,8 +92,7 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 			Log.w(LOG_TAG, "Clear audio jitter buffer.");
 			audioFramesQueue.clear();
 		}
-		audioFramesQueue.offer(new AudioFrame(audio, length, nFrame,
-				timeArrived));
+		audioFramesQueue.offer(new AudioFrame(audioSamples, timeArrived));
 	}
 
 	@Override
@@ -149,11 +143,12 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 						Log.w(LOG_TAG, "jitter_buffer_underflow: Audio frames queue is empty");
 
 					audioFrameProcessed = audioFramesQueue.take();
-					Log.d(LOG_TAG, "play frame: " + audioFrameProcessed.id);
+					Log.d(LOG_TAG, "play frame");
 					if (audioTrack != null
 							&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)) {
-						audioTrack.write(audioFrameProcessed.samples, 0,
-								audioFrameProcessed.length);
+						audioTrack.write(audioFrameProcessed.audioSamples
+								.getDataSamples(), 0,
+								audioFrameProcessed.audioSamples.getSize());
 					}
 				}
 			} catch (InterruptedException e) {
