@@ -33,6 +33,7 @@ import com.kurento.commons.sdp.enums.Mode;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.profiles.VideoProfile;
 import com.kurento.kas.media.rx.MediaRx;
+import com.kurento.kas.media.rx.VideoFrame;
 import com.kurento.kas.media.rx.VideoRx;
 import com.kurento.kas.media.tx.MediaTx;
 import com.kurento.kas.media.tx.VideoInfoTx;
@@ -138,11 +139,11 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	@Override
-	public void putVideoFrameRx(int[] rgb, int width, int height, int nFrame) {
+	public void putVideoFrameRx(VideoFrame videoFrame) {
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof VideoRx)
-					((VideoRx) j).putVideoFrameRx(rgb, width, height, nFrame);
+					((VideoRx) j).putVideoFrameRx(videoFrame);
 		} catch (MsControlException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

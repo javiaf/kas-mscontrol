@@ -32,6 +32,7 @@ import android.view.View;
 
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
+import com.kurento.kas.media.rx.VideoFrame;
 import com.kurento.kas.media.rx.VideoRx;
 
 public class VideoRecorderComponent extends MediaComponentBase implements
@@ -51,21 +52,7 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 
 	private SurfaceControl surfaceControl = null;
 
-	private class VideoFrame {
-		private int[] rgb;
-		private int width;
-		private int height;
-		private int id;
-
-		public VideoFrame(int[] rgb, int width, int height, int id) {
-			this.rgb = rgb;
-			this.width = width;
-			this.height = height;
-			this.id = id;
-		}
-	}
-
-	private int QUEUE_SIZE = 1;
+	private int QUEUE_SIZE = 20;
 	private BlockingQueue<VideoFrame> videoFramesQueue;
 
 	public View getVideoSurfaceRx() {
@@ -106,16 +93,16 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 	}
 
 	@Override
-	public void putVideoFrameRx(int[] rgb, int width, int height, int nFrame) {
-		Log.d(LOG_TAG, "queue size: " + videoFramesQueue.size() + " nFrame: "
-				+ nFrame);
+	public void putVideoFrameRx(VideoFrame videoFrame) {
+		Log.d(LOG_TAG, "queue size: " + videoFramesQueue.size());
+		Log.d(LOG_TAG, "width: " + videoFrame.getWidth() + "\theight: "
+				+ videoFrame.getHeight());
 		if (videoFramesQueue.size() >= QUEUE_SIZE) {
 			VideoFrame vf = videoFramesQueue.poll();
 			if (vf != null)
-				Log.w(LOG_TAG, "jitter_buffer_overflow: Drop video frame "
-						+ vf.id);
+				Log.w(LOG_TAG, "jitter_buffer_overflow: Drop video frame");
 		}
-		videoFramesQueue.offer(new VideoFrame(rgb, width, height, nFrame));
+		videoFramesQueue.offer(videoFrame);
 	}
 
 	@Override
@@ -164,12 +151,12 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 								"jitter_buffer_underflow: Video frames queue is empty");
 
 					videoFrameProcessed = videoFramesQueue.take();
-					Log.d(LOG_TAG, "play frame: " + videoFrameProcessed.id);
+					Log.d(LOG_TAG, "play frame");
 					tStart = System.currentTimeMillis();
 
-					rgb = videoFrameProcessed.rgb;
-					width = videoFrameProcessed.width;
-					height = videoFrameProcessed.height;
+					rgb = videoFrameProcessed.getDataFrame();
+					width = videoFrameProcessed.getWidth();
+					height = videoFrameProcessed.getHeight();
 
 					if (!isRecording)
 						continue;
@@ -188,6 +175,8 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 								srcBitmap = Bitmap.createBitmap(width, height,
 										Bitmap.Config.ARGB_8888);
 								lastWidth = width;
+								if (srcBitmap == null)
+									Log.w(LOG_TAG, "srcBitmap is null");
 							}
 
 							aux = (double) screenHeight / (double) height;
@@ -198,9 +187,11 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 
 							lastHeight = height;
 						}
-
-						srcBitmap.setPixels(rgb, 0, width, 0, 0, width, height);
-						canvas.drawBitmap(srcBitmap, null, dirty, null);
+						if (srcBitmap != null) {
+							srcBitmap.setPixels(rgb, 0, width, 0, 0, width,
+									height);
+							canvas.drawBitmap(srcBitmap, null, dirty, null);
+						}
 						mSurfaceReceive.unlockCanvasAndPost(canvas);
 					} catch (IllegalArgumentException e) {
 						Log.e(LOG_TAG, "Exception: " + e.toString());
