@@ -15,10 +15,10 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<!-- Dependency versions -->
-		<kcMsControlVersion>1.1.1-SNAPSHOT</kcMsControlVersion>
+		<kcMsControlVersion>1.1.1</kcMsControlVersion>
 		<kasMediaVersion>1.2.1-SNAPSHOT</kasMediaVersion>
 		<kcMediaSpecVersion>1.2.0</kcMediaSpecVersion>
-		<kcStunVersion>1.0.1-SNAPSHOT</kcStunVersion>
+		<kcStunVersion>1.0.1</kcStunVersion>
 	</properties>
 
 	<organization>
