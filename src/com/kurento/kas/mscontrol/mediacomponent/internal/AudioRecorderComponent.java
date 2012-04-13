@@ -43,7 +43,7 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 
 	private AudioTrackControl audioTrackControl = null;
 
-	private BlockingQueue<AudioSamples> audioFramesQueue;
+	private BlockingQueue<AudioSamples> audioSamplesQueue;
 
 	@Override
 	public synchronized boolean isStarted() {
@@ -59,13 +59,13 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 			throw new MsControlException(
 					"Params must have AudioRecorderComponent.STREAM_TYPE param.");
 		this.streamType = streamType;
-		this.audioFramesQueue = new LinkedBlockingQueue<AudioSamples>();
+		this.audioSamplesQueue = new LinkedBlockingQueue<AudioSamples>();
 	}
 
 	@Override
 	public synchronized void putAudioSamplesRx(AudioSamples audioSamples) {
-		Log.d(LOG_TAG, "queue size: " + audioFramesQueue.size());
-		audioFramesQueue.offer(audioSamples);
+		Log.d(LOG_TAG, "queue size: " + audioSamplesQueue.size());
+		audioSamplesQueue.offer(audioSamples);
 	}
 
 	@Override
@@ -112,10 +112,10 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 			try {
 				AudioSamples audioSamplesProcessed;
 				for (;;) {
-					if (audioFramesQueue.isEmpty())
+					if (audioSamplesQueue.isEmpty())
 						Log.w(LOG_TAG, "jitter_buffer_underflow: Audio frames queue is empty");
 
-					audioSamplesProcessed = audioFramesQueue.take();
+					audioSamplesProcessed = audioSamplesQueue.take();
 					Log.d(LOG_TAG, "play frame");
 					if (audioTrack != null
 							&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)) {
