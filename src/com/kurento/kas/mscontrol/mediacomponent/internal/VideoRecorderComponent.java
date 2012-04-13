@@ -36,7 +36,7 @@ import com.kurento.kas.media.rx.VideoFrame;
 import com.kurento.kas.media.rx.VideoRx;
 
 public class VideoRecorderComponent extends MediaComponentBase implements
-		VideoRx {
+		Recorder, VideoRx {
 
 	private static final String LOG_TAG = "NDK-video-rx";
 
@@ -49,19 +49,38 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 	private int screenHeight;
 
 	private boolean isRecording = false;
+	private long targetPtsNorm;
 
 	private SurfaceControl surfaceControl = null;
 
-	private int QUEUE_SIZE = 20;
+	private int QUEUE_SIZE = 100;
 	private BlockingQueue<VideoFrame> videoFramesQueue;
+
+	private final Object controll = new Object();
 
 	public View getVideoSurfaceRx() {
 		return videoSurfaceRx;
 	}
 
+	public synchronized boolean isRecording() {
+		return isRecording;
+	}
+
+	public synchronized void setRecording(boolean isRecording) {
+		this.isRecording = isRecording;
+	}
+
+	public long getTargetPtsNorm() {
+		return targetPtsNorm;
+	}
+
+	public void setTargetPtsNorm(long targetPtsNorm) {
+		this.targetPtsNorm = targetPtsNorm;
+	}
+
 	@Override
 	public boolean isStarted() {
-		return isRecording;
+		return isRecording();
 	}
 
 	public VideoRecorderComponent(Parameters params) throws MsControlException {
@@ -97,10 +116,12 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 		Log.d(LOG_TAG, "queue size: " + videoFramesQueue.size());
 		Log.d(LOG_TAG, "width: " + videoFrame.getWidth() + "\theight: "
 				+ videoFrame.getHeight());
-		if (videoFramesQueue.size() >= QUEUE_SIZE) {
-			VideoFrame vf = videoFramesQueue.poll();
-			if (vf != null)
+		if ((videoFramesQueue.size() >= QUEUE_SIZE)
+				|| (videoFrame.getPts() < 0)) {
+			// VideoFrame vf = videoFramesQueue.poll();
+			// if (vf != null)
 				Log.w(LOG_TAG, "jitter_buffer_overflow: Drop video frame");
+			return;
 		}
 		videoFramesQueue.offer(videoFrame);
 	}
@@ -110,14 +131,17 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
 		surfaceControl = new SurfaceControl();
 		surfaceControl.start();
-		isRecording = true;
+		// startRecord();
+		RecorderControllerComponent.getInstance().addRecorder(this);
+		Log.d(LOG_TAG, "add to controller");
 	}
 
 	@Override
 	public void stop() {
+		RecorderControllerComponent.getInstance().deleteRecorder(this);
+		stopRecord();
 		if (surfaceControl != null)
 			surfaceControl.interrupt();
-		isRecording = false;
 	}
 
 	private class SurfaceControl extends Thread {
@@ -145,71 +169,129 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 				long t;
 				long total = 0;
 
-				for (;;) {
-					if (videoFramesQueue.isEmpty())
-						Log.w(LOG_TAG,
-								"jitter_buffer_underflow: Video frames queue is empty");
+				synchronized (controll) {
+					for (;;) {
+						if (!isRecording())
+							controll.wait();
 
-					videoFrameProcessed = videoFramesQueue.take();
-					Log.d(LOG_TAG, "play frame");
-					tStart = System.currentTimeMillis();
+						if (videoFramesQueue.isEmpty())
+							Log.w(LOG_TAG,
+									"jitter_buffer_underflow: Video frames queue is empty");
 
-					rgb = videoFrameProcessed.getDataFrame();
-					width = videoFrameProcessed.getWidth();
-					height = videoFrameProcessed.getHeight();
+						long targetPtsNorm = getTargetPtsNorm();
+						if (targetPtsNorm != -1) {
+							long ptsNorm = calcPtsNorm(videoFramesQueue
+									.peek());
+							Log.d(LOG_TAG, "ptsNorm: " + ptsNorm
+									+ " targetPts: " + targetPtsNorm);
+							if ((ptsNorm == -1) || (ptsNorm > targetPtsNorm))
+								controll.wait();
+						}
+						videoFrameProcessed = videoFramesQueue.take();
+						Log.d(LOG_TAG,
+								"play frame " + videoFrameProcessed.getPts()
+										+ " ptsNorm: "
+										+ calcPtsNorm(videoFrameProcessed));
+						tStart = System.currentTimeMillis();
 
-					if (!isRecording)
-						continue;
-					if (rgb == null || rgb.length == 0)
-						continue;
+						rgb = videoFrameProcessed.getDataFrame();
+						width = videoFrameProcessed.getWidth();
+						height = videoFrameProcessed.getHeight();
 
-					try {
-						canvas = mSurfaceReceive.lockCanvas(null);
-						if (canvas == null)
+						if (rgb == null || rgb.length == 0)
 							continue;
 
-						if (height != lastHeight) {
-							if (width != lastWidth || srcBitmap == null) {
-								if (srcBitmap != null)
-									srcBitmap.recycle();
-								srcBitmap = Bitmap.createBitmap(width, height,
-										Bitmap.Config.ARGB_8888);
-								lastWidth = width;
-								if (srcBitmap == null)
-									Log.w(LOG_TAG, "srcBitmap is null");
+						try {
+							canvas = mSurfaceReceive.lockCanvas(null);
+							if (canvas == null)
+								continue;
+
+							if (height != lastHeight) {
+								if (width != lastWidth || srcBitmap == null) {
+									if (srcBitmap != null)
+										srcBitmap.recycle();
+									srcBitmap = Bitmap.createBitmap(width,
+											height, Bitmap.Config.ARGB_8888);
+									lastWidth = width;
+									if (srcBitmap == null)
+										Log.w(LOG_TAG, "srcBitmap is null");
+								}
+
+								aux = (double) screenHeight / (double) height;
+								heighAux = screenHeight;
+								widthAux = (int) (aux * width);
+
+								dirty = new Rect(0, 0, widthAux, heighAux);
+
+								lastHeight = height;
 							}
-
-							aux = (double) screenHeight / (double) height;
-							heighAux = screenHeight;
-							widthAux = (int) (aux * width);
-
-							dirty = new Rect(0, 0, widthAux, heighAux);
-
-							lastHeight = height;
+							if (srcBitmap != null) {
+								srcBitmap.setPixels(rgb, 0, width, 0, 0, width,
+										height);
+								canvas.drawBitmap(srcBitmap, null, dirty, null);
+							}
+							mSurfaceReceive.unlockCanvasAndPost(canvas);
+						} catch (IllegalArgumentException e) {
+							Log.e(LOG_TAG, "Exception: " + e.toString());
+						} catch (OutOfResourcesException e) {
+							Log.e(LOG_TAG, "Exception: " + e.toString());
 						}
-						if (srcBitmap != null) {
-							srcBitmap.setPixels(rgb, 0, width, 0, 0, width,
-									height);
-							canvas.drawBitmap(srcBitmap, null, dirty, null);
-						}
-						mSurfaceReceive.unlockCanvasAndPost(canvas);
-					} catch (IllegalArgumentException e) {
-						Log.e(LOG_TAG, "Exception: " + e.toString());
-					} catch (OutOfResourcesException e) {
-						Log.e(LOG_TAG, "Exception: " + e.toString());
+
+						tEnd = System.currentTimeMillis();
+						t = tEnd - tStart;
+						total += t;
+						Log.d(LOG_TAG, "frame played in: " + t
+								+ " ms. Average: " + (total / i));
+						i++;
 					}
-
-					tEnd = System.currentTimeMillis();
-					t = tEnd - tStart;
-					total += t;
-					Log.d(LOG_TAG, "frame played in: " + t + " ms. Average: "
-							+ (total / i));
-					i++;
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "SurfaceControl stopped");
 			}
 		}
+	}
+
+	@Override
+	public long getPtsNorm() {
+		return calcPtsNorm(videoFramesQueue.peek());
+	}
+
+	@Override
+	public boolean hasMediaPacket() {
+		return !videoFramesQueue.isEmpty();
+	}
+
+	@Override
+	public void startRecord() {
+		startRecord(-1);
+	}
+
+	@Override
+	public void startRecord(long targetPtsNorm) {
+		setTargetPtsNorm(targetPtsNorm);
+		setRecording(true);
+		synchronized (controll) {
+			controll.notify();
+		}
+	}
+
+	@Override
+	public void stopRecord() {
+		setRecording(false);
+	}
+
+	private long calcPtsNorm(VideoFrame vf) {
+		if (vf == null)
+			return -1;
+
+		// Log.d(LOG_TAG,
+		// "vf.getPts(): " + vf.getPts() + " vf.getStartTime(): "
+		// + vf.getStartTime() + " vf.getTimeBaseDen(): "
+		// + vf.getTimeBaseDen() + " vf.getTimeBaseNum(): "
+		// + vf.getTimeBaseNum());
+
+		return 1000 * ((vf.getPts() - vf.getStartTime()) * vf
+				.getTimeBaseNum()) / vf.getTimeBaseDen();
 	}
 
 }
