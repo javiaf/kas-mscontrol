@@ -49,30 +49,31 @@ public class RecorderControllerComponent implements
 		public void run() {
 			long t, tStart, currentT, targetPts, latency;
 			long inc = 20;
-			boolean started = false;
+			long tIncStart;
+			boolean record;
 
 			try {
-				tStart = 0;
-				Log.d(LOG_TAG, "Controller start");
+				tStart = System.currentTimeMillis();
+				tIncStart = tStart;
+				targetPts = 0;
+				Log.d(LOG_TAG, "Controller start with scheduler");
 				for (;;) {
-					targetPts = Long.MAX_VALUE;
-					for (Recorder r : recorders) {
-						targetPts = Math.min(targetPts, r.getPtsNorm());
-						if (targetPts < 0)
-							break;
-					}
 					t = System.currentTimeMillis();
-					currentT = t - tStart;
-					latency = currentT - targetPts;
-
-					if ((targetPts < 0) || (latency < 0)) {
+					record = true;
+					for (Recorder r : recorders) {
+						if (!r.hasMediaPacket())
+							record = false;
+					}
+					if (!record) {
+						Log.w(LOG_TAG, "can not record");
+						tIncStart = t;
 						sleep(inc);
 						continue;
 					}
-					if (!started) {
-						tStart = System.currentTimeMillis();
-						started = true;
-					}
+
+					currentT = t - tStart;
+					targetPts += t - tIncStart;
+					latency = currentT - targetPts;
 
 					Log.d(LOG_TAG, "currentT: " + currentT + " targetPts: "
 							+ targetPts + " latency: " + latency);
@@ -80,6 +81,7 @@ public class RecorderControllerComponent implements
 					for (Recorder r : recorders)
 						r.startRecord(targetPts);
 
+					tIncStart = t;
 					sleep(inc);
 				}
 			} catch (InterruptedException e) {
