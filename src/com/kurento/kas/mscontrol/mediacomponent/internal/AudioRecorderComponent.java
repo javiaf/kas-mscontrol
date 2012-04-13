@@ -43,23 +43,7 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 
 	private AudioTrackControl audioTrackControl = null;
 
-	private class AudioFrame {
-		private AudioSamples audioSamples;
-		private long timeArrive;
-
-		public AudioFrame(AudioSamples audioSamples, long timeArrive) {
-			this.audioSamples = audioSamples;
-			this.timeArrive = timeArrive;
-		}
-	}
-
-	// private int QUEUE_SIZE = 5;
-	private BlockingQueue<AudioFrame> audioFramesQueue;
-
-	private static final long T_MIN = 20;
-	private static final long T_MAX = 2000;
-
-	private long initTime;
+	private BlockingQueue<AudioSamples> audioFramesQueue;
 
 	@Override
 	public synchronized boolean isStarted() {
@@ -75,24 +59,13 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 			throw new MsControlException(
 					"Params must have AudioRecorderComponent.STREAM_TYPE param.");
 		this.streamType = streamType;
-		this.audioFramesQueue = new LinkedBlockingQueue<AudioFrame>();
-		this.initTime = System.currentTimeMillis();
+		this.audioFramesQueue = new LinkedBlockingQueue<AudioSamples>();
 	}
 
 	@Override
 	public synchronized void putAudioSamplesRx(AudioSamples audioSamples) {
 		Log.d(LOG_TAG, "queue size: " + audioFramesQueue.size());
-		long timeArrived = System.currentTimeMillis() - this.initTime;
-		long sum = 0;
-		for (AudioFrame af : audioFramesQueue) {
-			sum += Math.max(0, (timeArrived - af.timeArrive) - T_MIN);
-		}
-
-		if (sum > T_MAX) {
-			Log.w(LOG_TAG, "Clear audio jitter buffer.");
-			audioFramesQueue.clear();
-		}
-		audioFramesQueue.offer(new AudioFrame(audioSamples, timeArrived));
+		audioFramesQueue.offer(audioSamples);
 	}
 
 	@Override
@@ -137,18 +110,18 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 		@Override
 		public void run() {
 			try {
-				AudioFrame audioFrameProcessed;
+				AudioSamples audioSamplesProcessed;
 				for (;;) {
 					if (audioFramesQueue.isEmpty())
 						Log.w(LOG_TAG, "jitter_buffer_underflow: Audio frames queue is empty");
 
-					audioFrameProcessed = audioFramesQueue.take();
+					audioSamplesProcessed = audioFramesQueue.take();
 					Log.d(LOG_TAG, "play frame");
 					if (audioTrack != null
 							&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)) {
-						audioTrack.write(audioFrameProcessed.audioSamples
-								.getDataSamples(), 0,
-								audioFrameProcessed.audioSamples.getSize());
+						audioTrack.write(
+								audioSamplesProcessed.getDataSamples(), 0,
+								audioSamplesProcessed.getSize());
 					}
 				}
 			} catch (InterruptedException e) {
