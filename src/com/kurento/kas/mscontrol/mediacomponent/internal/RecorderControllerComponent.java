@@ -44,13 +44,15 @@ public class RecorderControllerComponent implements
 		}
 	}
 
+	private static final int MAX_LATENCY = 250;
+
 	private class Controller extends Thread {
 		@Override
 		public void run() {
 			long t, tStart, flushedT, currentFlushed, currentT, targetRelTime, targetTime, latency;
 			long inc = 20;
 			long tIncStart;
-			long minTime, estStartT;
+			long minTime, minLatency, estStartT;
 
 			try {
 				tStart = System.currentTimeMillis();
@@ -62,10 +64,12 @@ public class RecorderControllerComponent implements
 					t = System.currentTimeMillis();
 					minTime = Long.MAX_VALUE;
 					estStartT = Long.MAX_VALUE;
+					minLatency = Long.MAX_VALUE;
 					for (Recorder r : recorders) {
 						minTime = Math.min(minTime, r.getHeadTime());
 						estStartT = Math.min(estStartT,
 								r.getEstimatedStartTime());
+						minLatency = Math.min(minLatency, r.getLatency());
 					}
 					if (minTime < 0) {
 						Log.w(LOG_TAG, "can not record");
@@ -79,15 +83,15 @@ public class RecorderControllerComponent implements
 					targetRelTime += t - tIncStart;
 					targetTime = estStartT + targetRelTime;
 					targetTime = Math.min(targetTime, minTime + 2 * inc);
-					latency = currentFlushed - targetTime;
+					// latency = currentFlushed - targetTime;
 
-					Log.d(LOG_TAG, "estStartT: " + estStartT + " currentT: "
-							+ currentT + " currentFlushed: " + currentFlushed
-							+ " targetTime: " + targetTime + " targetRelTime: "
-							+ targetRelTime + " latency: " + latency);
+					 Log.d(LOG_TAG, "estStartT: " + estStartT + " currentT: "
+					 + currentT + " currentFlushed: " + currentFlushed
+					 + " targetTime: " + targetTime + " targetRelTime: "
+							+ targetRelTime + " latency: " + minLatency); // latency);
 
-					if (latency > 500) {
-						long flushTo = targetTime + 500;
+					if (minLatency > MAX_LATENCY) { // (latency > MAX_LATENCY) {
+						long flushTo = targetTime + MAX_LATENCY;
 						Log.w(LOG_TAG, "flush to " + flushTo);
 						for (Recorder r : recorders) {
 							Log.w(LOG_TAG, r + " latency: " + r.getLatency());
