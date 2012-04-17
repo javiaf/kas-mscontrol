@@ -8,7 +8,11 @@ public interface Recorder extends MediaComponentAndroid {
 	 * 
 	 * @return pts normalized to milliseconds or -1 if there is no media packet.
 	 */
-	public long getPtsNorm();
+	public long getPtsMillis();
+
+	public long getHeadTime();
+
+	public long getEstimatedStartTime();
 
 	/**
 	 * 
@@ -18,8 +22,16 @@ public interface Recorder extends MediaComponentAndroid {
 
 	public void startRecord();
 
-	public void startRecord(long pts);
+	public void startRecord(long time);
 
 	public void stopRecord();
+
+	public void flushTo(long time);
+
+	public void flushAll();
+
+	public long getLatency();
+
+	public long getLastPtsNorm();
 
 }

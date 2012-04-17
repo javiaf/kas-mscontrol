@@ -35,7 +35,7 @@ import com.kurento.commons.mscontrol.Parameters;
 import com.kurento.kas.media.rx.VideoFrame;
 import com.kurento.kas.media.rx.VideoRx;
 
-public class VideoRecorderComponent extends MediaComponentBase implements
+public class VideoRecorderComponent extends RecorderComponentBase implements
 		Recorder, VideoRx {
 
 	private static final String LOG_TAG = "NDK-video-rx";
@@ -49,7 +49,6 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 	private int screenHeight;
 
 	private boolean isRecording = false;
-	private long targetPtsNorm;
 
 	private SurfaceControl surfaceControl = null;
 
@@ -68,14 +67,6 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 
 	public synchronized void setRecording(boolean isRecording) {
 		this.isRecording = isRecording;
-	}
-
-	public long getTargetPtsNorm() {
-		return targetPtsNorm;
-	}
-
-	public void setTargetPtsNorm(long targetPtsNorm) {
-		this.targetPtsNorm = targetPtsNorm;
 	}
 
 	@Override
@@ -113,9 +104,11 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 
 	@Override
 	public void putVideoFrameRx(VideoFrame videoFrame) {
-		Log.d(LOG_TAG, "queue size: " + videoFramesQueue.size());
-		Log.d(LOG_TAG, "width: " + videoFrame.getWidth() + "\theight: "
-				+ videoFrame.getHeight());
+		Log.i(LOG_TAG, "Enqueue video frame (ptsNorm/rxTime)"
+				+ calcPtsMillis(videoFrame) + "/" + videoFrame.getRxTime()
+				+ " queue size: " + videoFramesQueue.size());
+		// Log.d(LOG_TAG, "width: " + videoFrame.getWidth() + "\theight: "
+		// + videoFrame.getHeight());
 		if ((videoFramesQueue.size() >= QUEUE_SIZE)
 				|| (videoFrame.getPts() < 0)) {
 			// VideoFrame vf = videoFramesQueue.poll();
@@ -123,6 +116,11 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 				Log.w(LOG_TAG, "jitter_buffer_overflow: Drop video frame");
 			return;
 		}
+		long ptsNorm = calcPtsMillis(videoFrame);
+		setLastPtsNorm(ptsNorm);
+		long estStartTime = caclEstimatedStartTime(ptsNorm,
+				videoFrame.getRxTime());
+		Log.i(LOG_TAG, "estimated start time: " + estStartTime);
 		videoFramesQueue.offer(videoFrame);
 	}
 
@@ -181,22 +179,24 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 						Log.w(LOG_TAG,
 								"jitter_buffer_underflow: Video frames queue is empty");
 
-					long targetPtsNorm = getTargetPtsNorm();
-					if (targetPtsNorm != -1) {
-						long ptsNorm = calcPtsNorm(videoFramesQueue.peek());
-						Log.d(LOG_TAG, "ptsNorm: " + ptsNorm + " targetPts: "
-								+ targetPtsNorm);
-						if ((ptsNorm == -1) || (ptsNorm > targetPtsNorm)) {
-							Log.d(LOG_TAG, "wait");
+					long targetTime = getTargetTime();
+					if (targetTime != -1) {
+						long ptsMillis = calcPtsMillis(videoFramesQueue.peek());
+						Log.d(LOG_TAG, "ptsMillis: " + ptsMillis
+								+ " targetTime: " + targetTime);
+						if ((ptsMillis == -1)
+								|| (ptsMillis + getEstimatedStartTime() > targetTime)) {
+							// Log.d(LOG_TAG, "wait");
 							synchronized (controll) {
 								controll.wait();
 							}
 							continue;
 						}
 					}
+
 					videoFrameProcessed = videoFramesQueue.take();
 					Log.d(LOG_TAG, "play frame "
-							+ calcPtsNorm(videoFrameProcessed));
+							+ calcPtsMillis(videoFrameProcessed));
 					tStart = System.currentTimeMillis();
 
 					rgb = videoFrameProcessed.getDataFrame();
@@ -256,8 +256,16 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 	}
 
 	@Override
-	public long getPtsNorm() {
-		return calcPtsNorm(videoFramesQueue.peek());
+	public long getPtsMillis() {
+		return calcPtsMillis(videoFramesQueue.peek());
+	}
+
+	@Override
+	public long getHeadTime() {
+		long ptsMillis = calcPtsMillis(videoFramesQueue.peek());
+		if (ptsMillis < 0)
+			return -1;
+		return ptsMillis + getEstimatedStartTime();
 	}
 
 	@Override
@@ -271,8 +279,8 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 	}
 
 	@Override
-	public void startRecord(long targetPtsNorm) {
-		setTargetPtsNorm(targetPtsNorm);
+	public void startRecord(long time) {
+		setTargetTime(time);
 		setRecording(true);
 		synchronized (controll) {
 			controll.notify();
@@ -284,7 +292,7 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 		setRecording(false);
 	}
 
-	private long calcPtsNorm(VideoFrame vf) {
+	private long calcPtsMillis(VideoFrame vf) {
 		if (vf == null)
 			return -1;
 
@@ -296,6 +304,30 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 
 		return 1000 * ((vf.getPts() - vf.getStartTime()) * vf
 				.getTimeBaseNum()) / vf.getTimeBaseDen();
+	}
+
+	@Override
+	public void flushTo(long time) {
+		VideoFrame vf = videoFramesQueue.peek();
+		while (vf != null) {
+			if ((calcPtsMillis(vf) + getEstimatedStartTime()) > time)
+				break;
+			videoFramesQueue.remove(vf);
+			vf = videoFramesQueue.peek();
+		}
+	}
+
+	@Override
+	public void flushAll() {
+		videoFramesQueue.clear();
+	}
+
+	@Override
+	public long getLatency() {
+		long firstPtsNorm = calcPtsMillis(videoFramesQueue.peek());
+		if (firstPtsNorm < 0)
+			return -1;
+		return getLastPtsNorm() - firstPtsNorm;
 	}
 
 }

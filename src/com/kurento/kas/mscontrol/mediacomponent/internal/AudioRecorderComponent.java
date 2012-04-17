@@ -32,7 +32,7 @@ import com.kurento.kas.media.rx.AudioRx;
 import com.kurento.kas.media.rx.AudioSamples;
 import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
 
-public class AudioRecorderComponent extends MediaComponentBase implements
+public class AudioRecorderComponent extends RecorderComponentBase implements
 		Recorder, AudioRx {
 
 	private static final String LOG_TAG = "NDK-audio-rx"; // "AudioRecorder";
@@ -49,7 +49,6 @@ public class AudioRecorderComponent extends MediaComponentBase implements
 	private final Object controll = new Object();
 
 	private boolean isRecording = false;
-	private long targetPtsNorm;
 
 	public synchronized boolean isRecording() {
 		return isRecording;
@@ -57,14 +56,6 @@ public class AudioRecorderComponent extends MediaComponentBase implements
 
 	public synchronized void setRecording(boolean isRecording) {
 		this.isRecording = isRecording;
-	}
-
-	public synchronized long getTargetPtsNorm() {
-		return targetPtsNorm;
-	}
-
-	public synchronized void setTargetPtsNorm(long targetPtsNorm) {
-		this.targetPtsNorm = targetPtsNorm;
 	}
 
 	@Override
@@ -86,7 +77,14 @@ public class AudioRecorderComponent extends MediaComponentBase implements
 
 	@Override
 	public synchronized void putAudioSamplesRx(AudioSamples audioSamples) {
-		Log.d(LOG_TAG, "queue size: " + audioSamplesQueue.size());
+		Log.i(LOG_TAG, "Enqueue audio samples (ptsNorm/rxTime)"
+				+ calcPtsMillis(audioSamples) + "/" + audioSamples.getRxTime()
+				+ " queue size: " + audioSamplesQueue.size());
+		long ptsNorm = calcPtsMillis(audioSamples);
+		setLastPtsNorm(ptsNorm);
+		long estStartTime = caclEstimatedStartTime(ptsNorm,
+				audioSamples.getRxTime());
+		Log.i(LOG_TAG, "estimated start time: " + estStartTime);
 		audioSamplesQueue.offer(audioSamples);
 	}
 
@@ -103,11 +101,12 @@ public class AudioRecorderComponent extends MediaComponentBase implements
 
 		int frequency = audioProfile.getSampleRate();
 
-		int buffer_min = AudioTrack.getMinBufferSize(frequency,
+		int minBufferSize = AudioTrack.getMinBufferSize(frequency,
 				channelConfiguration, audioEncoding);
 
+		Log.d(LOG_TAG, "minBufferSize: " + minBufferSize);
 		audioTrack = new AudioTrack(this.streamType, frequency,
-				channelConfiguration, audioEncoding, buffer_min,
+				channelConfiguration, audioEncoding, minBufferSize,
 				AudioTrack.MODE_STREAM);
 
 		if (audioTrack != null) {
@@ -149,13 +148,25 @@ public class AudioRecorderComponent extends MediaComponentBase implements
 					if (audioSamplesQueue.isEmpty())
 						Log.w(LOG_TAG, "jitter_buffer_underflow: Audio frames queue is empty");
 
-					long targetPtsNorm = getTargetPtsNorm();
-					if (targetPtsNorm != -1) {
-						long ptsNorm = calcPtsNorm(audioSamplesQueue.peek());
-						Log.d(LOG_TAG, "ptsNorm: " + ptsNorm + " targetPts: "
-								+ targetPtsNorm);
-						if ((ptsNorm == -1) || (ptsNorm > targetPtsNorm)) {
-							Log.d(LOG_TAG, "wait");
+					// Log.d(LOG_TAG, "Process audio samples...");
+					long targetTime = getTargetTime();
+					if (targetTime != -1) {
+						long ptsMillis = calcPtsMillis(audioSamplesQueue.peek());
+						if (audioTrack != null
+								&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)) {
+							Log.d(LOG_TAG,
+									"currentPts: "
+										+ ptsMillis
+										+ " targetTime: "
+										+ targetTime
+										+ " playback head position: "
+										+ (1000 * audioTrack
+												.getPlaybackHeadPosition() / audioTrack
+												.getPlaybackRate()));
+						}
+						if ((ptsMillis == -1)
+								|| (ptsMillis + getEstimatedStartTime() > targetTime)) {
+							// Log.d(LOG_TAG, "wait");
 							synchronized (controll) {
 								controll.wait();
 							}
@@ -164,14 +175,27 @@ public class AudioRecorderComponent extends MediaComponentBase implements
 					}
 
 					audioSamplesProcessed = audioSamplesQueue.take();
-					Log.d(LOG_TAG, "play audio samples");
+					Log.d(LOG_TAG, "play audio samples "
+							+ calcPtsMillis(audioSamplesProcessed));
 					if (audioTrack != null
 							&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)) {
-						Log.d(LOG_TAG, "ok");
+						// Log.d(LOG_TAG,
+						// "write... getNotificationMarkerPosition(): "
+						// + audioTrack
+						// .getNotificationMarkerPosition()
+						// + " getPlaybackHeadPosition(): "
+						// + audioTrack.getPlaybackHeadPosition()
+						// + " getPlaybackRate(): "
+						// + audioTrack.getPlaybackRate()
+						// + " 	getPositionNotificationPeriod(): "
+						// + audioTrack
+						// .getPositionNotificationPeriod());
 						audioTrack.write(
 								audioSamplesProcessed.getDataSamples(), 0,
 								audioSamplesProcessed.getSize());
+						// Log.d(LOG_TAG, "write OK");
 					}
+					// Log.d(LOG_TAG, "play OK");
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "AudioTrackControl stopped");
@@ -180,8 +204,16 @@ public class AudioRecorderComponent extends MediaComponentBase implements
 	}
 
 	@Override
-	public long getPtsNorm() {
-		return calcPtsNorm(audioSamplesQueue.peek());
+	public long getPtsMillis() {
+		return calcPtsMillis(audioSamplesQueue.peek());
+	}
+
+	@Override
+	public long getHeadTime() {
+		long ptsMillis = calcPtsMillis(audioSamplesQueue.peek());
+		if (ptsMillis < 0)
+			return -1;
+		return ptsMillis + getEstimatedStartTime();
 	}
 
 	@Override
@@ -195,8 +227,8 @@ public class AudioRecorderComponent extends MediaComponentBase implements
 	}
 
 	@Override
-	public void startRecord(long pts) {
-		setTargetPtsNorm(pts);
+	public void startRecord(long time) {
+		setTargetTime(time);
 		setRecording(true);
 		synchronized (controll) {
 			controll.notify();
@@ -208,12 +240,36 @@ public class AudioRecorderComponent extends MediaComponentBase implements
 		setRecording(false);
 	}
 
-	private long calcPtsNorm(AudioSamples as) {
+	private long calcPtsMillis(AudioSamples as) {
 		if (as == null)
 			return -1;
 
 		return 1000 * ((as.getPts() - as.getStartTime()) * as.getTimeBaseNum())
 				/ as.getTimeBaseDen();
+	}
+
+	@Override
+	public void flushTo(long time) {
+		AudioSamples as = audioSamplesQueue.peek();
+		while (as != null) {
+			if ((calcPtsMillis(as) + getEstimatedStartTime()) > time)
+				break;
+			audioSamplesQueue.remove(as);
+			as = audioSamplesQueue.peek();
+		}
+	}
+
+	@Override
+	public void flushAll() {
+		audioSamplesQueue.clear();
+	}
+
+	@Override
+	public long getLatency() {
+		long firstPtsNorm = calcPtsMillis(audioSamplesQueue.peek());
+		if (firstPtsNorm < 0)
+			return -1;
+		return getLastPtsNorm() - firstPtsNorm;
 	}
 
 }
