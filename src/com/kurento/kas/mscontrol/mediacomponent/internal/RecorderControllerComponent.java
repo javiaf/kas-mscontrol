@@ -47,41 +47,71 @@ public class RecorderControllerComponent implements
 	private class Controller extends Thread {
 		@Override
 		public void run() {
-			long t, tStart, currentT, targetPts, latency;
+			long t, tStart, flushedT, currentFlushed, currentT, targetRelTime, targetTime, latency;
 			long inc = 20;
 			long tIncStart;
-			boolean record;
+			long minTime, estStartT;
 
 			try {
 				tStart = System.currentTimeMillis();
+				flushedT = tStart;
 				tIncStart = tStart;
-				targetPts = 0;
+				targetRelTime = 0;
 				Log.d(LOG_TAG, "Controller start with scheduler");
 				for (;;) {
+					Log.i(LOG_TAG, "start");
 					t = System.currentTimeMillis();
-					record = true;
+					minTime = Long.MAX_VALUE;
+					estStartT = Long.MAX_VALUE;
 					for (Recorder r : recorders) {
-						if (!r.hasMediaPacket())
-							record = false;
+						minTime = Math.min(minTime, r.getHeadTime());
+						estStartT = Math.min(estStartT,
+								r.getEstimatedStartTime());
 					}
-					if (!record) {
+					if (minTime < 0) {
 						Log.w(LOG_TAG, "can not record");
 						tIncStart = t;
 						sleep(inc);
 						continue;
 					}
 
-					currentT = t - tStart;
-					targetPts += t - tIncStart;
-					latency = currentT - targetPts;
+					Log.d(LOG_TAG, "(t - tStart): " + (t - tStart)
+							+ " (t - flushedT): " + (t - flushedT)
+							+ " (t - tIncStart): " + (t - tIncStart));
 
-					Log.d(LOG_TAG, "currentT: " + currentT + " targetPts: "
-							+ targetPts + " latency: " + latency);
+					currentT = estStartT + (t - tStart);
+					currentFlushed = estStartT + (t - flushedT);
+					targetRelTime += t - tIncStart;
+					targetTime = estStartT + targetRelTime;
+
+					Log.d(LOG_TAG, "targetTime: " + targetTime
+							+ " minTime + 2 * inc: " + (minTime + 2 * inc));
+
+					targetTime = Math.min(targetTime, minTime + 2 * inc);
+					latency = currentFlushed - targetTime;
+
+					Log.d(LOG_TAG, "estStartT: " + estStartT + " currentT: "
+							+ currentT + " currentFlushed: " + currentFlushed
+							+ " targetTime: " + targetTime + " targetRelTime: "
+							+ targetRelTime + " latency: " + latency);
+
+					if (latency > 500) {
+						long flushTo = targetTime + 500;
+						Log.w(LOG_TAG, "flush to " + flushTo);
+						for (Recorder r : recorders) {
+							Log.w(LOG_TAG, r + " latency: " + r.getLatency());
+							r.flushTo(flushTo);
+						}
+						targetRelTime = Math.min(currentT, flushTo) - estStartT;
+						flushedT = System.currentTimeMillis() - targetRelTime;
+						continue;
+					}
 
 					for (Recorder r : recorders)
-						r.startRecord(targetPts);
+						r.startRecord(targetTime);
 
 					tIncStart = t;
+					Log.i(LOG_TAG, "finish");
 					sleep(inc);
 				}
 			} catch (InterruptedException e) {
