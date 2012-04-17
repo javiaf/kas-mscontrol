@@ -124,6 +124,7 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 		public void run() {
 			try {
 				AudioSamples audioSamplesProcessed;
+				long tStart, tEnd, t;
 				for (;;) {
 					if (!isRecording()) {
 						synchronized (controll) {
@@ -153,9 +154,14 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 							+ calcPtsMillis(audioSamplesProcessed));
 					if (audioTrack != null
 							&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)) {
+						tStart = System.currentTimeMillis();
 						audioTrack.write(
 								audioSamplesProcessed.getDataSamples(), 0,
 								audioSamplesProcessed.getSize());
+						tEnd = System.currentTimeMillis();
+						t = tEnd - tStart;
+						if (t > 20)
+							Log.w(LOG_TAG, "audioTrack.write time: " + t);
 					}
 					// Log.d(LOG_TAG, "play OK");
 				}
