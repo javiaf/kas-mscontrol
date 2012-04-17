@@ -106,7 +106,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		setLastPtsNorm(ptsNorm);
 		long estStartTime = caclEstimatedStartTime(ptsNorm,
 				videoFrame.getRxTime());
-		Log.i(LOG_TAG, "estimated start time: " + estStartTime);
+		// Log.i(LOG_TAG, "estimated start time: " + estStartTime);
 		packetsQueue.offer(videoFrame);
 	}
 
@@ -168,11 +168,11 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					long targetTime = getTargetTime();
 					if (targetTime != -1) {
 						long ptsMillis = calcPtsMillis(packetsQueue.peek());
-						Log.d(LOG_TAG, "ptsMillis: " + ptsMillis
-								+ " targetTime: " + targetTime);
+						// Log.d(LOG_TAG, "ptsMillis: " + ptsMillis
+						// + " targetTime: " + targetTime);
 						if ((ptsMillis == -1)
 								|| (ptsMillis + getEstimatedStartTime() > targetTime)) {
-							// Log.d(LOG_TAG, "wait");
+							Log.d(LOG_TAG, "wait");
 							synchronized (controll) {
 								controll.wait();
 							}

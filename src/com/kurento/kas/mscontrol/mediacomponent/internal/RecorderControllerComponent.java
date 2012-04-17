@@ -59,7 +59,6 @@ public class RecorderControllerComponent implements
 				targetRelTime = 0;
 				Log.d(LOG_TAG, "Controller start with scheduler");
 				for (;;) {
-					Log.i(LOG_TAG, "start");
 					t = System.currentTimeMillis();
 					minTime = Long.MAX_VALUE;
 					estStartT = Long.MAX_VALUE;
@@ -75,18 +74,10 @@ public class RecorderControllerComponent implements
 						continue;
 					}
 
-					Log.d(LOG_TAG, "(t - tStart): " + (t - tStart)
-							+ " (t - flushedT): " + (t - flushedT)
-							+ " (t - tIncStart): " + (t - tIncStart));
-
 					currentT = estStartT + (t - tStart);
 					currentFlushed = estStartT + (t - flushedT);
 					targetRelTime += t - tIncStart;
 					targetTime = estStartT + targetRelTime;
-
-					Log.d(LOG_TAG, "targetTime: " + targetTime
-							+ " minTime + 2 * inc: " + (minTime + 2 * inc));
-
 					targetTime = Math.min(targetTime, minTime + 2 * inc);
 					latency = currentFlushed - targetTime;
 
@@ -111,7 +102,6 @@ public class RecorderControllerComponent implements
 						r.startRecord(targetTime);
 
 					tIncStart = t;
-					Log.i(LOG_TAG, "finish");
 					sleep(inc);
 				}
 			} catch (InterruptedException e) {
