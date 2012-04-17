@@ -17,7 +17,6 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.media.AudioFormat;
@@ -30,6 +29,7 @@ import com.kurento.commons.mscontrol.join.Joinable;
 import com.kurento.kas.media.profiles.AudioProfile;
 import com.kurento.kas.media.rx.AudioRx;
 import com.kurento.kas.media.rx.AudioSamples;
+import com.kurento.kas.media.rx.RxPacket;
 import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
 
 public class AudioRecorderComponent extends RecorderComponentBase implements
@@ -43,20 +43,6 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 	private int streamType;
 
 	private AudioTrackControl audioTrackControl = null;
-
-	private BlockingQueue<AudioSamples> audioSamplesQueue;
-
-	private final Object controll = new Object();
-
-	private boolean isRecording = false;
-
-	public synchronized boolean isRecording() {
-		return isRecording;
-	}
-
-	public synchronized void setRecording(boolean isRecording) {
-		this.isRecording = isRecording;
-	}
 
 	@Override
 	public synchronized boolean isStarted() {
@@ -72,20 +58,21 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 			throw new MsControlException(
 					"Params must have AudioRecorderComponent.STREAM_TYPE param.");
 		this.streamType = streamType;
-		this.audioSamplesQueue = new LinkedBlockingQueue<AudioSamples>();
+
+		this.packetsQueue = new LinkedBlockingQueue<RxPacket>();
 	}
 
 	@Override
 	public synchronized void putAudioSamplesRx(AudioSamples audioSamples) {
 		Log.i(LOG_TAG, "Enqueue audio samples (ptsNorm/rxTime)"
 				+ calcPtsMillis(audioSamples) + "/" + audioSamples.getRxTime()
-				+ " queue size: " + audioSamplesQueue.size());
+				+ " queue size: " + packetsQueue.size());
 		long ptsNorm = calcPtsMillis(audioSamples);
 		setLastPtsNorm(ptsNorm);
 		long estStartTime = caclEstimatedStartTime(ptsNorm,
 				audioSamples.getRxTime());
 		Log.i(LOG_TAG, "estimated start time: " + estStartTime);
-		audioSamplesQueue.offer(audioSamples);
+		packetsQueue.offer(audioSamples);
 	}
 
 	@Override
@@ -145,13 +132,13 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 						continue;
 					}
 
-					if (audioSamplesQueue.isEmpty())
+					if (packetsQueue.isEmpty())
 						Log.w(LOG_TAG, "jitter_buffer_underflow: Audio frames queue is empty");
 
 					// Log.d(LOG_TAG, "Process audio samples...");
 					long targetTime = getTargetTime();
 					if (targetTime != -1) {
-						long ptsMillis = calcPtsMillis(audioSamplesQueue.peek());
+						long ptsMillis = calcPtsMillis(packetsQueue.peek());
 						if (audioTrack != null
 								&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)) {
 							Log.d(LOG_TAG,
@@ -174,7 +161,7 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 						}
 					}
 
-					audioSamplesProcessed = audioSamplesQueue.take();
+					audioSamplesProcessed = (AudioSamples) packetsQueue.take();
 					Log.d(LOG_TAG, "play audio samples "
 							+ calcPtsMillis(audioSamplesProcessed));
 					if (audioTrack != null
@@ -201,75 +188,6 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 				Log.d(LOG_TAG, "AudioTrackControl stopped");
 			}
 		}
-	}
-
-	@Override
-	public long getPtsMillis() {
-		return calcPtsMillis(audioSamplesQueue.peek());
-	}
-
-	@Override
-	public long getHeadTime() {
-		long ptsMillis = calcPtsMillis(audioSamplesQueue.peek());
-		if (ptsMillis < 0)
-			return -1;
-		return ptsMillis + getEstimatedStartTime();
-	}
-
-	@Override
-	public boolean hasMediaPacket() {
-		return !audioSamplesQueue.isEmpty();
-	}
-
-	@Override
-	public void startRecord() {
-		startRecord(-1);
-	}
-
-	@Override
-	public void startRecord(long time) {
-		setTargetTime(time);
-		setRecording(true);
-		synchronized (controll) {
-			controll.notify();
-		}
-	}
-
-	@Override
-	public void stopRecord() {
-		setRecording(false);
-	}
-
-	private long calcPtsMillis(AudioSamples as) {
-		if (as == null)
-			return -1;
-
-		return 1000 * ((as.getPts() - as.getStartTime()) * as.getTimeBaseNum())
-				/ as.getTimeBaseDen();
-	}
-
-	@Override
-	public void flushTo(long time) {
-		AudioSamples as = audioSamplesQueue.peek();
-		while (as != null) {
-			if ((calcPtsMillis(as) + getEstimatedStartTime()) > time)
-				break;
-			audioSamplesQueue.remove(as);
-			as = audioSamplesQueue.peek();
-		}
-	}
-
-	@Override
-	public void flushAll() {
-		audioSamplesQueue.clear();
-	}
-
-	@Override
-	public long getLatency() {
-		long firstPtsNorm = calcPtsMillis(audioSamplesQueue.peek());
-		if (firstPtsNorm < 0)
-			return -1;
-		return getLastPtsNorm() - firstPtsNorm;
 	}
 
 }
