@@ -17,13 +17,17 @@
 
 package com.kurento.kas.mscontrol.networkconnection.internal;
 
+import java.util.List;
+import java.util.Set;
+
 import android.util.Log;
 
 import com.kurento.commons.media.format.MediaSpec;
+import com.kurento.commons.media.format.Payload;
 import com.kurento.commons.media.format.SessionSpec;
-import com.kurento.commons.media.format.formatparameters.impl.H263FormatParameters;
-import com.kurento.commons.sdp.enums.MediaType;
-import com.kurento.commons.types.Fraction;
+import com.kurento.commons.media.format.enums.MediaType;
+import com.kurento.commons.media.format.exceptions.ArgumentNotSetException;
+import com.kurento.commons.media.format.payload.PayloadRtp;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.exception.CodecNotSupportedException;
@@ -96,67 +100,72 @@ public class RTPInfo {
 
 	public RTPInfo(SessionSpec se) {
 		Log.d(LOG_TAG, "sessionSpec:\n" + se);
+		// try {
+		List<MediaSpec> medias = se.getMediaSpecs();
+		if (medias.isEmpty())
+			return;
+
 		try {
-			this.dstIp = se.getOriginAddress();
-			for (MediaSpec ms : se.getMediaSpec()) {
-				Log.d(LOG_TAG, "ms: " + ms.toString());
-				if (ms.getMediaType().equals(MediaType.AUDIO)) {
-					this.dstAudioPort = ms.getPort();
-					if (ms.getPayloadList() != null
-							&& ms.getPayloadList().size() > 0) {
-						String encodingName = ms.getPayloadList().get(0)
-								.getEncodingName();
+			this.dstIp = medias.get(0).getTransport().getRtp().getAddress();
+		} catch (ArgumentNotSetException e) {
+			Log.e(LOG_TAG, e.toString());
+		}
+
+		for (MediaSpec m : medias) {
+			Set<MediaType> mediaTypes = m.getTypes();
+			if (mediaTypes.size() != 1)
+				continue;
+			for (MediaType t : mediaTypes) {
+				if (t == MediaType.AUDIO) {
+					try {
+						this.dstAudioPort = m.getTransport().getRtp().getPort();
+					} catch (ArgumentNotSetException e) {
+						Log.w(LOG_TAG,
+								"Can not get port for audio" + e.toString());
+					}
+					List<Payload> payloads = m.getPayloads();
+					if ((payloads != null) && !payloads.isEmpty()) {
+						Payload p = payloads.get(0);
+						String encodingName = "";
 						try {
+							PayloadRtp rtpInfo = p.getRtp();
+							encodingName = rtpInfo.getCodecName();
 							this.audioCodecType = AudioCodecType
 									.getCodecTypeFromName(encodingName);
+							this.audioPayloadType = rtpInfo.getId();
+						} catch (ArgumentNotSetException e1) {
+							Log.w(LOG_TAG, "Can not get payload RTP info.");
 						} catch (CodecNotSupportedException e) {
 							Log.w(LOG_TAG, encodingName + " not supported.");
 						}
-						this.audioPayloadType = ms.getPayloadList().get(0)
-								.getPayload();
 					}
-				} else if (ms.getMediaType().equals(MediaType.VIDEO)) {
-					this.dstVideoPort = ms.getPort();
-					if (ms.getPayloadList() != null
-							&& ms.getPayloadList().size() > 0) {
-						String encodingName = ms.getPayloadList().get(0)
-								.getEncodingName();
+				} else if (t == MediaType.VIDEO) {
+					try {
+						this.dstVideoPort = m.getTransport().getRtp().getPort();
+					} catch (ArgumentNotSetException e) {
+						Log.w(LOG_TAG,
+								"Can not get port for video" + e.toString());
+					}
+					List<Payload> payloads = m.getPayloads();
+					if ((payloads != null) && !payloads.isEmpty()) {
+						Payload p = payloads.get(0);
+						String encodingName = "";
 						try {
+							PayloadRtp rtpInfo = p.getRtp();
+							encodingName = rtpInfo.getCodecName();
 							this.videoCodecType = VideoCodecType
 									.getCodecTypeFromName(encodingName);
+							this.videoPayloadType = rtpInfo.getId();
+							this.videoBandwidth = p.getRtp().getBitrate();
+						} catch (ArgumentNotSetException e1) {
+							Log.w(LOG_TAG, "Can not get payload RTP info.");
 						} catch (CodecNotSupportedException e) {
 							Log.w(LOG_TAG, encodingName + " not supported.");
 						}
-						this.videoPayloadType = ms.getPayloadList().get(0)
-								.getPayload();
-						this.videoBandwidth = ms.getBandWidth();
-
-						if (VideoCodecType.H263.equals(this.videoCodecType)
-								&& ((H263FormatParameters) ms.getPayloadList()
-										.get(0).getFormatParameters())
-										.getProfilesList().size() > 0) {
-							this.frameWidth = ((H263FormatParameters) ms
-									.getPayloadList().get(0)
-									.getFormatParameters()).getProfilesList()
-									.get(0).getWidth();
-							this.frameHeight = ((H263FormatParameters) ms
-									.getPayloadList().get(0)
-									.getFormatParameters()).getProfilesList()
-									.get(0).getHeight();
-							this.frameRate = ((H263FormatParameters) ms
-									.getPayloadList().get(0)
-									.getFormatParameters()).getProfilesList()
-									.get(0).getMaxFrameRate();
-						}
-						Log.w(LOG_TAG, "frameWidth: " + frameWidth);
-						Log.w(LOG_TAG, "frameHeight: " + frameHeight);
-						Log.w(LOG_TAG, "frameRate: " + frameRate);
 					}
 				}
+				break;
 			}
-		} catch (Exception e) {
-			Log.e(LOG_TAG, "Error trying get RTP info from SDP");
-			e.printStackTrace();
 		}
 	}
 

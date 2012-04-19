@@ -21,14 +21,14 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.kurento.commons.media.format.enums.MediaType;
+import com.kurento.commons.media.format.enums.Mode;
 import com.kurento.commons.mscontrol.Configuration;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
 import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
 import com.kurento.commons.mscontrol.mediamixer.MediaMixer;
 import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
-import com.kurento.commons.sdp.enums.MediaType;
-import com.kurento.commons.sdp.enums.Mode;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.rx.MediaRx;

@@ -20,22 +20,18 @@ package com.kurento.kas.mscontrol.networkconnection.internal;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.sdp.SdpException;
-import javax.sdp.SessionDescription;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.kurento.commons.media.format.MediaSpec;
 import com.kurento.commons.media.format.SessionSpec;
-import com.kurento.commons.media.format.SpecTools;
+import com.kurento.commons.media.format.enums.Mode;
 import com.kurento.commons.mscontrol.MediaEventListener;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
 import com.kurento.commons.mscontrol.networkconnection.SdpPortManager;
 import com.kurento.commons.mscontrol.networkconnection.SdpPortManagerEvent;
 import com.kurento.commons.mscontrol.networkconnection.SdpPortManagerException;
-import com.kurento.commons.sdp.enums.Mode;
 
 public class SdpPortManagerImpl implements SdpPortManager {
 
@@ -89,22 +85,12 @@ public class SdpPortManagerImpl implements SdpPortManager {
 		try {
 			localSpec = resource.generateSessionSpec();
 			event = new SdpPortManagerEventImpl(
-					SdpPortManagerEvent.OFFER_GENERATED, this,
-					localSpec.getSessionDescription(),
+					SdpPortManagerEvent.OFFER_GENERATED, this, localSpec,
 					SdpPortManagerEvent.NO_ERROR);
 		} catch (MsControlException e) {
 			log.error(e.getMessage(), e);
 			event = new SdpPortManagerEventImpl(null, this, null,
 					SdpPortManagerEvent.RESOURCE_UNAVAILABLE);
-		} catch (SdpException e) {
-			event = new SdpPortManagerEventImpl(null, this, null,
-					SdpPortManagerEvent.RESOURCE_UNAVAILABLE);
-			log.error(
-					"Error creating Session Description from resource media list",
-					e);
-			throw new SdpPortManagerException(
-					"Error creating Session Description from resource media list",
-					e);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -119,23 +105,22 @@ public class SdpPortManagerImpl implements SdpPortManager {
 	 * available with SdpPortManagerEvent.getMediaServerSdp()
 	 */
 	@Override
-	public void processSdpOffer(byte[] offer) throws SdpPortManagerException {
+	public void processSdpOffer(SessionSpec offer)
+			throws SdpPortManagerException {
 		log.info("processSdpOffer");
 		SdpPortManagerEventImpl event = null;
 
 		try {
-			userAgentSDP = new SessionSpec(new String(offer));
-			SessionSpec[] intersectionSessions = SpecTools
-					.intersectSessionSpec(resource.generateSessionSpec(),
-							userAgentSDP);
+			userAgentSDP = offer;
+			SessionSpec[] intersectionSessions = SessionSpec.intersect(
+					resource.generateSessionSpec(), offer);
 			List<MediaSpec> combinedMediaList = intersectionSessions[1]
-					.getMediaSpec();
+					.getMediaSpecs();
 
-			userAgentSDP.setMediaSpec(combinedMediaList);
+			userAgentSDP.deleteAllMediaSpecs();
+			userAgentSDP.addMediaSpecs(combinedMediaList);
 			resource.setRemoteSessionSpec(userAgentSDP);
-
 			localSpec = intersectionSessions[0];
-
 			resource.setLocalSessionSpec(localSpec);
 
 			boolean allInactive = true;
@@ -148,46 +133,34 @@ public class SdpPortManagerImpl implements SdpPortManager {
 
 			// if combinedMediaList.isEmpty() then allInactive==true
 			if (allInactive) {
-				event = new SdpPortManagerEventImpl(null, this,
-						localSpec.getSessionDescription(),
+				event = new SdpPortManagerEventImpl(null, this, localSpec,
 						SdpPortManagerEvent.SDP_NOT_ACCEPTABLE);
 			} else {
 				event = new SdpPortManagerEventImpl(
-						SdpPortManagerEvent.ANSWER_GENERATED, this,
-						localSpec.getSessionDescription(),
+						SdpPortManagerEvent.ANSWER_GENERATED, this, localSpec,
 						SdpPortManagerEvent.NO_ERROR);
 			}
 		} catch (MsControlException e) {
 			log.error(e.getMessage(), e);
 			event = new SdpPortManagerEventImpl(null, this, null,
 					SdpPortManagerEvent.RESOURCE_UNAVAILABLE);
-		} catch (SdpException e) {
-			event = new SdpPortManagerEventImpl(null, this, null,
-					SdpPortManagerEvent.SDP_NOT_ACCEPTABLE);
-			log.error("Error processing SDPOffer", e);
-			throw new SdpPortManagerException("Error processing SDPOffer", e);
 		} finally {
 			notifyEvent(event);
 		}
 	}
 
 	@Override
-	public void processSdpAnswer(byte[] answer) throws SdpPortManagerException {
-		try {
-			userAgentSDP = new SessionSpec(new String(answer));
-			resource.setRemoteSessionSpec(SpecTools.intersectSessionSpec(
-					localSpec, userAgentSDP)[1]);
-			localSpec = SpecTools.intersectSessionSpec(localSpec, userAgentSDP)[0];
-			resource.setLocalSessionSpec(localSpec);
+	public void processSdpAnswer(SessionSpec answer)
+			throws SdpPortManagerException {
+		userAgentSDP = answer;
+		resource.setRemoteSessionSpec(SessionSpec.intersect(localSpec,
+				userAgentSDP)[1]);
+		localSpec = SessionSpec.intersect(localSpec, userAgentSDP)[0];
+		resource.setLocalSessionSpec(localSpec);
 
-			notifyEvent(new SdpPortManagerEventImpl(
-					SdpPortManagerEvent.ANSWER_PROCESSED, this, null,
-					SdpPortManagerEvent.NO_ERROR));
-		} catch (SdpException e) {
-			notifyEvent(new SdpPortManagerEventImpl(null, this, null,
-					SdpPortManagerEvent.SDP_NOT_ACCEPTABLE));
-			throw new SdpPortManagerException("Error getting media info", e);
-		}
+		notifyEvent(new SdpPortManagerEventImpl(
+				SdpPortManagerEvent.ANSWER_PROCESSED, this, null,
+				SdpPortManagerEvent.NO_ERROR));
 	}
 
 	@Override
@@ -204,38 +177,20 @@ public class SdpPortManagerImpl implements SdpPortManager {
 	 * <P>
 	 */
 	@Override
-	public byte[] getMediaServerSessionDescription()
+	public SessionSpec getMediaServerSessionDescription()
 			throws SdpPortManagerException {
-		SessionDescription sdp = null;
-		try {
-			if (localSpec != null) {
-				sdp = localSpec.getSessionDescription();
-			}
-		} catch (SdpException e) {
-			log.error("Error creating session description.", e);
-			throw new SdpPortManagerException(
-					"Error creating Session Description", e);
-		}
-		return sdp.toString().getBytes();
+		return localSpec;
 	}
 
 	@Override
-	public byte[] getUserAgentSessionDescription()
+	public SessionSpec getUserAgentSessionDescription()
 			throws SdpPortManagerException {
-		SessionDescription sdp = null;
-		try {
-			if (userAgentSDP != null) {
-				sdp = userAgentSDP.getSessionDescription();
-			}
-		} catch (SdpException e) {
-			throw new SdpPortManagerException(
-					"Error creating SessionDescription", e);
-		}
-		return sdp.toString().getBytes();
+		return userAgentSDP;
 	}
 
 	@SuppressWarnings("unchecked")
 	private void notifyEvent(SdpPortManagerEventImpl event) {
+		log.info("event: " + event);
 		for (MediaEventListener listener : mediaListenerList) {
 			listener.onEvent(event);
 		}

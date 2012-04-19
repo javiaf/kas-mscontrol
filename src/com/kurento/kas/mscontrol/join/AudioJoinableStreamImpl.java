@@ -19,15 +19,17 @@ package com.kurento.kas.mscontrol.join;
 
 import java.util.Map;
 
+import javax.sdp.SdpException;
+
 import android.util.Log;
 
 import com.kurento.commons.media.format.SessionSpec;
-import com.kurento.commons.media.format.SpecTools;
+import com.kurento.commons.media.format.conversor.SdpConversor;
+import com.kurento.commons.media.format.enums.MediaType;
+import com.kurento.commons.media.format.enums.Mode;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.join.Joinable;
 import com.kurento.commons.mscontrol.join.JoinableContainer;
-import com.kurento.commons.sdp.enums.MediaType;
-import com.kurento.commons.sdp.enums.Mode;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.profiles.AudioProfile;
 import com.kurento.kas.media.rx.AudioRx;
@@ -57,8 +59,7 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
 
-		Map<MediaType, Mode> mediaTypesModes = SpecTools
-				.getModesOfFirstMediaTypes(localSessionSpec);
+		Map<MediaType, Mode> mediaTypesModes = getModesOfMediaTypes(localSessionSpec);
 		Mode audioMode = mediaTypesModes.get(MediaType.AUDIO);
 		RTPInfo remoteRTPInfo = new RTPInfo(remoteSessionSpec);
 
@@ -125,9 +126,14 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 		@Override
 		public void run() {
 			Log.d(LOG_TAG, "startAudioRx");
-			if (!SpecTools.filterMediaByType(localSessionSpec, "audio").getMediaSpec().isEmpty()) {
-				String sdpAudio = SpecTools.filterMediaByType(localSessionSpec, "audio").toString();
-				MediaRx.startAudioRx(sdpAudio, maxDelayRx, this.audioRx);
+			SessionSpec s = filterMediaByType(localSessionSpec, MediaType.AUDIO);
+			if (!s.getMediaSpecs().isEmpty()) {
+				try {
+					String sdpAudio = SdpConversor.sessionSpec2Sdp(s);
+					MediaRx.startAudioRx(sdpAudio, maxDelayRx, this.audioRx);
+				} catch (SdpException e) {
+					Log.e(LOG_TAG, "Could not start audio rx " + e.toString());
+				}
 			}
 		}
 	}
