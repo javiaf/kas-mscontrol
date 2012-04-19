@@ -305,13 +305,13 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					.ceil(videoProfiles.get(0).getBitRate() / 1000.0);
 			for (VideoProfile vp : videoProfiles) {
 				if (VideoCodecType.MPEG4.equals(vp.getVideoCodecType()))
-					addPayload(videoMedia, payloadId, " MP4V-ES", 90000,
+					addPayload(videoMedia, payloadId, "MP4V-ES", 90000,
 							bitrate);
 				else if (VideoCodecType.H263.equals(vp.getVideoCodecType()))
-					addPayload(videoMedia, payloadId, " H263-1998", 90000,
+					addPayload(videoMedia, payloadId, "H263-1998", 90000,
 							bitrate);
 				else if (VideoCodecType.H264.equals(vp.getVideoCodecType()))
-					addPayload(videoMedia, payloadId, " H264", 90000, bitrate);
+					addPayload(videoMedia, payloadId, "H264", 90000, bitrate);
 				payloadId++;
 			}
 
