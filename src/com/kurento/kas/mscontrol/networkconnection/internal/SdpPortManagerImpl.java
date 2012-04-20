@@ -188,7 +188,6 @@ public class SdpPortManagerImpl implements SdpPortManager {
 
 	@SuppressWarnings("unchecked")
 	private void notifyEvent(SdpPortManagerEventImpl event) {
-		log.info("event: " + event);
 		for (MediaEventListener listener : mediaListenerList) {
 			listener.onEvent(event);
 		}
