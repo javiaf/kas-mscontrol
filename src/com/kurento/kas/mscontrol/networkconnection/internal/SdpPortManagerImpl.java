@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.kurento.commons.media.format.MediaSpec;
 import com.kurento.commons.media.format.SessionSpec;
-import com.kurento.commons.media.format.enums.Mode;
 import com.kurento.commons.mscontrol.MediaEventListener;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
@@ -123,16 +122,15 @@ public class SdpPortManagerImpl implements SdpPortManager {
 			localSpec = intersectionSessions[0];
 			resource.setLocalSessionSpec(localSpec);
 
-			boolean allInactive = true;
+			boolean sdpNotAcceptable = true;
 			for (MediaSpec ms : combinedMediaList) {
-				if (!Mode.INACTIVE.equals(ms.getMode())) {
-					allInactive = false;
+				if (!ms.getPayloads().isEmpty()) {
+					sdpNotAcceptable = false;
 					break;
 				}
 			}
 
-			// if combinedMediaList.isEmpty() then allInactive==true
-			if (allInactive) {
+			if (sdpNotAcceptable) {
 				event = new SdpPortManagerEventImpl(null, this, localSpec,
 						SdpPortManagerEvent.SDP_NOT_ACCEPTABLE);
 			} else {
