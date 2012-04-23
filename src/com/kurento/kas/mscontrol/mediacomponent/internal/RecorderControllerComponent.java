@@ -42,15 +42,17 @@ public class RecorderControllerComponent implements
 		}
 	}
 
-	private static final int MAX_LATENCY = 250;
+	public static final int INTERVAL = 40;
 
 	private class Controller extends Thread {
 		@Override
 		public void run() {
 			long t, tStart, flushedT, currentFlushed, currentT, targetRelTime, targetTime, latency;
 			long inc = 20;
+			long realInc;
 			long tIncStart;
 			long minTime, minLatency, estStartT;
+			int interval;
 
 			try {
 				tStart = System.currentTimeMillis();
@@ -58,6 +60,7 @@ public class RecorderControllerComponent implements
 				tIncStart = tStart;
 				targetRelTime = 0;
 				Log.d(LOG_TAG, "Controller start with scheduler");
+				Log.d(LOG_TAG, "maxDelay: " + maxDelay);
 				for (;;) {
 					t = System.currentTimeMillis();
 					minTime = Long.MAX_VALUE;
@@ -78,18 +81,20 @@ public class RecorderControllerComponent implements
 
 					currentT = estStartT + (t - tStart);
 					currentFlushed = estStartT + (t - flushedT);
-					targetRelTime += t - tIncStart;
+					realInc = t - tIncStart;
+					targetRelTime += realInc;
 					targetTime = estStartT + targetRelTime;
-					targetTime = Math.min(targetTime, minTime + 2 * inc);
+					targetTime = Math.min(targetTime, minTime + INTERVAL);
 					// latency = currentFlushed - targetTime;
+					// interval -= realInc;
 
 					 Log.d(LOG_TAG, "estStartT: " + estStartT + " currentT: "
 					 + currentT + " currentFlushed: " + currentFlushed
 					 + " targetTime: " + targetTime + " targetRelTime: "
 							+ targetRelTime + " latency: " + minLatency); // latency);
 
-					if (minLatency > MAX_LATENCY) { // (latency > MAX_LATENCY) {
-						long flushTo = targetTime + MAX_LATENCY;
+					if (minLatency > maxDelay) { // (latency > MAX_LATENCY) {
+						long flushTo = targetTime + maxDelay;
 						Log.w(LOG_TAG, "flush to " + flushTo);
 						for (Recorder r : recorders) {
 							Log.w(LOG_TAG, r + " latency: " + r.getLatency());
