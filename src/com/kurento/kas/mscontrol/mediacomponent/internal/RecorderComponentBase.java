@@ -19,6 +19,12 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	private boolean isRecording = false;
 	protected final Object controll = new Object();
 
+	private int maxDelay;
+
+	public RecorderComponentBase(int maxDelay) {
+		this.maxDelay = maxDelay;
+	}
+
 	protected synchronized boolean isRecording() {
 		return isRecording;
 	}
@@ -139,6 +145,17 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 
 		return 1000 * ((p.getPts() - p.getStartTime()) * p.getTimeBaseNum())
 				/ p.getTimeBaseDen();
+	}
+
+	private static RecorderControllerComponent recorderControllerInstance = null;
+
+	protected synchronized RecorderController getRecorderController() {
+		if (recorderControllerInstance == null) {
+			recorderControllerInstance = new RecorderControllerComponent(
+					maxDelay);
+		}
+		recorderControllerInstance.setMaxDelay(maxDelay);
+		return recorderControllerInstance;
 	}
 
 }

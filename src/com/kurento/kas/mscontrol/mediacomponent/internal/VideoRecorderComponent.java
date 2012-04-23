@@ -60,7 +60,10 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		return isRecording();
 	}
 
-	public VideoRecorderComponent(Parameters params) throws MsControlException {
+	public VideoRecorderComponent(int maxDelay, Parameters params)
+			throws MsControlException {
+		super(maxDelay);
+
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
@@ -116,13 +119,13 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		surfaceControl = new SurfaceControl();
 		surfaceControl.start();
 		// startRecord();
-		RecorderControllerComponent.getInstance().addRecorder(this);
+		getRecorderController().addRecorder(this);
 		Log.d(LOG_TAG, "add to controller");
 	}
 
 	@Override
 	public void stop() {
-		RecorderControllerComponent.getInstance().deleteRecorder(this);
+		getRecorderController().deleteRecorder(this);
 		stopRecord();
 		if (surfaceControl != null)
 			surfaceControl.interrupt();

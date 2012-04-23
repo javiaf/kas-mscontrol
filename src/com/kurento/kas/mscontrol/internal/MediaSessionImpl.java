@@ -74,11 +74,13 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		if (MediaComponentAndroid.AUDIO_PLAYER.equals(predefinedConfig))
 			return new AudioPlayerComponent();
 		else if (MediaComponentAndroid.AUDIO_RECORDER.equals(predefinedConfig))
-			return new AudioRecorderComponent(params);
+			return new AudioRecorderComponent(mediaSessionConfig.getMaxDelay(),
+					params);
 		else if (MediaComponentAndroid.VIDEO_PLAYER.equals(predefinedConfig))
 			return new VideoPlayerComponent(params);
 		else if (MediaComponentAndroid.VIDEO_RECORDER.equals(predefinedConfig))
-			return new VideoRecorderComponent(params);
+			return new VideoRecorderComponent(mediaSessionConfig.getMaxDelay(),
+					params);
 
 		throw new MsControlException("Configuration is not supported: "
 				+ predefinedConfig);
@@ -281,4 +283,5 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

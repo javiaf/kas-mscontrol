@@ -11,21 +11,19 @@ public class RecorderControllerComponent implements
 
 	private CopyOnWriteArraySet<Recorder> recorders = new CopyOnWriteArraySet<Recorder>();
 	private Controller controller;
-	
-	private static RecorderControllerComponent instance;
 
-	private synchronized static void createInstance() {
-		if (instance == null) {
-			instance = new RecorderControllerComponent();
-		}
+	private int maxDelay;
+
+	public int getMaxDelay() {
+		return maxDelay;
 	}
 
-	public static RecorderControllerComponent getInstance() {
-		if (instance == null)
-			createInstance();
-		return instance;
+	public void setMaxDelay(int maxDelay) {
+		this.maxDelay = maxDelay;
 	}
-
+	public RecorderControllerComponent(int maxDelay) {
+		this.maxDelay = maxDelay;
+	}
 	@Override
 	public synchronized void addRecorder(Recorder r) {
 		recorders.add(r);

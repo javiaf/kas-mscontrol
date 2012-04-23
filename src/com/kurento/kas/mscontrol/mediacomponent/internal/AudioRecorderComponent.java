@@ -49,7 +49,10 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 		return audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING;
 	}
 
-	public AudioRecorderComponent(Parameters params) throws MsControlException {
+	public AudioRecorderComponent(int maxDelay, Parameters params)
+			throws MsControlException {
+		super(maxDelay);
+
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
@@ -102,13 +105,13 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 		audioTrackControl = new AudioTrackControl();
 		audioTrackControl.start();
 
-		RecorderControllerComponent.getInstance().addRecorder(this);
+		getRecorderController().addRecorder(this);
 		Log.d(LOG_TAG, "add to controller");
 	}
 
 	@Override
 	public synchronized void stop() {
-		RecorderControllerComponent.getInstance().deleteRecorder(this);
+		getRecorderController().deleteRecorder(this);
 
 		if (audioTrackControl != null)
 			audioTrackControl.interrupt();
@@ -163,7 +166,6 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 						if (t > 20)
 							Log.w(LOG_TAG, "audioTrack.write time: " + t);
 					}
-					// Log.d(LOG_TAG, "play OK");
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "AudioTrackControl stopped");
