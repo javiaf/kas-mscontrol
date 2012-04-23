@@ -204,8 +204,19 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 							if (width != lastWidth || srcBitmap == null) {
 								if (srcBitmap != null)
 									srcBitmap.recycle();
-								srcBitmap = Bitmap.createBitmap(width, height,
-										Bitmap.Config.ARGB_8888);
+								try {
+									Log.d(LOG_TAG, "create bitmap");
+									srcBitmap = Bitmap.createBitmap(width,
+											height, Bitmap.Config.ARGB_8888);
+									Log.d(LOG_TAG, "create bitmap OK");
+								} catch (OutOfMemoryError e) {
+									e.printStackTrace();
+									Log.w(LOG_TAG,
+											"Can not create bitmap. No such memory.");
+									Log.w(LOG_TAG, e);
+									mSurfaceReceive.unlockCanvasAndPost(canvas);
+									continue;
+								}
 								lastWidth = width;
 								if (srcBitmap == null)
 									Log.w(LOG_TAG, "srcBitmap is null");
