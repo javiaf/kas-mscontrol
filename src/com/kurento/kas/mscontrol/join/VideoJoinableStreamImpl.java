@@ -21,15 +21,17 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.sdp.SdpException;
+
 import android.util.Log;
 
 import com.kurento.commons.media.format.SessionSpec;
-import com.kurento.commons.media.format.SpecTools;
+import com.kurento.commons.media.format.conversor.SdpConversor;
+import com.kurento.commons.media.format.enums.MediaType;
+import com.kurento.commons.media.format.enums.Mode;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.join.Joinable;
 import com.kurento.commons.mscontrol.join.JoinableContainer;
-import com.kurento.commons.sdp.enums.MediaType;
-import com.kurento.commons.sdp.enums.Mode;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.profiles.VideoProfile;
 import com.kurento.kas.media.rx.MediaRx;
@@ -84,8 +86,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		framesQueue = new LinkedBlockingQueue<Frame>(QUEUE_SIZE);
 		txTimes = new LinkedBlockingQueue<Long>(QUEUE_SIZE);
 
-		Map<MediaType, Mode> mediaTypesModes = SpecTools
-				.getModesOfFirstMediaTypes(localSessionSpec);
+		Map<MediaType, Mode> mediaTypesModes = getModesOfMediaTypes(localSessionSpec);
 		Mode videoMode = mediaTypesModes.get(MediaType.VIDEO);
 		RTPInfo remoteRTPInfo = new RTPInfo(remoteSessionSpec);
 
@@ -212,11 +213,14 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		@Override
 		public void run() {
 			Log.d(LOG_TAG, "startVideoRx");
-			if (!SpecTools.filterMediaByType(localSessionSpec, "video")
-					.getMediaSpec().isEmpty()) {
-				String sdpVideo = SpecTools.filterMediaByType(localSessionSpec,
-						"video").toString();
-				MediaRx.startVideoRx(sdpVideo, maxDelayRx, this.videoRx);
+			SessionSpec s = filterMediaByType(localSessionSpec, MediaType.VIDEO);
+			if (!s.getMediaSpecs().isEmpty()) {
+				try {
+					String sdpVideo = SdpConversor.sessionSpec2Sdp(s);
+					MediaRx.startVideoRx(sdpVideo, maxDelayRx, this.videoRx);
+				} catch (SdpException e) {
+					Log.e(LOG_TAG, "Could not start video rx " + e.toString());
+				}
 			}
 		}
 	}

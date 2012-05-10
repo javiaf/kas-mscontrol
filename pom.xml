@@ -15,10 +15,10 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<!-- Dependency versions -->
-		<kcMsControlVersion>1.1.1</kcMsControlVersion>
+		<kcMsControlVersion>2.0.0-SNAPSHOT</kcMsControlVersion>
 		<kasMediaVersion>1.2.1-SNAPSHOT</kasMediaVersion>
-		<kcMediaSpecVersion>1.2.0</kcMediaSpecVersion>
-		<kcStunVersion>1.0.1</kcStunVersion>
+		<kcMediaSpecConversorVersion>1.0.0-SNAPSHOT</kcMediaSpecConversorVersion>
+		<kcStunVersion>1.0.1-SNAPSHOT</kcStunVersion>
 	</properties>
 
 	<organization>
@@ -69,8 +69,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.kurento.commons</groupId>
-			<artifactId>kc-mediaspec</artifactId>
-			<version>${kcMediaSpecVersion}</version>
+			<artifactId>kc-mediaspec-conversor</artifactId>
+			<version>${kcMediaSpecConversorVersion}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.kurento.commons</groupId>

@@ -19,8 +19,7 @@ package com.kurento.kas.mscontrol.networkconnection.internal;
 
 import java.util.EventObject;
 
-import javax.sdp.SessionDescription;
-
+import com.kurento.commons.media.format.SessionSpec;
 import com.kurento.commons.mscontrol.EventType;
 import com.kurento.commons.mscontrol.MediaErr;
 import com.kurento.commons.mscontrol.networkconnection.SdpPortManager;
@@ -33,10 +32,10 @@ public class SdpPortManagerEventImpl extends EventObject implements
 
 	private EventType eventType;
 	private MediaErr error;
-	private SessionDescription sdp;
+	private SessionSpec sdp;
 
 	public SdpPortManagerEventImpl(EventType eventType, SdpPortManager source,
-			SessionDescription sdp, MediaErr error) {
+			SessionSpec sdp, MediaErr error) {
 		super(source);
 		this.eventType = eventType;
 		this.source = source;
@@ -54,7 +53,7 @@ public class SdpPortManagerEventImpl extends EventObject implements
 		return error;
 	}
 
-	public SessionDescription getSdp() {
+	public SessionSpec getSdp() {
 		return sdp;
 	}
 
@@ -87,10 +86,8 @@ public class SdpPortManagerEventImpl extends EventObject implements
 	}
 
 	@Override
-	public byte[] getMediaServerSdp() {
-		if (sdp == null)
-			return null;
-		return sdp.toString().getBytes();
+	public SessionSpec getMediaServerSdp() {
+		return sdp;
 	}
 
 }

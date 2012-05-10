@@ -17,7 +17,6 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.media.AudioFormat;
@@ -30,9 +29,11 @@ import com.kurento.commons.mscontrol.join.Joinable;
 import com.kurento.kas.media.profiles.AudioProfile;
 import com.kurento.kas.media.rx.AudioRx;
 import com.kurento.kas.media.rx.AudioSamples;
+import com.kurento.kas.media.rx.RxPacket;
 import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
 
-public class AudioRecorderComponent extends MediaComponentBase implements AudioRx {
+public class AudioRecorderComponent extends RecorderComponentBase implements
+		Recorder, AudioRx {
 
 	private static final String LOG_TAG = "NDK-audio-rx"; // "AudioRecorder";
 
@@ -43,30 +44,15 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 
 	private AudioTrackControl audioTrackControl = null;
 
-	private class AudioFrame {
-		private AudioSamples audioSamples;
-		private long timeArrive;
-
-		public AudioFrame(AudioSamples audioSamples, long timeArrive) {
-			this.audioSamples = audioSamples;
-			this.timeArrive = timeArrive;
-		}
-	}
-
-	// private int QUEUE_SIZE = 5;
-	private BlockingQueue<AudioFrame> audioFramesQueue;
-
-	private static final long T_MIN = 20;
-	private static final long T_MAX = 2000;
-
-	private long initTime;
-
 	@Override
 	public synchronized boolean isStarted() {
 		return audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING;
 	}
 
-	public AudioRecorderComponent(Parameters params) throws MsControlException {
+	public AudioRecorderComponent(int maxDelay, Parameters params)
+			throws MsControlException {
+		super(maxDelay);
+
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
@@ -75,24 +61,21 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 			throw new MsControlException(
 					"Params must have AudioRecorderComponent.STREAM_TYPE param.");
 		this.streamType = streamType;
-		this.audioFramesQueue = new LinkedBlockingQueue<AudioFrame>();
-		this.initTime = System.currentTimeMillis();
+
+		this.packetsQueue = new LinkedBlockingQueue<RxPacket>();
 	}
 
 	@Override
 	public synchronized void putAudioSamplesRx(AudioSamples audioSamples) {
-		Log.d(LOG_TAG, "queue size: " + audioFramesQueue.size());
-		long timeArrived = System.currentTimeMillis() - this.initTime;
-		long sum = 0;
-		for (AudioFrame af : audioFramesQueue) {
-			sum += Math.max(0, (timeArrived - af.timeArrive) - T_MIN);
-		}
-
-		if (sum > T_MAX) {
-			Log.w(LOG_TAG, "Clear audio jitter buffer.");
-			audioFramesQueue.clear();
-		}
-		audioFramesQueue.offer(new AudioFrame(audioSamples, timeArrived));
+		Log.i(LOG_TAG, "Enqueue audio samples (ptsNorm/rxTime)"
+				+ calcPtsMillis(audioSamples) + "/" + audioSamples.getRxTime()
+				+ " queue size: " + packetsQueue.size());
+		long ptsNorm = calcPtsMillis(audioSamples);
+		setLastPtsNorm(ptsNorm);
+		long estStartTime = caclEstimatedStartTime(ptsNorm,
+				audioSamples.getRxTime());
+		// Log.i(LOG_TAG, "estimated start time: " + estStartTime);
+		packetsQueue.offer(audioSamples);
 	}
 
 	@Override
@@ -108,11 +91,12 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 
 		int frequency = audioProfile.getSampleRate();
 
-		int buffer_min = AudioTrack.getMinBufferSize(frequency,
+		int minBufferSize = AudioTrack.getMinBufferSize(frequency,
 				channelConfiguration, audioEncoding);
 
+		Log.d(LOG_TAG, "minBufferSize: " + minBufferSize);
 		audioTrack = new AudioTrack(this.streamType, frequency,
-				channelConfiguration, audioEncoding, buffer_min,
+				channelConfiguration, audioEncoding, minBufferSize,
 				AudioTrack.MODE_STREAM);
 
 		if (audioTrack != null) {
@@ -120,10 +104,15 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 		}
 		audioTrackControl = new AudioTrackControl();
 		audioTrackControl.start();
+
+		getRecorderController().addRecorder(this);
+		Log.d(LOG_TAG, "add to controller");
 	}
 
 	@Override
 	public synchronized void stop() {
+		getRecorderController().deleteRecorder(this);
+
 		if (audioTrackControl != null)
 			audioTrackControl.interrupt();
 		if (audioTrack != null) {
@@ -137,18 +126,45 @@ public class AudioRecorderComponent extends MediaComponentBase implements AudioR
 		@Override
 		public void run() {
 			try {
-				AudioFrame audioFrameProcessed;
+				AudioSamples audioSamplesProcessed;
+				long tStart, tEnd, t;
 				for (;;) {
-					if (audioFramesQueue.isEmpty())
+					if (!isRecording()) {
+						synchronized (controll) {
+							controll.wait();
+						}
+						continue;
+					}
+
+					if (packetsQueue.isEmpty())
 						Log.w(LOG_TAG, "jitter_buffer_underflow: Audio frames queue is empty");
 
-					audioFrameProcessed = audioFramesQueue.take();
-					Log.d(LOG_TAG, "play frame");
+					long targetTime = getTargetTime();
+					if (targetTime != -1) {
+						long ptsMillis = calcPtsMillis(packetsQueue.peek());
+						if ((ptsMillis == -1)
+								|| (ptsMillis + getEstimatedStartTime() > (targetTime))) {
+							Log.d(LOG_TAG, "wait");
+							synchronized (controll) {
+								controll.wait();
+							}
+							continue;
+						}
+					}
+
+					audioSamplesProcessed = (AudioSamples) packetsQueue.take();
+					Log.d(LOG_TAG, "play audio samples "
+							+ calcPtsMillis(audioSamplesProcessed));
 					if (audioTrack != null
 							&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)) {
-						audioTrack.write(audioFrameProcessed.audioSamples
-								.getDataSamples(), 0,
-								audioFrameProcessed.audioSamples.getSize());
+						tStart = System.currentTimeMillis();
+						audioTrack.write(
+								audioSamplesProcessed.getDataSamples(), 0,
+								audioSamplesProcessed.getSize());
+						tEnd = System.currentTimeMillis();
+						t = tEnd - tStart;
+						if (t > 20)
+							Log.w(LOG_TAG, "audioTrack.write time: " + t);
 					}
 				}
 			} catch (InterruptedException e) {

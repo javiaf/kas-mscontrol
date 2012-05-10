@@ -21,14 +21,14 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Map;
 
+import com.kurento.commons.media.format.enums.MediaType;
+import com.kurento.commons.media.format.enums.Mode;
 import com.kurento.commons.mscontrol.Configuration;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
 import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
 import com.kurento.commons.mscontrol.mediamixer.MediaMixer;
 import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
-import com.kurento.commons.sdp.enums.MediaType;
-import com.kurento.commons.sdp.enums.Mode;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.rx.MediaRx;
@@ -74,11 +74,13 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		if (MediaComponentAndroid.AUDIO_PLAYER.equals(predefinedConfig))
 			return new AudioPlayerComponent();
 		else if (MediaComponentAndroid.AUDIO_RECORDER.equals(predefinedConfig))
-			return new AudioRecorderComponent(params);
+			return new AudioRecorderComponent(mediaSessionConfig.getMaxDelay(),
+					params);
 		else if (MediaComponentAndroid.VIDEO_PLAYER.equals(predefinedConfig))
 			return new VideoPlayerComponent(params);
 		else if (MediaComponentAndroid.VIDEO_RECORDER.equals(predefinedConfig))
-			return new VideoRecorderComponent(params);
+			return new VideoRecorderComponent(mediaSessionConfig.getMaxDelay(),
+					params);
 
 		throw new MsControlException("Configuration is not supported: "
 				+ predefinedConfig);
@@ -281,4 +283,5 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

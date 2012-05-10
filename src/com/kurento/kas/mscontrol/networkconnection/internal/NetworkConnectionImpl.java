@@ -19,25 +19,22 @@ package com.kurento.kas.mscontrol.networkconnection.internal;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Vector;
+import java.util.HashSet;
 import java.util.concurrent.Exchanger;
-
-import javax.sdp.SdpException;
 
 import android.util.Log;
 
 import com.kurento.commons.media.format.MediaSpec;
-import com.kurento.commons.media.format.PayloadSpec;
+import com.kurento.commons.media.format.Payload;
 import com.kurento.commons.media.format.SessionSpec;
-import com.kurento.commons.media.format.formatparameters.FormatParameters;
-import com.kurento.commons.media.format.formatparameters.impl.H263FormatParameters;
-import com.kurento.commons.media.format.formatparameters.impl.H263VideoProfile;
+import com.kurento.commons.media.format.Transport;
+import com.kurento.commons.media.format.enums.MediaType;
+import com.kurento.commons.media.format.enums.Mode;
+import com.kurento.commons.media.format.exceptions.ArgumentNotSetException;
+import com.kurento.commons.media.format.payload.PayloadRtp;
+import com.kurento.commons.media.format.transport.TransportRtp;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.join.JoinableStream.StreamType;
-import com.kurento.commons.sdp.enums.MediaType;
-import com.kurento.commons.sdp.enums.Mode;
-import com.kurento.commons.types.Fraction;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.ports.MediaPortManager;
@@ -132,18 +129,28 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			audioJoinableStreamImpl.stop();
 	}
 
-	private void addPayloadSpec(List<PayloadSpec> videoList, String payloadStr,
-			MediaType mediaType, int port, FormatParameters formatParameters) {
-		try {
-			PayloadSpec payload = new PayloadSpec(payloadStr);
-			payload.setMediaType(mediaType);
-			payload.setPort(port);
-			if (formatParameters != null)
-				payload.setFormatParams(formatParameters);
-			videoList.add(payload);
-		} catch (SdpException e) {
-			e.printStackTrace();
-		}
+	private Payload addPayload(MediaSpec mediaSpec, int id, String codecName,
+			int clockRate, int bitrate, Integer channels) {
+		Log.d(LOG_TAG, "addPayload: " + codecName);
+
+		PayloadRtp rtpInfo = new PayloadRtp(id, codecName, clockRate);
+		rtpInfo.setBitrate(bitrate);
+		if (channels != null)
+			rtpInfo.setChannels(channels);
+
+		Payload payload = new Payload();
+		payload.setRtp(rtpInfo);
+		mediaSpec.addPayload(payload);
+
+		Log.d(LOG_TAG, "payload: " + payload);
+		Log.d(LOG_TAG, "mediaSpec: " + mediaSpec);
+
+		return payload;
+	}
+
+	private Payload addPayload(MediaSpec mediaSpec, int id, String codecName,
+			int clockRate, int bitrate) {
+		return addPayload(mediaSpec, id, codecName, clockRate, bitrate, null);
 	}
 
 	private void takeMediaPort() throws MsControlException {
@@ -287,43 +294,37 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		if (publicAddress == null)
 			throw new MsControlException("Error when retrieve public address.");
 
-		int payload = 96;
+		int payloadId = 96;
 
 		// VIDEO
 		MediaSpec videoMedia = null;
 
 		if (videoProfiles != null && videoProfiles.size() > 0) {
-			List<PayloadSpec> videoList = new Vector<PayloadSpec>();
+			videoMedia = new MediaSpec();
+			int bitrate = (int) Math
+					.ceil(videoProfiles.get(0).getBitRate() / 1000.0);
 			for (VideoProfile vp : videoProfiles) {
 				if (VideoCodecType.MPEG4.equals(vp.getVideoCodecType()))
-					addPayloadSpec(videoList, payload + " MP4V-ES/90000",
-							MediaType.VIDEO, videoPort, null);
-				else if (VideoCodecType.H263.equals(vp.getVideoCodecType())) {
-					ArrayList<H263VideoProfile> profilesList = new ArrayList<H263VideoProfile>();
-					profilesList.add(new H263VideoProfile(vp.getWidth(), vp
-							.getHeight(), new Fraction(
-							vp.getFrameRateNum() * 1000, 1001)));
-					H263FormatParameters h263fp = null;
-					try {
-						h263fp = new H263FormatParameters(profilesList);
-					} catch (SdpException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					addPayloadSpec(videoList, payload + " H263-1998/90000",
-							MediaType.VIDEO, videoPort, h263fp);
-				} else if (VideoCodecType.H264.equals(vp.getVideoCodecType())) {
-					addPayloadSpec(videoList, payload + " H264/90000",
-							MediaType.VIDEO, videoPort, null);
-				}
-				payload++;
+					addPayload(videoMedia, payloadId, "MP4V-ES", 90000,
+							bitrate);
+				else if (VideoCodecType.H263.equals(vp.getVideoCodecType()))
+					addPayload(videoMedia, payloadId, "H263-1998", 90000,
+							bitrate);
+				else if (VideoCodecType.H264.equals(vp.getVideoCodecType()))
+					addPayload(videoMedia, payloadId, "H264", 90000, bitrate);
+				payloadId++;
 			}
 
-			videoMedia = new MediaSpec();
-			videoMedia.setPayloadList(videoList);
+			TransportRtp transRtp = new TransportRtp();
+			transRtp.setAddress(publicAddress.getHostAddress().toString());
+			transRtp.setPort(videoPort);
+			Transport trans = new Transport();
+			trans.setRtp(transRtp);
+			videoMedia.setTransport(trans);
 
-			videoMedia.setBandWidth((int) Math.ceil(videoProfiles.get(0)
-					.getBitRate() / 1000.0));
+			HashSet<MediaType> types = new HashSet<MediaType>();
+			types.add(MediaType.VIDEO);
+			videoMedia.setTypes(types);
 
 			Mode videoMode = Mode.SENDRECV;
 			if (this.mediaSessionConfig.getMediaTypeModes() != null
@@ -338,58 +339,36 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		MediaSpec audioMedia = null;
 
 		if (audioProfiles != null && audioProfiles.size() > 0) {
-			List<PayloadSpec> audioList = new Vector<PayloadSpec>();
+			audioMedia = new MediaSpec();
+			int bitrate = (int) Math.ceil(maxAudioBitrate / 1000.0);
 			for (AudioProfile ap : audioProfiles) {
-				if (AudioProfile.MP2.equals(ap)) {
-					PayloadSpec payloadAudioMP2 = new PayloadSpec();
-					payloadAudioMP2.setMediaType(MediaType.AUDIO);
-					payloadAudioMP2.setPort(audioPort);
-					payloadAudioMP2.setPayload(14);
-					audioList.add(payloadAudioMP2);
-				} else if (AudioProfile.AMR.equals(ap)) {
-					PayloadSpec audioPayloadAMR = null;
+				if (AudioProfile.MP2.equals(ap))
+					addPayload(audioMedia, 14, "MPA", 8000, bitrate);
+				else if (AudioProfile.AMR.equals(ap)) {
+					Payload p = addPayload(audioMedia, payloadId, "AMR", 8000,
+							bitrate, 1);
 					try {
-						audioPayloadAMR = new PayloadSpec(payload
-								+ " AMR/8000/1");
-						audioPayloadAMR.setFormatParams("octet-align=1");
-						audioPayloadAMR.setMediaType(MediaType.AUDIO);
-						audioPayloadAMR.setPort(audioPort);
-					} catch (SdpException e) {
-						e.printStackTrace();
+						p.getRtp().setParameterValue("octet-align", "1");
+					} catch (ArgumentNotSetException e) {
+						Log.w(LOG_TAG, "error while asign \"octet-align=1\"");
 					}
-					audioList.add(audioPayloadAMR);
-				} else if (AudioProfile.AAC.equals(ap)) {
-					PayloadSpec audioPayloadAAC = null;
-					try {
-						audioPayloadAAC = new PayloadSpec(payload
-								+ " MPEG4-GENERIC/44100/2");
-						audioPayloadAAC
-								.setFormatParams("profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3; config=121056E500");
-						audioPayloadAAC.setMediaType(MediaType.AUDIO);
-						audioPayloadAAC.setPort(audioPort);
-					} catch (SdpException e) {
-						e.printStackTrace();
-					}
-					audioList.add(audioPayloadAAC);
-				} else if (AudioProfile.PCMU.equals(ap)) {
-					PayloadSpec payloadAudioPCMU = new PayloadSpec();
-					payloadAudioPCMU.setMediaType(MediaType.AUDIO);
-					payloadAudioPCMU.setPort(audioPort);
-					payloadAudioPCMU.setPayload(0);
-					audioList.add(payloadAudioPCMU);
-				} else if (AudioProfile.PCMA.equals(ap)) {
-					PayloadSpec payloadAudioPCMA = new PayloadSpec();
-					payloadAudioPCMA.setMediaType(MediaType.AUDIO);
-					payloadAudioPCMA.setPort(audioPort);
-					payloadAudioPCMA.setPayload(8);
-					audioList.add(payloadAudioPCMA);
-				}
-				payload++;
+				} else if (AudioProfile.PCMU.equals(ap))
+					addPayload(audioMedia, 0, "PCMU", 8000, bitrate);
+				else if (AudioProfile.PCMA.equals(ap))
+					addPayload(audioMedia, 8, "PCMA", 8000, bitrate);
+				payloadId++;
 			}
 
-			audioMedia = new MediaSpec();
-			audioMedia.setPayloadList(audioList);
-			audioMedia.setBandWidth((int) Math.ceil(maxAudioBitrate / 1000.0));
+			TransportRtp transRtp = new TransportRtp();
+			transRtp.setAddress(publicAddress.getHostAddress().toString());
+			transRtp.setPort(audioPort);
+			Transport trans = new Transport();
+			trans.setRtp(transRtp);
+			audioMedia.setTransport(trans);
+
+			HashSet<MediaType> types = new HashSet<MediaType>();
+			types.add(MediaType.AUDIO);
+			audioMedia.setTypes(types);
 
 			Mode audioMode = Mode.SENDRECV;
 			if (this.mediaSessionConfig.getMediaTypeModes() != null
@@ -400,18 +379,15 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			audioMedia.setMode(audioMode);
 		}
 
-		List<MediaSpec> mediaList = new Vector<MediaSpec>();
-		if (videoMedia != null)
-			mediaList.add(videoMedia);
-		if (audioMedia != null)
-			mediaList.add(audioMedia);
+		Log.d(LOG_TAG, "videoMedia: " + videoMedia);
+		Log.d(LOG_TAG, "audioMedia: " + audioMedia);
 
 		SessionSpec session = new SessionSpec();
-		session.setMediaSpec(mediaList);
-
-		session.setOriginAddress(publicAddress.getHostAddress().toString());
-		session.setRemoteHandler(publicAddress.getHostAddress().toString());
-		session.setSessionName("TestSession");
+		if (videoMedia != null)
+			session.addMediaSpec(videoMedia);
+		if (audioMedia != null)
+			session.addMediaSpec(audioMedia);
+		session.setId("12345"); // ("KurentoAndroidClient");
 
 		return session;
 	}

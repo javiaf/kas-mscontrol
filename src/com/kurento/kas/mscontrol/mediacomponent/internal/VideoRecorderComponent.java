@@ -18,7 +18,6 @@
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -32,11 +31,12 @@ import android.view.View;
 
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
+import com.kurento.kas.media.rx.RxPacket;
 import com.kurento.kas.media.rx.VideoFrame;
 import com.kurento.kas.media.rx.VideoRx;
 
-public class VideoRecorderComponent extends MediaComponentBase implements
-		VideoRx {
+public class VideoRecorderComponent extends RecorderComponentBase implements
+		Recorder, VideoRx {
 
 	private static final String LOG_TAG = "NDK-video-rx";
 
@@ -47,13 +47,9 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 
 	// private int screenWidth;
 	private int screenHeight;
-
-	private boolean isRecording = false;
-
 	private SurfaceControl surfaceControl = null;
 
-	private int QUEUE_SIZE = 20;
-	private BlockingQueue<VideoFrame> videoFramesQueue;
+	private int QUEUE_SIZE = 100;
 
 	public View getVideoSurfaceRx() {
 		return videoSurfaceRx;
@@ -61,10 +57,13 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 
 	@Override
 	public boolean isStarted() {
-		return isRecording;
+		return isRecording();
 	}
 
-	public VideoRecorderComponent(Parameters params) throws MsControlException {
+	public VideoRecorderComponent(int maxDelay, Parameters params)
+			throws MsControlException {
+		super(maxDelay);
+
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
@@ -89,20 +88,29 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 		mHolderReceive = mVideoReceiveView.getHolder();
 		mSurfaceReceive = mHolderReceive.getSurface();
 
-		this.videoFramesQueue = new ArrayBlockingQueue<VideoFrame>(QUEUE_SIZE);
+		this.packetsQueue = new ArrayBlockingQueue<RxPacket>(QUEUE_SIZE);
 	}
 
 	@Override
 	public void putVideoFrameRx(VideoFrame videoFrame) {
-		Log.d(LOG_TAG, "queue size: " + videoFramesQueue.size());
-		Log.d(LOG_TAG, "width: " + videoFrame.getWidth() + "\theight: "
-				+ videoFrame.getHeight());
-		if (videoFramesQueue.size() >= QUEUE_SIZE) {
-			VideoFrame vf = videoFramesQueue.poll();
-			if (vf != null)
+		Log.i(LOG_TAG, "Enqueue video frame (ptsNorm/rxTime)"
+				+ calcPtsMillis(videoFrame) + "/" + videoFrame.getRxTime()
+				+ " queue size: " + packetsQueue.size());
+		// Log.d(LOG_TAG, "width: " + videoFrame.getWidth() + "\theight: "
+		// + videoFrame.getHeight());
+		if ((packetsQueue.size() >= QUEUE_SIZE)
+				|| (videoFrame.getPts() < 0)) {
+			// VideoFrame vf = videoFramesQueue.poll();
+			// if (vf != null)
 				Log.w(LOG_TAG, "jitter_buffer_overflow: Drop video frame");
+			return;
 		}
-		videoFramesQueue.offer(videoFrame);
+		long ptsNorm = calcPtsMillis(videoFrame);
+		setLastPtsNorm(ptsNorm);
+		long estStartTime = caclEstimatedStartTime(ptsNorm,
+				videoFrame.getRxTime());
+		// Log.i(LOG_TAG, "estimated start time: " + estStartTime);
+		packetsQueue.offer(videoFrame);
 	}
 
 	@Override
@@ -110,14 +118,17 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
 		surfaceControl = new SurfaceControl();
 		surfaceControl.start();
-		isRecording = true;
+		// startRecord();
+		getRecorderController().addRecorder(this);
+		Log.d(LOG_TAG, "add to controller");
 	}
 
 	@Override
 	public void stop() {
+		getRecorderController().deleteRecorder(this);
+		stopRecord();
 		if (surfaceControl != null)
 			surfaceControl.interrupt();
-		isRecording = false;
 	}
 
 	private class SurfaceControl extends Thread {
@@ -146,20 +157,41 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 				long total = 0;
 
 				for (;;) {
-					if (videoFramesQueue.isEmpty())
+					if (!isRecording()) {
+						synchronized (controll) {
+							controll.wait();
+						}
+						continue;
+					}
+
+					if (packetsQueue.isEmpty())
 						Log.w(LOG_TAG,
 								"jitter_buffer_underflow: Video frames queue is empty");
 
-					videoFrameProcessed = videoFramesQueue.take();
-					Log.d(LOG_TAG, "play frame");
+					long targetTime = getTargetTime();
+					if (targetTime != -1) {
+						long ptsMillis = calcPtsMillis(packetsQueue.peek());
+						// Log.d(LOG_TAG, "ptsMillis: " + ptsMillis
+						// + " targetTime: " + targetTime);
+						if ((ptsMillis == -1)
+								|| (ptsMillis + getEstimatedStartTime() > targetTime)) {
+							Log.d(LOG_TAG, "wait");
+							synchronized (controll) {
+								controll.wait();
+							}
+							continue;
+						}
+					}
+
+					videoFrameProcessed = (VideoFrame) packetsQueue.take();
+					Log.d(LOG_TAG, "play frame "
+							+ calcPtsMillis(videoFrameProcessed));
 					tStart = System.currentTimeMillis();
 
 					rgb = videoFrameProcessed.getDataFrame();
 					width = videoFrameProcessed.getWidth();
 					height = videoFrameProcessed.getHeight();
 
-					if (!isRecording)
-						continue;
 					if (rgb == null || rgb.length == 0)
 						continue;
 
@@ -172,8 +204,19 @@ public class VideoRecorderComponent extends MediaComponentBase implements
 							if (width != lastWidth || srcBitmap == null) {
 								if (srcBitmap != null)
 									srcBitmap.recycle();
-								srcBitmap = Bitmap.createBitmap(width, height,
-										Bitmap.Config.ARGB_8888);
+								try {
+									Log.d(LOG_TAG, "create bitmap");
+									srcBitmap = Bitmap.createBitmap(width,
+											height, Bitmap.Config.ARGB_8888);
+									Log.d(LOG_TAG, "create bitmap OK");
+								} catch (OutOfMemoryError e) {
+									e.printStackTrace();
+									Log.w(LOG_TAG,
+											"Can not create bitmap. No such memory.");
+									Log.w(LOG_TAG, e);
+									mSurfaceReceive.unlockCanvasAndPost(canvas);
+									continue;
+								}
 								lastWidth = width;
 								if (srcBitmap == null)
 									Log.w(LOG_TAG, "srcBitmap is null");
