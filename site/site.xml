@@ -14,6 +14,8 @@
 		<menu name="Kurento MsControl">
 			<item name="Media management" href="./media-management.html" />
 			<item name="Media buffering" href="./buffer-controller.html" />
+			<item name="Test Plan" href="./test-plan.html" />
+			
 		</menu>
 		<menu ref="reports" />
 

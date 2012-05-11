@@ -1,0 +1,165 @@
+   ------
+   Kurento Android MsControl test plan
+   ------
+   ------
+   Date
+   ------
+   
+Kurento Android MsControl Test Plan
+
+  	[<<Conventions>>]
+	
+		[<Automation>] Each test indicates if an automated procedure is in place.
+		               Automated tests are JUnit based.
+		  
+		[<Pass criteria>] Pass criteria will provide a set of conditions to be 
+	                      verified in order to declare the test passed. False 
+	                      conditions will cause the test to be set as NOT PASSED.
+	                      
+	[<<Test setup>>]
+	
+		In order to execute automated test it is required an Android device connected
+		through an USB interface. Following commands are required in order to perform
+		tests
+		
++--------------------
+cd kas-mscontrol
+mvn install
+cd kas-mscontrol-test
+mvn package
+mvn android:deploy
+mvn test????
++--------------------		 
+		
+		If more than one device is plug to the test host it will be required to identify
+		the target test device. This is particularly useful when test must be executed 
+		in multiple platforms
+		
++-----------------
+-Dandroid.device=deviceSerialNumber
++-----------------
+
+* Streaming Tests
+
+** Mpeg4 streaming support
+
+	Kurento Android MsControl must provide Mpeg4 support including 
+	codification/decodification and RTP transmission/reception. Several frame
+	rates and formats (dimensions) must be tested
+	
+	[<<Test Procedure>>]
+	
+		Implement the media path shown in the chart below. A Raw test
+		source will generate synthetic video frames that will codec and
+		transfered over RTP through the local interface. Decoded
+		frames will be injected into a video analyzer that will check
+		following media characteristics.
+		
+			* <<Frame sequence>>: Verify if frames are delivered in an
+			ordered sequence
+			
+			* <<Frame rate>>: Verify the frame rate is lower or equal
+			to configured value
+			
+			* <<Frame timestamp>>: verify frames PTS correspond to the
+			frame arrival time and there is no drift from theoretical
+			value (1% max_drift)
+			
+			* <<Bit rate>>: Verify the bit rate is aligned with
+			configured value
+			
+			* <<Frame dimenion>>: Verify the frame dimensions correspond
+			to configured value
+			
+			* <<Frame content>>: Verify the frame content is similar to
+			transmitted content
+
+		[<Step 1>] Send Mpeg4 stream during 30'': dimension=720x480, 3=fps
+		maxbitrate=1 Mbps
+	
+		[<Step 2>] Send Mpeg4 stream during 30'': dimension=640x480, 7=fps
+		maxbitrate=700 Kbps
+
+		[<Step 3>] Send Mpeg4 stream during 30'': dimension=320x240, 15=fps
+		maxbitrate=300 Kbps
+		
+		[<Step 4>] Send Mpeg4 stream during 30'': dimension=176x144, 25=fps
+		maxbitrate=128 Kbps 
+		
+			               
+	    <<Automated by>> <<<none>>>
+	             
+	
+	[]
+	
++-----------------
+
+  +----------------+    +-------+    +--------+
+  |     Test       |____| Mpeg4 |____| RTP TX |______
+  | video source   |    | CODEC |    |        |     |
+  +----------------+    +-------+    +--------+     |
+                                                 LOOPBACK
+  +----------------+   +---------+   +--------+     |
+  |      Test      |___| Mpeg4   |___| RTP RX |_____|
+  |   video sink   |   | DECODER |   |        |
+  +----------------+   +---------+   +--------+
+        |                 |              |
+        |                 |              |
+  +----------------+   +----------+ +----------+ 
+  |     video      |   |  codec   | |    RTP   |
+  |    analysis    |   | analysis | | analysis |
+  +----------------+   +----------+ +----------+
+
++-----------------
+
+ 	[<<Pass Criteria>>]
+
+		[[1]] Verify in <Step 1> received video frames comply with defined 
+		characteristics.
+	  
+		[[2]] Verify in <Step 2> received video frames comply with defined 
+		characteristics.
+		
+		[[3]] Verify in <Step 3> received video frames comply with defined 
+		characteristics.
+		
+		[[4]] Verify in <Step 4> received video frames comply with defined 
+		characteristics.
+		
+		
+		
+** H264 streaming support
+
+** H263 streaming support
+
+** AMR streaming support
+
+** MP2 streaming support
+
+** PCMU streaming support
+
+** PCMA streaming support
+
+* Media negotiation tests
+
+* Resource management tests
+
+** Port lock & release
+
+* Buffer tests
+
+** Stream reordenation test
+
+** Synchronization test
+
+* MediaComponent interconnection
+
+* Join micro to RTP
+
+* Join Camera to RTP
+
+* Join RTP to speaker
+
+* Join RTP to loudspeaker
+
+* Join RTP to screen
