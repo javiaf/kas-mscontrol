@@ -57,17 +57,21 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		private byte[] data;
 		private int width;
 		private int height;
+		private long time;
 
-		public Frame(byte[] data, int width, int height) {
+		public Frame(byte[] data, int width, int height, long time) {
 			this.data = data;
 			this.width = width;
 			this.height = height;
+			this.time = time;
 		}
 	}
 
 	private int QUEUE_SIZE = 2;
 	private LinkedBlockingQueue<Frame> framesQueue;
 	private LinkedBlockingQueue<Long> txTimes;
+
+	private long timeFirstFrame;
 
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
@@ -130,13 +134,17 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			}
 		}
 
+		this.timeFirstFrame = -1;
+
 	}
 
 	@Override
-	public void putVideoFrame(byte[] data, int width, int height) {
+	public void putVideoFrame(byte[] data, int width, int height, long time) {
+		if (timeFirstFrame == -1)
+			timeFirstFrame = time;
 		if (framesQueue.size() >= QUEUE_SIZE)
 			framesQueue.poll();
-		framesQueue.offer(new Frame(data, width, height));
+		framesQueue.offer(new Frame(data, width, height, time-timeFirstFrame));
 	}
 
 	@Override
@@ -186,7 +194,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					txTimes.offer(t);
 					tStart = System.currentTimeMillis();
 					MediaTx.putVideoFrame(frameProcessed.data,
-							frameProcessed.width, frameProcessed.height);
+							frameProcessed.width, frameProcessed.height,
+							frameProcessed.time);
 					tEnd = System.currentTimeMillis();
 					tEncode = tEnd - tStart;
 					tTotal += tEncode;

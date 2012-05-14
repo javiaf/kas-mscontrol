@@ -128,11 +128,12 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	public void onPreviewFrame(byte[] data, Camera camera) {
 		if (data == null)
 			return;
+		long time = System.currentTimeMillis();
 		// Send frame to subscribers
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof VideoSink)
-					((VideoSink) j).putVideoFrame(data, width, height);
+					((VideoSink) j).putVideoFrame(data, width, height, time);
 		} catch (MsControlException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
