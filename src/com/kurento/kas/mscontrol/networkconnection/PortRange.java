@@ -13,7 +13,7 @@ public class PortRange {
 	 * and maxPort. The minPort and the maxPort are considered inclusive.
 	 * 
 	 * @param minPort
-	 *            range min port. It must be greater than or equal 1.
+	 *            range min port. It must be greater than or equal 1024.
 	 * @param maxPort
 	 *            range max port. It must be greater than minPort and less than
 	 *            or equal 65535.
@@ -23,7 +23,7 @@ public class PortRange {
 	 *             if maxPort is less than minPort or greater than than 65535.
 	 */
 	public PortRange(int minPort, int maxPort) throws IllegalArgumentException {
-		if (minPort < 1)
+		if (minPort < 1024)
 			throw new IllegalArgumentException(
 					"minPort must be greater than or equal 1");
 		if ((maxPort < minPort) || (maxPort > 65535))
