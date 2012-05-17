@@ -19,7 +19,8 @@ package com.kurento.kas.mscontrol.join;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import javax.sdp.SdpException;
 
@@ -68,8 +69,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	private int QUEUE_SIZE = 2;
-	private LinkedBlockingQueue<Frame> framesQueue;
-	private LinkedBlockingQueue<Long> txTimes;
+	private BlockingQueue<Frame> framesQueue;
 
 	private long timeFirstFrame;
 
@@ -87,8 +87,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			QUEUE_SIZE = framesQueueSize;
 		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
 
-		framesQueue = new LinkedBlockingQueue<Frame>(QUEUE_SIZE);
-		txTimes = new LinkedBlockingQueue<Long>(QUEUE_SIZE);
+		framesQueue = new ArrayBlockingQueue<Frame>(QUEUE_SIZE);
 
 		Map<MediaType, Mode> mediaTypesModes = getModesOfMediaTypes(localSessionSpec);
 		Mode videoMode = mediaTypesModes.get(MediaType.VIDEO);
@@ -144,6 +143,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			timeFirstFrame = time;
 		if (framesQueue.size() >= QUEUE_SIZE)
 			framesQueue.poll();
+//		Log.d(LOG_TAG, "putVideoFrame: " + (time - timeFirstFrame));
 		framesQueue.offer(new Frame(data, width, height, time-timeFirstFrame));
 	}
 
@@ -170,41 +170,300 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	private class VideoTxThread extends Thread {
+
+		private static final int STEP = 8;
+
+		private long caclFrameTime(long frameTime, long it, long lastFrameTime) {
+			long currentFrameTime;
+			if (it > (STEP - 1))
+				currentFrameTime = ((STEP - 1) * frameTime + lastFrameTime)
+						/ STEP;
+			else
+				currentFrameTime = (it * frameTime + lastFrameTime)
+						/ (it + 1);
+			return currentFrameTime;
+		}
+
 		@Override
 		public void run() {
+//			int tFrame = 1000 / (videoProfile.getFrameRateNum() / videoProfile
+//					.getFrameRateDen());
+//			Frame frameProcessed;
+//
+//			long tStart, tEnd, tEncode, tReal;
+//			long tTotal = 0;
+//			long n = 0;
+//			long t, h, s;
+//			long tDequeued;
+//			long rft = tFrame;
+//
+//			int queueTimesSize = 8;
+//			BlockingQueue<Long> timesQueue = new ArrayBlockingQueue<Long>(
+//					queueTimesSize);
+//
+//			Log.d(LOG_TAG, "tFrame: " + tFrame);
+//
+//			try {
+//				for (;;) {
+//					t = System.currentTimeMillis();
+//					tDequeued = 0;
+//					if (timesQueue.isEmpty())
+//						tDequeued = 0;
+//					else
+//						tDequeued = timesQueue.peek();
+//
+//					if (tDequeued != 0) {
+//						h = (t - tDequeued) / timesQueue.size();
+//						Log.d(LOG_TAG, "h: " + h);
+//						s = tFrame - h;
+//						if (s > 0) {
+//							Log.d(LOG_TAG, "sleep: " + s);
+//							sleep(s);
+//						}
+//					}
+//
+//					if (timesQueue.size() >= queueTimesSize)
+//						timesQueue.poll();
+//					timesQueue.offer(t);
+//					frameProcessed = framesQueue.take();
+//
+//					tStart = System.currentTimeMillis();
+//					MediaTx.putVideoFrame(frameProcessed.data,
+//							frameProcessed.width, frameProcessed.height,
+//							frameProcessed.time);
+//					tEnd = System.currentTimeMillis();
+//
+//					tEncode = tEnd - tStart;
+//					tReal = tEnd - t;
+//					tTotal += tEncode;
+//					Log.i(LOG_TAG, "Capture frame time: " + frameProcessed.time
+//							+ " time real frame: " + tReal
+//							+ "ms Encode/send RTP frame time: " + tEncode
+//							+ "ms Average time: " + (tTotal / (n + 1)) + " ms");
+//					rft = caclFrameTime(rft, n, tReal);
+//					Log.d(LOG_TAG, "rft: " + rft);
+//					Log.i(LOG_TAG, "Real frame rate: " + (1000.0 / rft) + "fps");
+//					n++;
+//				}
+//			} catch (InterruptedException e) {
+//				Log.d(LOG_TAG, "VideoTxThread stopped");
+//			}
+
+
+//			int tFrame = 1000 / (videoProfile.getFrameRateNum() / videoProfile
+//					.getFrameRateDen());
+//			Frame frameProcessed;
+//
+//			long tStartTake, tStartEncode, tEnd, tTake, tEncode, tReal;
+//			long n = 0;
+//			long t, s;
+//			long h = tFrame;
+//			long tTotal = 0;
+//			long rft = tFrame;
+//
+//			Log.d(LOG_TAG, "tFrame: " + tFrame);
+//
+//			long tInit = System.currentTimeMillis();
+//			try {
+//				for (;;) {
+//					t = System.currentTimeMillis();
+//					s = tFrame - h;
+//					if (s > 0) {
+//						Log.d(LOG_TAG, "sleep: " + s);
+//						sleep(s);
+//					}
+//					if (framesQueue.isEmpty())
+//						Log.w(LOG_TAG,
+//								"Buffer underflow: Video frames queue is empty");
+//					tStartTake = System.currentTimeMillis();
+//					frameProcessed = framesQueue.take();
+//
+//					tStartEncode = System.currentTimeMillis();
+//					MediaTx.putVideoFrame(frameProcessed.data,
+//							frameProcessed.width, frameProcessed.height,
+//							frameProcessed.time);
+//					tEnd = System.currentTimeMillis();
+//
+//					tEncode = tEnd - tStartEncode;
+//					tTake = tEnd - tStartTake;
+//					tReal = tEnd - t;
+//					tTotal += tEncode;
+//					Log.i(LOG_TAG, "Capture frame time: " + frameProcessed.time
+//							+ " time real frame: " + tReal
+//							+ "ms Encode/send RTP frame time: " + tEncode
+//							+ "ms tTake: " + tTake + "ms Average time: "
+//							+ (tTotal / (n + 1)) + " ms");
+//					h = caclFrameTime(h, n, tTake);
+//					rft = caclFrameTime(rft, n, tReal);
+//					Log.d(LOG_TAG, "h: " + h + " rft: " + rft);
+//					Log.i(LOG_TAG, "Real frame rate: " + (1000.0 / rft) + "fps");
+//					n++;
+//				}
+//			} catch (InterruptedException e) {
+//				Log.d(LOG_TAG, "VideoTxThread stopped");
+//			}
+
+
+//			int tf = 1000 / (videoProfile.getFrameRateNum() / videoProfile
+//					.getFrameRateDen());
+//			Frame frameProcessed;
+//
+//			long tStart, tEnd, tEncode, tTake, tReal;
+//			long tTotal = 0;
+//			long n = 0;
+//			long t, s;
+//			long tDequeued;
+//			long rft = tf;
+//			long tFirstFrame = 0;
+//			long tFrame;
+//
+//			long t1, t2;
+//			long tDiffSleep;
+//
+//			int queueTimesSize = 2;
+//			LinkedList<Long> timesQueue = new LinkedList<Long>();
+//
+//			Log.d(LOG_TAG, "tFrame: " + tf);
+//
+//			long tInit = System.currentTimeMillis();
+//			try {
+//				for (;;) {
+//					t = System.currentTimeMillis();
+//					if (!timesQueue.isEmpty())
+//						Log.d(LOG_TAG, "diff last frame before sleep: " + (t - timesQueue.getLast()));
+//					tDequeued = 0;
+//					if (timesQueue.isEmpty())
+//						tDequeued = 0;
+//					else
+//						tDequeued = timesQueue.peek();
+//
+//					if (tDequeued != 0) {
+//						s = (timesQueue.size() * tf + tDequeued) - t;
+//						if (s > 0) {
+//							Log.d(LOG_TAG, "timesQueue.size(): " + timesQueue.size() + " sleep: " + s);
+//							t1 = System.currentTimeMillis();
+//							sleep(s);
+//							t2 = System.currentTimeMillis();
+//							tDiffSleep = t2 - t1 - s;
+//							Log.d(LOG_TAG, "t sleep real: " + (t2 - t1)
+//									+ " diff sleep: " + tDiffSleep);
+//						}
+//					}
+//
+//					if (framesQueue.isEmpty())
+//						Log.w(LOG_TAG, "Buffer underflow: Video frames queue is empty");
+//					t1 = System.currentTimeMillis();
+//					frameProcessed = framesQueue.take();
+//					tTake = System.currentTimeMillis();
+//					Log.d(LOG_TAG, "framesQueue.take() time: " + (tTake - t1));
+//
+//					if (!timesQueue.isEmpty())
+//						Log.e(LOG_TAG, "diff last frame after sleep: " + (tTake - timesQueue.getLast()));
+//
+//					if (timesQueue.size() >= queueTimesSize)
+//						timesQueue.poll();
+//					// timesQueue.offer(t);
+//					timesQueue.offer(tTake);
+//					if (n == 0)
+//						tFirstFrame = tTake;
+//					tFrame = tTake - tFirstFrame;
+//
+//					tStart = System.currentTimeMillis();
+//					MediaTx.putVideoFrame(frameProcessed.data,
+//							frameProcessed.width, frameProcessed.height,
+//							tFrame);
+//					tEnd = System.currentTimeMillis();
+//
+//					tEncode = tEnd - tStart;
+//					tReal = tEnd - t;
+//					tTotal += tEncode;
+//					Log.i(LOG_TAG, "n: " + n + " Capture frame: "
+//							+ frameProcessed.time
+//							+ " time: " + tFrame
+//							+ " time real frame: " + tReal
+//							+ "ms Encode/send RTP frame time: " + tEncode
+//							+ "ms Average time: " + (tTotal / (n + 1)) + " ms");
+//					rft = caclFrameTime(rft, n, tReal);
+//					Log.d(LOG_TAG, "rft: " + rft);
+//					Log.i(LOG_TAG, "Real frame rate: " + (1000.0 / rft) + "fps");
+//					n++;
+//				}
+//
+//
+//			} catch (InterruptedException e) {
+//				Log.d(LOG_TAG, "VideoTxThread stopped");
+//				long tFinish = System.currentTimeMillis();
+//				Log.i(LOG_TAG, "time total: " + (tFinish - tInit)
+//						+ " n frames: " + (n + 1) + " Average fr: "
+//						+ ((1000.0 * (n + 1)) / (tFinish - tInit)) + "fps");
+//			}
+
 			int tFrame = 1000 / (videoProfile.getFrameRateNum() / videoProfile
 					.getFrameRateDen());
 			Frame frameProcessed;
 
-			long tStart, tEnd, tEncode;
-			long tTotal = 0;
-			long n = 1;
+			long tStartTake, tStartEncode, tEnd, tTake, tEncode, tReal;
+			long n = 0;
+			long t, s;
+			long h = tFrame;
+			long tFirstFrame = 0;
+			long tCurrentFrame, timePts;
+//			long tTotal = 0;
+//			long rft = tFrame;
+//			long lastTSend = 0;
 
+			Log.d(LOG_TAG, "tFrame: " + tFrame);
+
+			long tInit = System.currentTimeMillis();
 			try {
-				for (int i = 0; i < QUEUE_SIZE; i++)
-					txTimes.offer(new Long(0));
 				for (;;) {
-					long t = System.currentTimeMillis();
-					long h = (t - txTimes.take()) / QUEUE_SIZE;
-					if (h < tFrame) {
-						long s = tFrame - h;
+					t = System.currentTimeMillis();
+					s = tFrame - h;
+					if (s > 0) {
+//						Log.d(LOG_TAG, "sleep: " + s);
 						sleep(s);
 					}
+					if (framesQueue.isEmpty())
+						Log.w(LOG_TAG, "Buffer underflow: Video frames queue is empty");
+					tStartTake = System.currentTimeMillis();
 					frameProcessed = framesQueue.take();
-					txTimes.offer(t);
-					tStart = System.currentTimeMillis();
+					tCurrentFrame = System.currentTimeMillis();
+
+					if (n == 0)
+						tFirstFrame = tCurrentFrame;
+					timePts = tCurrentFrame - tFirstFrame;
+
+					tStartEncode = System.currentTimeMillis();
 					MediaTx.putVideoFrame(frameProcessed.data,
 							frameProcessed.width, frameProcessed.height,
-							frameProcessed.time);
+							timePts);
 					tEnd = System.currentTimeMillis();
-					tEncode = tEnd - tStart;
-					tTotal += tEncode;
-					Log.i(LOG_TAG, "Encode/send RTP frame time: " + tEncode
-							+ "ms Average time: " + (tTotal / n) + " ms");
+
+//					tEncode = tEnd - tStartEncode;
+					tTake = tEnd - tStartTake;
+//					tReal = tEnd - t;
+//					tTotal += tEncode;
+//					Log.i(LOG_TAG, "Capture frame time: " + frameProcessed.time
+//							+ " timePts: " + timePts
+//							+ " time real frame: " + tReal
+//							+ "ms Encode/send RTP frame time: " + tEncode
+//							+ "ms tTake: " + tTake + "ms Average time: "
+//							+ (tTotal / (n + 1)) + " ms");
+					h = caclFrameTime(h, n, tTake);
+//					rft = caclFrameTime(rft, n, tReal);
+//					Log.d(LOG_TAG, "h: " + h + " rft: " + rft);
+//					Log.d(LOG_TAG, "diff last frame: " + (tEnd - lastTSend));
+//					Log.i(LOG_TAG, "Real frame rate: " + (1000.0 / rft) + "fps");
+//					Log.w(LOG_TAG, "Sent in time: " + (tEnd - tInit));
+//					lastTSend = tEnd;
 					n++;
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "VideoTxThread stopped");
+				long tFinish = System.currentTimeMillis();
+				Log.i(LOG_TAG, "time total: " + (tFinish - tInit)
+						+ " n frames: " + (n + 1) + " Average fr: "
+						+ ((1000.0 * (n + 1)) / (tFinish - tInit)) + "fps");
 			}
 		}
 	}
