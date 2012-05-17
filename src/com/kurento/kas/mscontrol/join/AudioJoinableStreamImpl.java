@@ -49,6 +49,12 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 
 	private AudioRxThread audioRxThread = null;
 
+	private long timeFirstSamples;
+	private long timeLastSamples;
+
+	private int audioPacketTime; // ms
+	private long n;
+
 	public AudioInfoTx getAudioInfoTx() {
 		return audioInfo;
 	}
@@ -88,11 +94,31 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 				}
 			}
 		}
+
+		this.audioPacketTime = (1000 * audioInfo.getFrameSize())
+				/ audioInfo.getAudioProfile().getSampleRate();
+		this.timeFirstSamples = -1;
 	}
 
 	@Override
-	public void putAudioSamples(short[] in_buffer, int in_size) {
-		MediaTx.putAudioSamples(in_buffer, in_size);
+	public void putAudioSamples(short[] in_buffer, int in_size, long time) {
+		if (timeFirstSamples == -1) {
+			n = 0;
+			timeFirstSamples = time;
+		}
+		long diffFirstFrame = time - timeFirstSamples;
+		long diffLastFrame = time - timeLastSamples;
+		long drift = n - diffFirstFrame;
+		if (drift < -2 * audioPacketTime) {
+			Log.w(LOG_TAG, "GAP. Expected time: " + n + "  diffFirstFrame: "
+					+ diffFirstFrame + "  diffLastFrame: " + diffLastFrame
+					+ "  drift: " + drift);
+			n = diffFirstFrame - (diffFirstFrame % audioPacketTime);
+			Log.w(LOG_TAG, "n set to " + n);
+		}
+		MediaTx.putAudioSamples(in_buffer, in_size, n);
+		timeLastSamples = time;
+		n += audioPacketTime;
 	}
 
 	@Override

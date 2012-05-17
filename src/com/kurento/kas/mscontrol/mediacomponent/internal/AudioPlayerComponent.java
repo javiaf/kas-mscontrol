@@ -144,11 +144,14 @@ public class AudioPlayerComponent extends MediaComponentBase {
 			audioRecord.startRecording();
 			setPlaying(true);
 			try {
+				android.os.Process.setThreadPriority(
+							android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 				while (isPlaying()) {
 					int bufferReadResult = readFully(buffer, frameSize);
+					long time = System.currentTimeMillis();
 					for (Joinable j : getJoinees(Direction.SEND))
 						if (j instanceof AudioSink)
-							((AudioSink) j).putAudioSamples(buffer, bufferReadResult);
+							((AudioSink) j).putAudioSamples(buffer, bufferReadResult, time);
 				}
 				releaseAudioRecord();
 			} catch (Throwable t) {
