@@ -429,8 +429,11 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					frameProcessed = framesQueue.take();
 					tCurrentFrame = System.currentTimeMillis();
 
-					if (n == 0)
+					if (n == 0) {
+						tInit = System.currentTimeMillis();
+						tStartTake = System.currentTimeMillis();
 						tFirstFrame = tCurrentFrame;
+					}
 					timePts = tCurrentFrame - tFirstFrame;
 
 					tStartEncode = System.currentTimeMillis();
