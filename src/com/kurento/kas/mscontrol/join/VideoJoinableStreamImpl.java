@@ -171,7 +171,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 	private class VideoTxThread extends Thread {
 
-		private static final int STEP = 8;
+		private static final int STEP = 4;
 
 		private long caclFrameTime(long frameTime, long it, long lastFrameTime) {
 			long currentFrameTime;
