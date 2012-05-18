@@ -92,12 +92,12 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 					this.audioRxThread = new AudioRxThread(this, maxDelayRx);
 					this.audioRxThread.start();
 				}
+
+				this.audioPacketTime = (1000 * audioInfo.getFrameSize())
+						/ audioInfo.getAudioProfile().getSampleRate();
+				this.timeFirstSamples = -1;
 			}
 		}
-
-		this.audioPacketTime = (1000 * audioInfo.getFrameSize())
-				/ audioInfo.getAudioProfile().getSampleRate();
-		this.timeFirstSamples = -1;
 	}
 
 	@Override
