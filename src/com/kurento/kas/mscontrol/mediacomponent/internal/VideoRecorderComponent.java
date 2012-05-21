@@ -17,7 +17,9 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -33,10 +35,9 @@ import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
 import com.kurento.kas.media.rx.RxPacket;
 import com.kurento.kas.media.rx.VideoFrame;
-import com.kurento.kas.media.rx.VideoRx;
 
 public class VideoRecorderComponent extends RecorderComponentBase implements
-		Recorder, VideoRx {
+		Recorder, VideoRecorder {
 
 	private static final String LOG_TAG = "NDK-video-rx";
 
@@ -45,11 +46,13 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	private Surface mSurfaceReceive;
 	private View videoSurfaceRx;
 
+	private RecorderController controller;
+
 	// private int screenWidth;
 	private int screenHeight;
 	private SurfaceControl surfaceControl = null;
 
-	private int QUEUE_SIZE = 100;
+	private Map<VideoFrame, VideoFeeder> framesMap;
 
 	public View getVideoSurfaceRx() {
 		return videoSurfaceRx;
@@ -88,21 +91,20 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		mHolderReceive = mVideoReceiveView.getHolder();
 		mSurfaceReceive = mHolderReceive.getSurface();
 
-		this.packetsQueue = new ArrayBlockingQueue<RxPacket>(QUEUE_SIZE);
+		this.packetsQueue = new LinkedBlockingQueue<RxPacket>();
+		this.framesMap = new ConcurrentHashMap<VideoFrame, VideoFeeder>();
 	}
 
 	@Override
-	public void putVideoFrameRx(VideoFrame videoFrame) {
+	public void putVideoFrame(VideoFrame videoFrame, VideoFeeder feeder) {
 		Log.i(LOG_TAG, "Enqueue video frame (ptsNorm/rxTime)"
 				+ calcPtsMillis(videoFrame) + "/" + videoFrame.getRxTime()
 				+ " queue size: " + packetsQueue.size());
 		// Log.d(LOG_TAG, "width: " + videoFrame.getWidth() + "\theight: "
 		// + videoFrame.getHeight());
-		if ((packetsQueue.size() >= QUEUE_SIZE)
-				|| (videoFrame.getPts() < 0)) {
-			// VideoFrame vf = videoFramesQueue.poll();
-			// if (vf != null)
-				Log.w(LOG_TAG, "jitter_buffer_overflow: Drop video frame");
+		if (videoFrame.getPts() < 0) {
+			if (feeder != null)
+				feeder.freeVideoFrameRx(videoFrame);
 			return;
 		}
 		long ptsNorm = calcPtsMillis(videoFrame);
@@ -111,21 +113,23 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 				videoFrame.getRxTime());
 		// Log.i(LOG_TAG, "estimated start time: " + estStartTime);
 		packetsQueue.offer(videoFrame);
+		this.framesMap.put(videoFrame, feeder);
 	}
 
 	@Override
 	public void start() {
-		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
 		surfaceControl = new SurfaceControl();
 		surfaceControl.start();
 		// startRecord();
-		getRecorderController().addRecorder(this);
+		controller = getRecorderController();
+		controller.addRecorder(this);
 		Log.d(LOG_TAG, "add to controller");
 	}
 
 	@Override
 	public void stop() {
-		getRecorderController().deleteRecorder(this);
+		if (controller != null)
+			controller.deleteRecorder(this);
 		stopRecord();
 		if (surfaceControl != null)
 			surfaceControl.interrupt();
@@ -247,11 +251,28 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					total += t;
 					Log.d(LOG_TAG, "frame played in: " + t + " ms. Average: "
 							+ (total / i));
+					VideoFeeder feeder = framesMap.get(videoFrameProcessed);
+					if (feeder != null)
+						feeder.freeVideoFrameRx(videoFrameProcessed);
 					i++;
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "SurfaceControl stopped");
 			}
+		}
+	}
+
+	@Override
+	public void flushTo(long time) {
+		VideoFrame vf = (VideoFrame) packetsQueue.peek();
+		while (vf != null) {
+			if ((calcPtsMillis(vf) + getEstimatedStartTime()) > time)
+				break;
+			VideoFeeder feeder = framesMap.get(vf);
+			if (feeder != null)
+				feeder.freeVideoFrameRx(vf);
+			packetsQueue.remove(vf);
+			vf = (VideoFrame) packetsQueue.peek();
 		}
 	}
 

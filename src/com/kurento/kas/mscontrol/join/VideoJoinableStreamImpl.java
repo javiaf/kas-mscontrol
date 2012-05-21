@@ -18,7 +18,10 @@
 package com.kurento.kas.mscontrol.join;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -40,11 +43,13 @@ import com.kurento.kas.media.rx.VideoFrame;
 import com.kurento.kas.media.rx.VideoRx;
 import com.kurento.kas.media.tx.MediaTx;
 import com.kurento.kas.media.tx.VideoInfoTx;
+import com.kurento.kas.mscontrol.mediacomponent.internal.VideoFeeder;
+import com.kurento.kas.mscontrol.mediacomponent.internal.VideoRecorder;
 import com.kurento.kas.mscontrol.mediacomponent.internal.VideoSink;
 import com.kurento.kas.mscontrol.networkconnection.internal.RTPInfo;
 
 public class VideoJoinableStreamImpl extends JoinableStreamBase implements
-		VideoSink, VideoRx {
+		VideoSink, VideoRx, VideoFeeder {
 
 	public final static String LOG_TAG = "VideoJoinableStream";
 
@@ -72,6 +77,9 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	private BlockingQueue<Frame> framesQueue;
 
 	private long timeFirstFrame;
+
+	private Set<int[]> freeFrames;
+	private Map<int[], Integer> usedFrames;
 
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
@@ -134,7 +142,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		}
 
 		this.timeFirstFrame = -1;
-
+		this.freeFrames = new HashSet<int[]>();
+		this.usedFrames = new HashMap<int[], Integer>();
 	}
 
 	@Override
@@ -143,20 +152,53 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			timeFirstFrame = time;
 		if (framesQueue.size() >= QUEUE_SIZE)
 			framesQueue.poll();
-//		Log.d(LOG_TAG, "putVideoFrame: " + (time - timeFirstFrame));
 		framesQueue.offer(new Frame(data, width, height, time-timeFirstFrame));
 	}
 
 	@Override
-	public void putVideoFrameRx(VideoFrame videoFrame) {
+	public synchronized void putVideoFrameRx(VideoFrame videoFrame) {
+		int n = 1;
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
-				if (j instanceof VideoRx)
-					((VideoRx) j).putVideoFrameRx(videoFrame);
+				if (j instanceof VideoRecorder) {
+					usedFrames.put(videoFrame.getDataFrame(), n++);
+					((VideoRecorder) j).putVideoFrame(videoFrame, this);
+				}
 		} catch (MsControlException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public synchronized void freeVideoFrameRx(VideoFrame videoFrame) {
+		Integer count = usedFrames.get(videoFrame.getDataFrame());
+		if (count == null)
+			return;
+		if (--count == 0) {
+			usedFrames.remove(videoFrame.getDataFrame());
+			freeFrames.add(videoFrame.getDataFrame());
+		} else
+			usedFrames.put(videoFrame.getDataFrame(), count);
+	}
+
+	@Override
+	public synchronized int[] getFrameBuffer(int size) {
+		if (size % (Integer.SIZE / 8) != 0)
+			throw new IllegalArgumentException("Size must be multiple of "
+					+ (Integer.SIZE / 8));
+
+		int l = size / (Integer.SIZE / 8);
+		if (freeFrames.isEmpty())
+			return new int[l];
+		for (int[] b : freeFrames) {
+			if (b.length >= l) {
+				freeFrames.remove(b);
+				return b;
+			}
+		}
+
+		return new int[l];
 	}
 
 	public void stop() {
