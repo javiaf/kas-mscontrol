@@ -11,6 +11,7 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	private long estimatedStartTime;
 	private long targetTime;
 	private long lastPtsNorm;
+	protected boolean sync;
 
 	protected BlockingQueue<RxPacket> packetsQueue;
 
@@ -23,6 +24,8 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 
 	public RecorderComponentBase(int maxDelay) {
 		this.maxDelay = maxDelay;
+		this.estimatedStartTime = -1;
+		this.sync = false;
 	}
 
 	protected synchronized boolean isRecording() {
@@ -34,12 +37,27 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	}
 
 	@Override
+	public synchronized boolean isSynchronize() {
+		return this.sync;
+	}
+
+	@Override
+	public synchronized void setSynchronize(boolean sync) {
+		this.sync = sync;
+	}
+
+	@Override
 	public synchronized long getEstimatedStartTime() {
 		return estimatedStartTime;
 	}
 
 	public synchronized void setEstimatedStartTime(long estimatedStartTime) {
 		this.estimatedStartTime = estimatedStartTime;
+	}
+
+	@Override
+	public synchronized long getEstimatedFinishTime() {
+		return estimatedStartTime + lastPtsNorm;
 	}
 
 	public synchronized long getTargetTime() {

@@ -4,6 +4,10 @@ import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
 
 public interface Recorder extends MediaComponentAndroid {
 
+	public boolean isSynchronize();
+
+	public void setSynchronize(boolean sync);
+
 	/**
 	 * 
 	 * @return pts normalized to milliseconds or -1 if there is no media packet.
@@ -13,6 +17,8 @@ public interface Recorder extends MediaComponentAndroid {
 	public long getHeadTime();
 
 	public long getEstimatedStartTime();
+
+	public long getEstimatedFinishTime();
 
 	/**
 	 * 
