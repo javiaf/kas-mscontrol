@@ -42,6 +42,7 @@ public class RecorderControllerComponent implements
 		}
 	}
 
+	public static final int INC = 40;
 	public static final int INTERVAL = 40;
 	public static final int MAX_WAIT = 200;
 
@@ -49,30 +50,31 @@ public class RecorderControllerComponent implements
 		@Override
 		public void run() {
 			try {
-				long inc = 20;
 				long t, lastT;
-				long globalHeadTime, globalFinishTime, globalStartT;
+				long globalStartTime, globalHeadTime, globalFinishTime;
+				long relativeTargetTime, absoluteTargetTime;
+				long latency;
 
 				lastT = System.currentTimeMillis();
-				long relativeTargetTime = 0;
-				long absoluteTargetTime = lastT;
-				long latency;
-				long nToRecord;
+				relativeTargetTime = 0;
+				absoluteTargetTime = lastT;
 
 				for (;;) {
 					t = System.currentTimeMillis();
 
 					globalHeadTime = Long.MAX_VALUE;
 					globalFinishTime = Long.MAX_VALUE;
-					globalStartT = Long.MAX_VALUE;
-					nToRecord = 0;
+					globalStartTime = Long.MAX_VALUE;
+					long nToRecord = 0;
 					for (Recorder r : recorders) {
 						long finishTime = r.getEstimatedFinishTime();
-//						Log.d(LOG_TAG, r + " lastPtsNorm: " + r.getLastPtsNorm());
+						long startTime = r.getEstimatedStartTime();
+						if (startTime >=0)
+							globalStartTime = Math.min(globalStartTime, startTime);
+
 						if (r.hasMediaPacket()) {
 							globalHeadTime = Math.min(globalHeadTime, r.getHeadTime());
 							globalFinishTime = Math.min(globalFinishTime, finishTime);
-							globalStartT = Math.min(globalStartT, r.getEstimatedStartTime());
 							r.setSynchronize(true);
 							nToRecord++;
 						} else if ((absoluteTargetTime - finishTime) > MAX_WAIT) {
@@ -82,37 +84,25 @@ public class RecorderControllerComponent implements
 
 					if (nToRecord == 0) {
 						lastT = t;
-						sleep(inc);
+						sleep(INC);
 						continue;
 					}
 
 					relativeTargetTime += t - lastT;
-					absoluteTargetTime = globalStartT + relativeTargetTime;
-
-					Log.d(LOG_TAG, "absoluteTargetTime: " + absoluteTargetTime
-							+ " globalHeadTime: " + globalHeadTime
-							+ " relativeTargetTime before: " + relativeTargetTime);
-
+					absoluteTargetTime = globalStartTime + relativeTargetTime;
 					absoluteTargetTime = Math.min(absoluteTargetTime, globalHeadTime);
 					latency = globalFinishTime - absoluteTargetTime;
-//					relativeTargetTime = absoluteTargetTime - globalStartT;
-
-					Log.d(LOG_TAG, "estStartT: " + globalStartT
-							+ " targetTime: " + absoluteTargetTime
-							+ " latency: " + latency
-							+ " relativeTargetTime after: " + relativeTargetTime);
+					// relativeTargetTime = absoluteTargetTime - globalStartT;
 
 					if (latency > maxDelay) {
 						long flushTo = globalFinishTime - 1;
-						Log.w(LOG_TAG, "flush to " + flushTo);
-						for (Recorder r : recorders) {
-							Log.w(LOG_TAG, r + " latency: " + r.getLatency());
+						Log.w(LOG_TAG, "Latency: " + latency + ". Flush to " + flushTo);
+						for (Recorder r : recorders)
 							r.flushTo(flushTo);
-						}
-						relativeTargetTime = flushTo - globalStartT;
+						relativeTargetTime = flushTo - globalStartTime;
 
 						lastT = t;
-						sleep(inc);
+						sleep(INC);
 						continue;
 					}
 
@@ -122,7 +112,7 @@ public class RecorderControllerComponent implements
 					}
 
 					lastT = t;
-					sleep(inc);
+					sleep(INC);
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "Controller stopped");
