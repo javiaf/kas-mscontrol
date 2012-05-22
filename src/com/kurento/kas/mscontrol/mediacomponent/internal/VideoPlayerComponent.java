@@ -36,6 +36,7 @@ import com.kurento.commons.mscontrol.Parameters;
 import com.kurento.commons.mscontrol.join.Joinable;
 import com.kurento.kas.media.profiles.VideoProfile;
 import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
+import com.kurento.kas.mscontrol.mediacomponent.AndroidAction;
 
 public class VideoPlayerComponent extends MediaComponentBase implements
 		PreviewCallback {
@@ -318,6 +319,18 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		stop();
 		isReleased = true;
 		mHolder2.removeCallback(cb);
+	}
+
+	@Override
+	public void onAction(AndroidAction action) throws MsControlException {
+		if (action == null)
+			throw new MsControlException("Action not supported");
+
+		if (AndroidAction.CAMERA_AUTOFOCUS.equals(action)) {
+			// TODO: autofocus camera.
+		}
+
+		throw new MsControlException("Action not supported");
 	}
 
 }
