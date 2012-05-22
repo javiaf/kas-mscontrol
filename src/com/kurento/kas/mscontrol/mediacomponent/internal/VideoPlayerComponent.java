@@ -22,7 +22,9 @@ import java.util.List;
 
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
+import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.PreviewCallback;
+import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
 import android.os.Build.VERSION;
 import android.util.Log;
@@ -89,7 +91,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 
 	}
 
-	//TODO: Review orientation camera when you use front camera.
+	// TODO: Review orientation camera when you use front camera.
 	private Camera openFrontFacingCameraGingerbread() {
 		int cameraCount = 0;
 		Camera cam = null;
@@ -286,10 +288,43 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 			throw new MsControlException("Action not supported");
 
 		if (AndroidAction.CAMERA_AUTOFOCUS.equals(action)) {
-			// TODO: autofocus camera.
+			try {
+				mCamera.autoFocus(null);
+			} catch (Exception e) {
+				Log.e(LOG_TAG, e.getMessage(), e);
+			}
+		} else if (AndroidAction.CAMERA_TAKEPHOTO.equals(action)) {
+			if (mCamera != null) {
+				mCamera.takePicture(myShutterCallback, myPictureCallback_RAW,
+						myPictureCallback_JPG);
+			}
 		}
-
 		throw new MsControlException("Action not supported");
 	}
+
+	ShutterCallback myShutterCallback = new ShutterCallback() {
+
+		@Override
+		public void onShutter() {
+
+		}
+	};
+
+	PictureCallback myPictureCallback_RAW = new PictureCallback() {
+
+		@Override
+		public void onPictureTaken(byte[] arg0, Camera arg1) {
+
+		}
+	};
+
+	PictureCallback myPictureCallback_JPG = new PictureCallback() {
+
+		@Override
+		public void onPictureTaken(byte[] arg0, Camera arg1) {
+			Log.d(LOG_TAG, "onPictureTaken");
+			mCamera.startPreview();
+		}
+	};
 
 }
