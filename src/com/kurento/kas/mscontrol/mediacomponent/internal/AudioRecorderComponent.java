@@ -42,6 +42,8 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 	private AudioTrack audioTrack;
 	private int streamType;
 
+	private RecorderController controller;
+
 	private AudioTrackControl audioTrackControl = null;
 
 	@Override
@@ -103,13 +105,16 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 		audioTrackControl = new AudioTrackControl();
 		audioTrackControl.start();
 
-		getRecorderController().addRecorder(this);
+		controller = getRecorderController();
+		controller.addRecorder(this);
 		Log.d(LOG_TAG, "add to controller");
 	}
 
 	@Override
 	public synchronized void stop() {
-		getRecorderController().deleteRecorder(this);
+		stopRecord();
+		if (controller != null)
+			controller.deleteRecorder(this);
 
 		if (audioTrackControl != null)
 			audioTrackControl.interrupt();
