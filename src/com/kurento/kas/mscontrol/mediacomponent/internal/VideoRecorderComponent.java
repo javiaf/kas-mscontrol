@@ -97,11 +97,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 	@Override
 	public void putVideoFrame(VideoFrame videoFrame, VideoFeeder feeder) {
-		Log.i(LOG_TAG, "Enqueue video frame (ptsNorm/rxTime)"
-				+ calcPtsMillis(videoFrame) + "/" + videoFrame.getRxTime()
-				+ " queue size: " + packetsQueue.size());
-		// Log.d(LOG_TAG, "width: " + videoFrame.getWidth() + "\theight: "
-		// + videoFrame.getHeight());
 		if (videoFrame.getPts() < 0) {
 			if (feeder != null)
 				feeder.freeVideoFrameRx(videoFrame);
@@ -109,9 +104,10 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		}
 		long ptsNorm = calcPtsMillis(videoFrame);
 		setLastPtsNorm(ptsNorm);
-		long estStartTime = caclEstimatedStartTime(ptsNorm,
-				videoFrame.getRxTime());
-		// Log.i(LOG_TAG, "estimated start time: " + estStartTime);
+		caclEstimatedStartTime(ptsNorm, videoFrame.getRxTime());
+//		Log.i(LOG_TAG, "Enqueue video frame (ptsNorm/rxTime)"
+//				+ ptsNorm + "/" + videoFrame.getRxTime()
+//				+ " queue size: " + packetsQueue.size());
 		packetsQueue.offer(videoFrame);
 		this.framesMap.put(videoFrame, feeder);
 	}
@@ -120,7 +116,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	public void start() {
 		surfaceControl = new SurfaceControl();
 		surfaceControl.start();
-		// startRecord();
 		controller = getRecorderController();
 		controller.addRecorder(this);
 		Log.d(LOG_TAG, "add to controller");
@@ -128,9 +123,9 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 	@Override
 	public void stop() {
+		stopRecord();
 		if (controller != null)
 			controller.deleteRecorder(this);
-		stopRecord();
 		if (surfaceControl != null)
 			surfaceControl.interrupt();
 	}
@@ -155,10 +150,10 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 				Rect dirty = null;
 				Bitmap srcBitmap = null;
 
-				long tStart, tEnd;
-				long i = 1;
-				long t;
-				long total = 0;
+//				long tStart, tEnd;
+//				long i = 1;
+//				long t;
+//				long total = 0;
 
 				for (;;) {
 					if (!isRecording()) {
@@ -175,11 +170,8 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					long targetTime = getTargetTime();
 					if (targetTime != -1) {
 						long ptsMillis = calcPtsMillis(packetsQueue.peek());
-						// Log.d(LOG_TAG, "ptsMillis: " + ptsMillis
-						// + " targetTime: " + targetTime);
 						if ((ptsMillis == -1)
 								|| (ptsMillis + getEstimatedStartTime() > targetTime)) {
-							Log.d(LOG_TAG, "wait");
 							synchronized (controll) {
 								controll.wait();
 							}
@@ -188,9 +180,9 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					}
 
 					videoFrameProcessed = (VideoFrame) packetsQueue.take();
-					Log.d(LOG_TAG, "play frame "
-							+ calcPtsMillis(videoFrameProcessed));
-					tStart = System.currentTimeMillis();
+//					Log.d(LOG_TAG, "play frame "
+//							+ calcPtsMillis(videoFrameProcessed));
+//					tStart = System.currentTimeMillis();
 
 					rgb = videoFrameProcessed.getDataFrame();
 					width = videoFrameProcessed.getWidth();
@@ -246,15 +238,15 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 						Log.e(LOG_TAG, "Exception: " + e.toString());
 					}
 
-					tEnd = System.currentTimeMillis();
-					t = tEnd - tStart;
-					total += t;
-					Log.d(LOG_TAG, "frame played in: " + t + " ms. Average: "
-							+ (total / i));
+//					tEnd = System.currentTimeMillis();
+//					t = tEnd - tStart;
+//					total += t;
+//					Log.d(LOG_TAG, "frame played in: " + t + " ms. Average: "
+//							+ (total / i));
 					VideoFeeder feeder = framesMap.get(videoFrameProcessed);
 					if (feeder != null)
 						feeder.freeVideoFrameRx(videoFrameProcessed);
-					i++;
+//					i++;
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "SurfaceControl stopped");

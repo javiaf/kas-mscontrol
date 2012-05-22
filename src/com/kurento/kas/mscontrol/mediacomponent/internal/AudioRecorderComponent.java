@@ -67,14 +67,12 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 
 	@Override
 	public synchronized void putAudioSamplesRx(AudioSamples audioSamples) {
-		Log.i(LOG_TAG, "Enqueue audio samples (ptsNorm/rxTime)"
-				+ calcPtsMillis(audioSamples) + "/" + audioSamples.getRxTime()
-				+ " queue size: " + packetsQueue.size());
+//		Log.i(LOG_TAG, "Enqueue audio samples (ptsNorm/rxTime)"
+//				+ calcPtsMillis(audioSamples) + "/" + audioSamples.getRxTime()
+//				+ " queue size: " + packetsQueue.size());
 		long ptsNorm = calcPtsMillis(audioSamples);
 		setLastPtsNorm(ptsNorm);
-		long estStartTime = caclEstimatedStartTime(ptsNorm,
-				audioSamples.getRxTime());
-		// Log.i(LOG_TAG, "estimated start time: " + estStartTime);
+		caclEstimatedStartTime(ptsNorm, audioSamples.getRxTime());
 		packetsQueue.offer(audioSamples);
 	}
 
@@ -127,7 +125,6 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 		public void run() {
 			try {
 				AudioSamples audioSamplesProcessed;
-				long tStart, tEnd, t;
 				for (;;) {
 					if (!isRecording()) {
 						synchronized (controll) {
@@ -144,7 +141,6 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 						long ptsMillis = calcPtsMillis(packetsQueue.peek());
 						if ((ptsMillis == -1)
 								|| (ptsMillis + getEstimatedStartTime() > (targetTime))) {
-							Log.d(LOG_TAG, "wait");
 							synchronized (controll) {
 								controll.wait();
 							}
@@ -153,18 +149,10 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 					}
 
 					audioSamplesProcessed = (AudioSamples) packetsQueue.take();
-					Log.d(LOG_TAG, "play audio samples "
-							+ calcPtsMillis(audioSamplesProcessed));
 					if (audioTrack != null
 							&& (audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING)) {
-						tStart = System.currentTimeMillis();
-						audioTrack.write(
-								audioSamplesProcessed.getDataSamples(), 0,
+						audioTrack.write(audioSamplesProcessed.getDataSamples(), 0,
 								audioSamplesProcessed.getSize());
-						tEnd = System.currentTimeMillis();
-						t = tEnd - tStart;
-						if (t > 20)
-							Log.w(LOG_TAG, "audioTrack.write time: " + t);
 					}
 				}
 			} catch (InterruptedException e) {
