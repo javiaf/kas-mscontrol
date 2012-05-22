@@ -68,11 +68,6 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 		this.targetTime = targetPtsNorm;
 	}
 
-	@Override
-	public synchronized long getLastPtsNorm() {
-		return lastPtsNorm;
-	}
-
 	public synchronized void setLastPtsNorm(long lastAudioSamplesPtsNorm) {
 		this.lastPtsNorm = lastAudioSamplesPtsNorm;
 	}
@@ -95,11 +90,6 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 
 	@Override
 	public abstract void stop();
-
-	@Override
-	public long getPtsMillis() {
-		return calcPtsMillis(packetsQueue.peek());
-	}
 
 	@Override
 	public long getHeadTime() {
@@ -147,14 +137,6 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	@Override
 	public void flushAll() {
 		packetsQueue.clear();
-	}
-
-	@Override
-	public long getLatency() {
-		long firstPtsNorm = calcPtsMillis(packetsQueue.peek());
-		if (firstPtsNorm < 0)
-			return -1;
-		return getLastPtsNorm() - firstPtsNorm;
 	}
 
 	protected long calcPtsMillis(RxPacket p) {
