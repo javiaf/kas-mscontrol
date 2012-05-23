@@ -22,7 +22,9 @@ import java.util.List;
 
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
+import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.PreviewCallback;
+import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
 import android.os.Build.VERSION;
 import android.util.Log;
@@ -36,6 +38,7 @@ import com.kurento.commons.mscontrol.Parameters;
 import com.kurento.commons.mscontrol.join.Joinable;
 import com.kurento.kas.media.profiles.VideoProfile;
 import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
+import com.kurento.kas.mscontrol.mediacomponent.AndroidAction;
 
 public class VideoPlayerComponent extends MediaComponentBase implements
 		PreviewCallback {
@@ -88,7 +91,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 
 	}
 
-	//TODO: Review orientation camera when you use front camera.
+	// TODO: Review orientation camera when you use front camera.
 	private Camera openFrontFacingCameraGingerbread() {
 		int cameraCount = 0;
 		Camera cam = null;
@@ -244,47 +247,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 				+ " x " + parameters.getPreviewSize().height);
 		Log.d(LOG_TAG, "getSupportedPreviewSizes:\n" + cad);
 
-		// int result = 0;
-		// if (VERSION.SDK_INT < 9) {
-		// result = (360 + 90 - screenOrientation) % 360;
-		// // mCamera.setDisplayOrientation(result);
-		//
-		// } else {
-		//
-		// android.hardware.Camera.CameraInfo info = new
-		// android.hardware.Camera.CameraInfo();
-		// android.hardware.Camera.getCameraInfo(0, info);
-		// int rotation = screenOrientation;
-		// int degrees = 0;
-		// switch (rotation) {
-		// case Surface.ROTATION_0:
-		// degrees = 0;
-		// break;
-		// case Surface.ROTATION_90:
-		// degrees = 90;
-		// break;
-		// case Surface.ROTATION_180:
-		// degrees = 180;
-		// break;
-		// case Surface.ROTATION_270:
-		// degrees = 270;
-		// break;
-		// }
-		//
-		// if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-		// result = (info.orientation + degrees) % 360;
-		// result = (360 - result) % 360; // compensate the mirror
-		// } else { // back-facing
-		// result = (info.orientation - degrees + 360) % 360;
-		// }
-		// Log.d(LOG_TAG, "info.orientation = " + info.orientation
-		// + "; Result-Orientation = " + result);
-		// mCamera.setDisplayOrientation(result);
-		//
-		// }
-		// parameters.setRotation(result);
-		// mCamera.setParameters(parameters);
-
 		try {
 
 			mCamera.setPreviewDisplay(mHolder2);
@@ -319,5 +281,50 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		isReleased = true;
 		mHolder2.removeCallback(cb);
 	}
+
+	@Override
+	public void onAction(AndroidAction action) throws MsControlException {
+		if (action == null)
+			throw new MsControlException("Action not supported");
+
+		if (AndroidAction.CAMERA_AUTOFOCUS.equals(action)) {
+			try {
+				mCamera.autoFocus(null);
+			} catch (Exception e) {
+				Log.e(LOG_TAG, e.getMessage(), e);
+			}
+		} else if (AndroidAction.CAMERA_TAKEPHOTO.equals(action)) {
+			if (mCamera != null) {
+				mCamera.takePicture(myShutterCallback, myPictureCallback_RAW,
+						myPictureCallback_JPG);
+			}
+		}
+		throw new MsControlException("Action not supported");
+	}
+
+	ShutterCallback myShutterCallback = new ShutterCallback() {
+
+		@Override
+		public void onShutter() {
+
+		}
+	};
+
+	PictureCallback myPictureCallback_RAW = new PictureCallback() {
+
+		@Override
+		public void onPictureTaken(byte[] arg0, Camera arg1) {
+
+		}
+	};
+
+	PictureCallback myPictureCallback_JPG = new PictureCallback() {
+
+		@Override
+		public void onPictureTaken(byte[] arg0, Camera arg1) {
+			Log.d(LOG_TAG, "onPictureTaken");
+			mCamera.startPreview();
+		}
+	};
 
 }

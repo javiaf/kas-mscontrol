@@ -18,6 +18,7 @@
 package com.kurento.kas.mscontrol.mediacomponent;
 
 import com.kurento.commons.mscontrol.Configuration;
+import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameter;
 import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
 
@@ -100,7 +101,9 @@ public interface MediaComponentAndroid extends MediaComponent {
 	 */
 	public static final Parameter DISPLAY_ORIENTATION = new Parameter() {
 	};
-	
+
 	public boolean isStarted();
+
+	public void onAction(AndroidAction action) throws MsControlException;
 
 }
