@@ -51,9 +51,10 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 		return audioTrack.getPlayState() == AudioTrack.PLAYSTATE_PLAYING;
 	}
 
-	public AudioRecorderComponent(int maxDelay, Parameters params)
+	public AudioRecorderComponent(int maxDelay, boolean syncMediaStreams,
+			Parameters params)
 			throws MsControlException {
-		super(maxDelay);
+		super(maxDelay, syncMediaStreams);
 
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");

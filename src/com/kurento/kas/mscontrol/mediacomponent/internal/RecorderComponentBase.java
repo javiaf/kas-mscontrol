@@ -11,7 +11,7 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	private long estimatedStartTime;
 	private long targetTime;
 	private long lastPtsNorm;
-	protected boolean sync;
+	protected boolean isSynchronized;
 
 	protected BlockingQueue<RxPacket> packetsQueue;
 
@@ -21,11 +21,13 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	protected final Object controll = new Object();
 
 	private int maxDelay;
+	private boolean syncMediaStreams;
 
-	public RecorderComponentBase(int maxDelay) {
+	public RecorderComponentBase(int maxDelay, boolean syncMediaStreams) {
 		this.maxDelay = maxDelay;
+		this.syncMediaStreams = syncMediaStreams;
 		this.estimatedStartTime = -1;
-		this.sync = false;
+		this.isSynchronized = false;
 	}
 
 	protected synchronized boolean isRecording() {
@@ -38,12 +40,12 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 
 	@Override
 	public synchronized boolean isSynchronize() {
-		return this.sync;
+		return this.isSynchronized;
 	}
 
 	@Override
 	public synchronized void setSynchronize(boolean sync) {
-		this.sync = sync;
+		this.isSynchronized = sync;
 	}
 
 	@Override
@@ -150,6 +152,9 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	private static RecorderControllerComponent recorderControllerInstance = null;
 
 	protected synchronized RecorderController getRecorderController() {
+		if (!syncMediaStreams)
+			return new RecorderControllerComponent(maxDelay);
+
 		if (recorderControllerInstance == null) {
 			recorderControllerInstance = new RecorderControllerComponent(
 					maxDelay);

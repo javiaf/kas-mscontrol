@@ -63,9 +63,10 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		return isRecording();
 	}
 
-	public VideoRecorderComponent(int maxDelay, Parameters params)
+	public VideoRecorderComponent(int maxDelay, boolean syncMediaStreams,
+			Parameters params)
 			throws MsControlException {
-		super(maxDelay);
+		super(maxDelay, syncMediaStreams);
 
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
