@@ -256,6 +256,18 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	}
 
 	@Override
+	public void flushAll() {
+		VideoFrame vf = (VideoFrame) packetsQueue.peek();
+		while (vf != null) {
+			VideoFeeder feeder = framesMap.get(vf);
+			if (feeder != null)
+				feeder.freeVideoFrameRx(vf);
+			packetsQueue.remove(vf);
+			vf = (VideoFrame) packetsQueue.peek();
+		}
+	}
+
+	@Override
 	public void flushTo(long time) {
 		VideoFrame vf = (VideoFrame) packetsQueue.peek();
 		while (vf != null) {
