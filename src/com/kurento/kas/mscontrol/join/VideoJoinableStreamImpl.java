@@ -182,6 +182,17 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			usedFrames.put(videoFrame.getDataFrame(), count);
 	}
 
+	private int[] createFrameBuffer(int length) {
+		try {
+			return new int[length];
+		} catch (OutOfMemoryError e) {
+			e.printStackTrace();
+			Log.w(LOG_TAG, "Can not create frame buffer. No such memory.");
+			Log.w(LOG_TAG, e);
+			return null;
+		}
+	}
+
 	@Override
 	public synchronized int[] getFrameBuffer(int size) {
 		if (size % (Integer.SIZE / 8) != 0)
@@ -190,7 +201,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 		int l = size / (Integer.SIZE / 8);
 		if (freeFrames.isEmpty())
-			return new int[l];
+			return createFrameBuffer(l);
 		for (int[] b : freeFrames) {
 			if (b.length >= l) {
 				freeFrames.remove(b);
@@ -198,7 +209,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			}
 		}
 
-		return new int[l];
+		return createFrameBuffer(l);
 	}
 
 	public void stop() {
