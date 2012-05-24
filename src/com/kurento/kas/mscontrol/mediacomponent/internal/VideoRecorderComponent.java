@@ -98,7 +98,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 	@Override
 	public void putVideoFrame(VideoFrame videoFrame, VideoFeeder feeder) {
-		if (videoFrame.getPts() < 0) {
+		if (!isRecording() || videoFrame.getPts() < 0) {
 			if (feeder != null)
 				feeder.freeVideoFrameRx(videoFrame);
 			return;
@@ -117,6 +117,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	public void start() {
 		surfaceControl = new SurfaceControl();
 		surfaceControl.start();
+		setRecording(true);
 		controller = getRecorderController();
 		controller.addRecorder(this);
 		Log.d(LOG_TAG, "add to controller");
@@ -212,6 +213,11 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 											"Can not create bitmap. No such memory.");
 									Log.w(LOG_TAG, e);
 									mSurfaceReceive.unlockCanvasAndPost(canvas);
+
+									VideoFeeder feeder = framesMap.get(videoFrameProcessed);
+									if (feeder != null)
+										feeder.freeVideoFrameRx(videoFrameProcessed);
+
 									continue;
 								}
 								lastWidth = width;
