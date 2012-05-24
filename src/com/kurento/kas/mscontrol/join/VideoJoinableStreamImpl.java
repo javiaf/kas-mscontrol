@@ -182,19 +182,39 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			usedFrames.put(videoFrame.getDataFrame(), count);
 	}
 
+	// TODO: improve memory (video frame buffers) management.
 	private int[] createFrameBuffer(int length) {
+		int[] buffer = null;
+
+		long size = length * Integer.SIZE;
+		long freeMemory = Runtime.getRuntime().freeMemory();
+		long maxMemory = Runtime.getRuntime().maxMemory();
+		long nextTotalMemory = Runtime.getRuntime().totalMemory() + size;
+
 		try {
-			return new int[length];
+			if ((freeMemory >= size) || (nextTotalMemory <= maxMemory))
+				buffer = new int[length];
 		} catch (OutOfMemoryError e) {
 			e.printStackTrace();
-			Log.w(LOG_TAG, "Can not create frame buffer. No such memory.");
 			Log.w(LOG_TAG, e);
-			return null;
+			buffer = null;
 		}
+
+		if (buffer == null)
+			Log.w(LOG_TAG, "Can not create frame buffer. No such memory.");
+
+		return buffer;
 	}
 
 	@Override
 	public synchronized int[] getFrameBuffer(int size) {
+//		Log.d(LOG_TAG, "freeFrames.size(): " + freeFrames.size()
+//				+ " usedFrames.size(): " + usedFrames.size());
+//
+//		Log.d(LOG_TAG, "freeMemory: " + Runtime.getRuntime().freeMemory()/1024
+//				+ "KB maxMemory: " + Runtime.getRuntime().maxMemory()/1024
+//				+ "KB totalMemory: " + Runtime.getRuntime().totalMemory()/1024 + "KB");
+
 		if (size % (Integer.SIZE / 8) != 0)
 			throw new IllegalArgumentException("Size must be multiple of "
 					+ (Integer.SIZE / 8));
