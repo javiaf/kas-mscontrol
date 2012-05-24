@@ -106,6 +106,8 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 		audioTrackControl = new AudioTrackControl();
 		audioTrackControl.start();
 
+		setRecording(true);
+
 		controller = getRecorderController();
 		controller.addRecorder(this);
 		Log.d(LOG_TAG, "add to controller");
