@@ -280,18 +280,12 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			long tCurrentFrame;
 			long tInit = System.currentTimeMillis();
 			long timePts;
-
-			// long tStartTake, tEnd, tTake, tEncode, tReal;
-			// long tTotal = 0;
-			// long rft = tFrame;
-			// long lastTSend = 0;
 			long tTotal = 0;
 
 			System.out.println("tr: " + tr); //
 
 			try {
 				for (;;) {
-//					long t1 = System.currentTimeMillis(); //
 					if (lastT > 0) {
 						t = System.currentTimeMillis();
 						nextFrame = (ALPHA + 1) * tr - ALPHA * h;
@@ -299,21 +293,12 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					} else
 						s = -1;
 
-//					Log.d(LOG_TAG, "h: " + h + "  nextFrame: " + nextFrame  + "  s: " + s); //
-					if (s > 0) {
-//						long ta = System.currentTimeMillis(); //
+					if (s > 0)
 						sleep(s);
-//						Log.d(LOG_TAG, "real sleep: "+ (System.currentTimeMillis()-ta)); //
-					}
-//					long t2 = System.currentTimeMillis(); //
-//					Log.d(LOG_TAG, "first op: " + (t2 - t1) + " ms"); //
-
 					t = System.currentTimeMillis();
 					if (lastT > 0)
 						tFrame = t - lastT;
-//					Log.d(LOG_TAG, "tFrame: " + tFrame); //
 
-//					t1 = System.currentTimeMillis(); //
 					h = caclFrameTimeLuis(h, n, tFrame);
 
 					if (framesQueue.isEmpty())
@@ -329,18 +314,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					timePts = tCurrentFrame - tFirstFrame;
 					frameProcessed.setTime(timePts);
 
-//					t2 = System.currentTimeMillis(); //
-//					Log.d(LOG_TAG, "take time: " + (t2 - t1) + " ms"); //
-
-//					t1 = System.currentTimeMillis(); //
 					MediaTx.putVideoFrame(frameProcessed);
-//					t2 = System.currentTimeMillis(); //
-
-//					long tEncode = t2 - t1; //
-//					tTotal += tEncode; //
-
-//					Log.i(LOG_TAG, "Encode/send RTP frame time: " + tEncode
-//							+ "ms Average time: " + (tTotal / (n + 1)) + " ms"); //
 
 					lastT = t;
 					n++;
@@ -350,7 +324,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 				long tFinish = System.currentTimeMillis();
 				Log.i(LOG_TAG, "time total: " + (tFinish - tInit)
 						+ " n frames: " + (n + 1) + " Average fr: "
-						+ ((1000.0 * (n + 1)) / (tFinish - tInit)) + "fps");
+						+ ((1000.0 * (n + 1)) / (tFinish - tInit)) + "fps"
+						+ " Average encode time: " + (tTotal / (n + 1)));
 				txFinished.release();
 			}
 
