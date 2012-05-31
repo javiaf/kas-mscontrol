@@ -17,8 +17,7 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.graphics.Bitmap;
@@ -52,7 +51,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	private int screenHeight;
 	private SurfaceControl surfaceControl = null;
 
-	private Map<VideoFrame, VideoFeeder> framesMap;
+	private BlockingQueue<VideoFeeder> feedersQueue;
 
 	public View getVideoSurfaceRx() {
 		return videoSurfaceRx;
@@ -93,7 +92,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		mSurfaceReceive = mHolderReceive.getSurface();
 
 		this.packetsQueue = new LinkedBlockingQueue<RxPacket>();
-		this.framesMap = new ConcurrentHashMap<VideoFrame, VideoFeeder>();
+		this.feedersQueue = new LinkedBlockingQueue<VideoFeeder>();
 	}
 
 	@Override
@@ -110,7 +109,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 //				+ ptsNorm + "/" + videoFrame.getRxTime()
 //				+ " queue size: " + packetsQueue.size());
 		packetsQueue.offer(videoFrame);
-		this.framesMap.put(videoFrame, feeder);
+		this.feedersQueue.offer(feeder);
 	}
 
 	@Override
@@ -214,7 +213,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 									Log.w(LOG_TAG, e);
 									mSurfaceReceive.unlockCanvasAndPost(canvas);
 
-									VideoFeeder feeder = framesMap.get(videoFrameProcessed);
+									VideoFeeder feeder = feedersQueue.poll();
 									if (feeder != null)
 										feeder.freeVideoFrameRx(videoFrameProcessed);
 
@@ -250,7 +249,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 //					total += t;
 //					Log.d(LOG_TAG, "frame played in: " + t + " ms. Average: "
 //							+ (total / i));
-					VideoFeeder feeder = framesMap.get(videoFrameProcessed);
+					VideoFeeder feeder = feedersQueue.poll();
 					if (feeder != null)
 						feeder.freeVideoFrameRx(videoFrameProcessed);
 //					i++;
@@ -265,7 +264,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	public void flushAll() {
 		VideoFrame vf = (VideoFrame) packetsQueue.peek();
 		while (vf != null) {
-			VideoFeeder feeder = framesMap.get(vf);
+			VideoFeeder feeder = feedersQueue.poll();
 			if (feeder != null)
 				feeder.freeVideoFrameRx(vf);
 			packetsQueue.remove(vf);
@@ -279,7 +278,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		while (vf != null) {
 			if ((calcPtsMillis(vf) + getEstimatedStartTime()) > time)
 				break;
-			VideoFeeder feeder = framesMap.get(vf);
+			VideoFeeder feeder = feedersQueue.poll();
 			if (feeder != null)
 				feeder.freeVideoFrameRx(vf);
 			packetsQueue.remove(vf);
