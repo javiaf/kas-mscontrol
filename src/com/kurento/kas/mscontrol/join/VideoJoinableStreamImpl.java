@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Semaphore;
 
 import javax.sdp.SdpException;
 
@@ -60,6 +61,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	private VideoTxThread videoTxThread = null;
 	private VideoRxThread videoRxThread = null;
 
+	private Semaphore txFinished = new Semaphore(0);
 
 	private int QUEUE_SIZE = 2;
 	private BlockingQueue<VideoFrameTx> framesQueue;
@@ -228,8 +230,14 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	public void stop() {
-		if (videoTxThread != null)
+		if (videoTxThread != null) {
 			videoTxThread.interrupt();
+			try {
+				txFinished.acquire();
+			} catch (InterruptedException e) {
+				Log.e(LOG_TAG, "Error while waiting to complete test", e);
+			}
+		}
 
 		Log.d(LOG_TAG, "finishVideo");
 		MediaTx.finishVideo();
@@ -534,6 +542,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 				Log.i(LOG_TAG, "time total: " + (tFinish - tInit)
 						+ " n frames: " + (n + 1) + " Average fr: "
 						+ ((1000.0 * (n + 1)) / (tFinish - tInit)) + "fps");
+				txFinished.release();
 			}
 		}
 	}
