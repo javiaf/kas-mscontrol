@@ -42,6 +42,7 @@ import com.kurento.kas.media.rx.MediaRx;
 import com.kurento.kas.media.rx.VideoFrame;
 import com.kurento.kas.media.rx.VideoRx;
 import com.kurento.kas.media.tx.MediaTx;
+import com.kurento.kas.media.tx.VideoFrameTx;
 import com.kurento.kas.media.tx.VideoInfoTx;
 import com.kurento.kas.mscontrol.mediacomponent.internal.VideoFeeder;
 import com.kurento.kas.mscontrol.mediacomponent.internal.VideoRecorder;
@@ -59,22 +60,9 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	private VideoTxThread videoTxThread = null;
 	private VideoRxThread videoRxThread = null;
 
-	private class Frame {
-		private byte[] data;
-		private int width;
-		private int height;
-		private long time;
-
-		public Frame(byte[] data, int width, int height, long time) {
-			this.data = data;
-			this.width = width;
-			this.height = height;
-			this.time = time;
-		}
-	}
 
 	private int QUEUE_SIZE = 2;
-	private BlockingQueue<Frame> framesQueue;
+	private BlockingQueue<VideoFrameTx> framesQueue;
 
 	private long timeFirstFrame;
 
@@ -95,7 +83,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			QUEUE_SIZE = framesQueueSize;
 		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
 
-		framesQueue = new ArrayBlockingQueue<Frame>(QUEUE_SIZE);
+		framesQueue = new ArrayBlockingQueue<VideoFrameTx>(QUEUE_SIZE);
 
 		Map<MediaType, Mode> mediaTypesModes = getModesOfMediaTypes(localSessionSpec);
 		Mode videoMode = mediaTypesModes.get(MediaType.VIDEO);
@@ -147,12 +135,19 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	}
 
 	@Override
-	public void putVideoFrame(byte[] data, int width, int height, long time) {
+	public VideoFrameTx putVideoFrame(byte[] data, int width, int height,
+			long time) {
 		if (timeFirstFrame == -1)
 			timeFirstFrame = time;
-		if (framesQueue.size() >= QUEUE_SIZE)
+		if (framesQueue.size() >= QUEUE_SIZE) {
+			Log.w(LOG_TAG, "Buffer overflow: Video frames queue is full");
 			framesQueue.poll();
-		framesQueue.offer(new Frame(data, width, height, time-timeFirstFrame));
+		}
+		VideoFrameTx vf = new VideoFrameTx(data, width, height, time
+				- timeFirstFrame);
+		framesQueue.offer(vf);
+
+		return vf;
 	}
 
 	@Override
@@ -473,7 +468,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 			int tFrame = 1000 / (videoProfile.getFrameRateNum() / videoProfile
 					.getFrameRateDen());
-			Frame frameProcessed;
+			VideoFrameTx frameProcessed;
 
 			long tStartTake, tStartEncode, tEnd, tTake, tEncode, tReal;
 			long n = 0;
@@ -508,11 +503,10 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 						tFirstFrame = tCurrentFrame;
 					}
 					timePts = tCurrentFrame - tFirstFrame;
+					frameProcessed.setTime(timePts);
 
 					tStartEncode = System.currentTimeMillis();
-					MediaTx.putVideoFrame(frameProcessed.data,
-							frameProcessed.width, frameProcessed.height,
-							timePts);
+					MediaTx.putVideoFrame(frameProcessed);
 					tEnd = System.currentTimeMillis();
 
 //					tEncode = tEnd - tStartEncode;
