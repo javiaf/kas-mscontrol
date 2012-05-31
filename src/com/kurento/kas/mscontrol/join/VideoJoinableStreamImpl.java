@@ -19,11 +19,11 @@ package com.kurento.kas.mscontrol.join;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Semaphore;
 
 import javax.sdp.SdpException;
@@ -132,7 +132,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		}
 
 		this.timeFirstFrame = -1;
-		this.freeFrames = new HashSet<int[]>();
+		this.freeFrames = new CopyOnWriteArraySet<int[]>();
 		this.usedFrames = new HashMap<int[], Integer>();
 	}
 
@@ -212,18 +212,21 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 //				+ "KB maxMemory: " + Runtime.getRuntime().maxMemory()/1024
 //				+ "KB totalMemory: " + Runtime.getRuntime().totalMemory()/1024 + "KB");
 
-		if (size % (Integer.SIZE / 8) != 0)
-			throw new IllegalArgumentException("Size must be multiple of "
-					+ (Integer.SIZE / 8));
+		if (size % (Integer.SIZE / 8) != 0) {
+			Log.w(LOG_TAG, "Size must be multiple of " + (Integer.SIZE / 8));
+			return null;
+			// throw new IllegalArgumentException("Size must be multiple of "
+			// + (Integer.SIZE / 8));
+		}
 
 		int l = size / (Integer.SIZE / 8);
 		if (freeFrames.isEmpty())
 			return createFrameBuffer(l);
+
 		for (int[] b : freeFrames) {
-			if (b.length >= l) {
-				freeFrames.remove(b);
+			freeFrames.remove(b);
+			if (b.length >= l)
 				return b;
-			}
 		}
 
 		return createFrameBuffer(l);
