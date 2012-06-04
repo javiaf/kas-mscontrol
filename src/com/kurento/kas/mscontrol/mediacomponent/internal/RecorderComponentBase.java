@@ -70,16 +70,21 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 		this.targetTime = targetPtsNorm;
 	}
 
-	public synchronized void setLastPtsNorm(long lastAudioSamplesPtsNorm) {
-		this.lastPtsNorm = lastAudioSamplesPtsNorm;
+	public synchronized void setLastPtsNorm(long ptsNorm) {
+		this.lastPtsNorm = ptsNorm;
 	}
 
 	public synchronized long caclEstimatedStartTime(long ptsNorm, long rxTime) {
+		long newEstStartTime = rxTime - ptsNorm;
+		if (Math.abs(newEstStartTime - estimatedStartTime) > 1000)
+			n = 0;
+
 		if (n > 15)
 			estimatedStartTime = (15 * estimatedStartTime + (rxTime - ptsNorm)) / 16;
 		else
-			estimatedStartTime = (n * estimatedStartTime + (rxTime - ptsNorm))
+			estimatedStartTime = (n * estimatedStartTime + newEstStartTime)
 					/ (n + 1);
+
 		n++;
 		return estimatedStartTime;
 	}
@@ -96,8 +101,6 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	@Override
 	public long getHeadTime() {
 		long ptsMillis = calcPtsMillis(packetsQueue.peek());
-		if (ptsMillis < 0)
-			return -1;
 		return ptsMillis + getEstimatedStartTime();
 	}
 

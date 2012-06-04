@@ -97,17 +97,22 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 	@Override
 	public void putVideoFrame(VideoFrame videoFrame, VideoFeeder feeder) {
-		if (!isRecording() || videoFrame.getPts() < 0) {
+		Log.d(LOG_TAG, "putVideoFrame");
+		Log.d(LOG_TAG, "videoFrame.getPts(): " + videoFrame.getPts()
+				+ "  videoFrame.getStartTime(): " + videoFrame.getStartTime());
+		if (!isRecording()) { // || videoFrame.getPts() < 0) {
 			if (feeder != null)
 				feeder.freeVideoFrameRx(videoFrame);
 			return;
 		}
 		long ptsNorm = calcPtsMillis(videoFrame);
 		setLastPtsNorm(ptsNorm);
-		caclEstimatedStartTime(ptsNorm, videoFrame.getRxTime());
-//		Log.i(LOG_TAG, "Enqueue video frame (ptsNorm/rxTime)"
-//				+ ptsNorm + "/" + videoFrame.getRxTime()
-//				+ " queue size: " + packetsQueue.size());
+		long st = caclEstimatedStartTime(ptsNorm, videoFrame.getRxTime());
+		Log.i(LOG_TAG,
+				"Enqueue video frame (ptsNorm/rxTime)" + ptsNorm + "/"
+						+ videoFrame.getRxTime() + " queue size: "
+						+ packetsQueue.size()
+						+ "  estimated start time: " +  st);
 		packetsQueue.offer(videoFrame);
 		this.feedersQueue.offer(feeder);
 	}
