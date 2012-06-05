@@ -105,10 +105,13 @@ public class RTPInfo {
 		if (medias.isEmpty())
 			return;
 
-		try {
-			this.dstIp = medias.get(0).getTransport().getRtp().getAddress();
-		} catch (ArgumentNotSetException e) {
-			Log.e(LOG_TAG, e.toString());
+		for (MediaSpec m : medias) {
+			try {
+				this.dstIp = m.getTransport().getRtp().getAddress();
+				break;
+			} catch (ArgumentNotSetException e) {
+				Log.w(LOG_TAG, e.toString());
+			}
 		}
 
 		for (MediaSpec m : medias) {
