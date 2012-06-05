@@ -212,7 +212,7 @@ public class MSControlFactory {
 	 * 
 	 *            <tr>
 	 *            <td>{@link MediaSessionAndroid#STUN_HOST STUN_HOST}</td>
-	 *            <td>O</td>
+	 *            <td>M</td>
 	 *            <td>String</td>
 	 *            <td>NA</td>
 	 *            <td></td>
@@ -221,7 +221,7 @@ public class MSControlFactory {
 	 * 
 	 *            <tr>
 	 *            <td>{@link MediaSessionAndroid#STUN_PORT STUN_PORT}</td>
-	 *            <td>O</td>
+	 *            <td>M</td>
 	 *            <td>Integer</td>
 	 *            <td>[1024, 65535]</td>
 	 *            <td>3478</td>
