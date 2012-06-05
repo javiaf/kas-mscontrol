@@ -17,8 +17,11 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
+import com.kurento.kas.media.tx.VideoFrameTx;
+
 public interface VideoSink {
 
-	public void putVideoFrame(byte[] data, int width, int height, long time);
+	public VideoFrameTx putVideoFrame(byte[] data, int width, int height,
+			long time);
 	
 }

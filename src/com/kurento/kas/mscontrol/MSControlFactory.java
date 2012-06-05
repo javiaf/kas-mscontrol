@@ -24,6 +24,7 @@ import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.mscontrol.internal.MediaSessionImpl;
 import com.kurento.kas.mscontrol.internal.ParametersImpl;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
+import com.kurento.kas.mscontrol.networkconnection.PortRange;
 
 /**
  * This factory creates MediaSessionAndroid from a set of parameters.
@@ -197,6 +198,16 @@ public class MSControlFactory {
 	 *            <td>2</td>
 	 *            <td>Indicate the number of frames will be buffered from the
 	 *            camera.</td>
+	 *            </tr>
+	 * 
+	 *            <tr>
+	 *            <td>{@link MediaSessionAndroid#SYNCHRONIZE_MEDIA_STREAMS
+	 *            SYNCHRONIZE_MEDIA_STREAMS}</td>
+	 *            <td>O</td>
+	 *            <td>Boolean</td>
+	 *            <td>{true, false}</td>
+	 *            <td>false</td>
+	 *            <td>Indicate if the received streams must be synchronized.</td>
 	 *            </tr>
 	 * 
 	 *            <tr>

@@ -11,6 +11,7 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	private long estimatedStartTime;
 	private long targetTime;
 	private long lastPtsNorm;
+	protected boolean isSynchronized;
 
 	protected BlockingQueue<RxPacket> packetsQueue;
 
@@ -20,9 +21,13 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	protected final Object controll = new Object();
 
 	private int maxDelay;
+	private boolean syncMediaStreams;
 
-	public RecorderComponentBase(int maxDelay) {
+	public RecorderComponentBase(int maxDelay, boolean syncMediaStreams) {
 		this.maxDelay = maxDelay;
+		this.syncMediaStreams = syncMediaStreams;
+		this.estimatedStartTime = -1;
+		this.isSynchronized = false;
 	}
 
 	protected synchronized boolean isRecording() {
@@ -34,12 +39,27 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	}
 
 	@Override
+	public synchronized boolean isSynchronize() {
+		return this.isSynchronized;
+	}
+
+	@Override
+	public synchronized void setSynchronize(boolean sync) {
+		this.isSynchronized = sync;
+	}
+
+	@Override
 	public synchronized long getEstimatedStartTime() {
 		return estimatedStartTime;
 	}
 
 	public synchronized void setEstimatedStartTime(long estimatedStartTime) {
 		this.estimatedStartTime = estimatedStartTime;
+	}
+
+	@Override
+	public synchronized long getEstimatedFinishTime() {
+		return estimatedStartTime + lastPtsNorm;
 	}
 
 	public synchronized long getTargetTime() {
@@ -50,21 +70,21 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 		this.targetTime = targetPtsNorm;
 	}
 
-	@Override
-	public synchronized long getLastPtsNorm() {
-		return lastPtsNorm;
-	}
-
-	public synchronized void setLastPtsNorm(long lastAudioSamplesPtsNorm) {
-		this.lastPtsNorm = lastAudioSamplesPtsNorm;
+	public synchronized void setLastPtsNorm(long ptsNorm) {
+		this.lastPtsNorm = ptsNorm;
 	}
 
 	public synchronized long caclEstimatedStartTime(long ptsNorm, long rxTime) {
+		long newEstStartTime = rxTime - ptsNorm;
+		if (Math.abs(newEstStartTime - estimatedStartTime) > 1000)
+			n = 0;
+
 		if (n > 15)
 			estimatedStartTime = (15 * estimatedStartTime + (rxTime - ptsNorm)) / 16;
 		else
-			estimatedStartTime = (n * estimatedStartTime + (rxTime - ptsNorm))
+			estimatedStartTime = (n * estimatedStartTime + newEstStartTime)
 					/ (n + 1);
+
 		n++;
 		return estimatedStartTime;
 	}
@@ -79,15 +99,8 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	public abstract void stop();
 
 	@Override
-	public long getPtsMillis() {
-		return calcPtsMillis(packetsQueue.peek());
-	}
-
-	@Override
 	public long getHeadTime() {
 		long ptsMillis = calcPtsMillis(packetsQueue.peek());
-		if (ptsMillis < 0)
-			return -1;
 		return ptsMillis + getEstimatedStartTime();
 	}
 
@@ -131,14 +144,6 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 		packetsQueue.clear();
 	}
 
-	@Override
-	public long getLatency() {
-		long firstPtsNorm = calcPtsMillis(packetsQueue.peek());
-		if (firstPtsNorm < 0)
-			return -1;
-		return getLastPtsNorm() - firstPtsNorm;
-	}
-
 	protected long calcPtsMillis(RxPacket p) {
 		if (p == null)
 			return -1;
@@ -150,6 +155,9 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	private static RecorderControllerComponent recorderControllerInstance = null;
 
 	protected synchronized RecorderController getRecorderController() {
+		if (!syncMediaStreams)
+			return new RecorderControllerComponent(maxDelay);
+
 		if (recorderControllerInstance == null) {
 			recorderControllerInstance = new RecorderControllerComponent(
 					maxDelay);

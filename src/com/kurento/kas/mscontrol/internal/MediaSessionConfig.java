@@ -52,6 +52,8 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	private Integer gopSize;
 	private Integer framesQueueSize;
 
+	private Boolean syncMediaStreams;
+
 	public String getStunHost() {
 		return stunHost;
 	}
@@ -116,14 +118,18 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 		return framesQueueSize;
 	}
 
+	public Boolean getSyncMediaStreams() {
+		return syncMediaStreams;
+	}
+
 	protected MediaSessionConfig(NetIF netIF, InetAddress localAddress,
 			Integer maxBW, Integer maxDelay,
 			Map<MediaType, Mode> mediaTypeModes,
 			ArrayList<AudioCodecType> audioCodecs, PortRange audioPortRange,
 			ArrayList<VideoCodecType> videoCodecs, PortRange videoPortRange,
 			Integer frameWidth, Integer frameHeight, Integer maxFrameRate,
-			Integer gopSize, Integer framesQueueSize, String stunHost,
-			Integer stunPort) {
+			Integer gopSize, Integer framesQueueSize, Boolean syncMediaStreams,
+			String stunHost, Integer stunPort) {
 
 		this.stunHost = stunHost;
 		this.stunPort = stunPort;
@@ -144,6 +150,8 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 		this.maxFrameRate = maxFrameRate;
 		this.gopSize = gopSize;
 		this.framesQueueSize = framesQueueSize;
+
+		this.syncMediaStreams = syncMediaStreams;
 	}
 
 }

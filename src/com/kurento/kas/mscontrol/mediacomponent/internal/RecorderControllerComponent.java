@@ -42,74 +42,77 @@ public class RecorderControllerComponent implements
 		}
 	}
 
+	public static final int INC = 40;
 	public static final int INTERVAL = 40;
+	public static final int MAX_WAIT = 200;
 
 	private class Controller extends Thread {
 		@Override
 		public void run() {
-			long t, tStart, flushedT, currentFlushed, currentT, targetRelTime, targetTime, latency;
-			long inc = 20;
-			long realInc;
-			long tIncStart;
-			long minTime, minLatency, estStartT;
-			int interval;
-
 			try {
-				tStart = System.currentTimeMillis();
-				flushedT = tStart;
-				tIncStart = tStart;
-				targetRelTime = 0;
-				Log.d(LOG_TAG, "Controller start with scheduler");
-				Log.d(LOG_TAG, "maxDelay: " + maxDelay);
+				long t, lastT;
+				long globalStartTime, globalHeadTime, globalFinishTime;
+				long relativeTargetTime, absoluteTargetTime;
+				long latency;
+
+				lastT = System.currentTimeMillis();
+				relativeTargetTime = 0;
+				absoluteTargetTime = lastT;
+
 				for (;;) {
 					t = System.currentTimeMillis();
-					minTime = Long.MAX_VALUE;
-					estStartT = Long.MAX_VALUE;
-					minLatency = Long.MAX_VALUE;
+
+					globalHeadTime = Long.MAX_VALUE;
+					globalFinishTime = Long.MAX_VALUE;
+					globalStartTime = Long.MAX_VALUE;
+					long nToRecord = 0;
 					for (Recorder r : recorders) {
-						minTime = Math.min(minTime, r.getHeadTime());
-						estStartT = Math.min(estStartT,
-								r.getEstimatedStartTime());
-						minLatency = Math.min(minLatency, r.getLatency());
-					}
-					if (minTime < 0) {
-						Log.w(LOG_TAG, "can not record");
-						tIncStart = t;
-						sleep(inc);
-						continue;
-					}
+						long finishTime = r.getEstimatedFinishTime();
+						long startTime = r.getEstimatedStartTime();
+						if (startTime >=0)
+							globalStartTime = Math.min(globalStartTime, startTime);
 
-					currentT = estStartT + (t - tStart);
-					currentFlushed = estStartT + (t - flushedT);
-					realInc = t - tIncStart;
-					targetRelTime += realInc;
-					targetTime = estStartT + targetRelTime;
-					targetTime = Math.min(targetTime, minTime + INTERVAL);
-					// latency = currentFlushed - targetTime;
-					// interval -= realInc;
-
-					 Log.d(LOG_TAG, "estStartT: " + estStartT + " currentT: "
-					 + currentT + " currentFlushed: " + currentFlushed
-					 + " targetTime: " + targetTime + " targetRelTime: "
-							+ targetRelTime + " latency: " + minLatency); // latency);
-
-					if (minLatency > maxDelay) { // (latency > MAX_LATENCY) {
-						long flushTo = targetTime + maxDelay;
-						Log.w(LOG_TAG, "flush to " + flushTo);
-						for (Recorder r : recorders) {
-							Log.w(LOG_TAG, r + " latency: " + r.getLatency());
-							r.flushTo(flushTo);
+						if (r.hasMediaPacket()) {
+							globalHeadTime = Math.min(globalHeadTime, r.getHeadTime());
+							globalFinishTime = Math.min(globalFinishTime, finishTime);
+							r.setSynchronize(true);
+							nToRecord++;
+						} else if ((absoluteTargetTime - finishTime) > MAX_WAIT) {
+							r.setSynchronize(false);
 						}
-						targetRelTime = Math.min(currentT, flushTo) - estStartT;
-						flushedT = System.currentTimeMillis() - targetRelTime;
+					}
+
+					if (nToRecord == 0) {
+						lastT = t;
+						sleep(INC);
 						continue;
 					}
 
-					for (Recorder r : recorders)
-						r.startRecord(targetTime);
+					relativeTargetTime += t - lastT;
+					absoluteTargetTime = globalStartTime + relativeTargetTime;
+					absoluteTargetTime = Math.min(absoluteTargetTime, globalHeadTime);
+					latency = globalFinishTime - absoluteTargetTime;
+					// relativeTargetTime = absoluteTargetTime - globalStartT;
 
-					tIncStart = t;
-					sleep(inc);
+					if (latency > maxDelay) {
+						long flushTo = globalFinishTime - 1;
+						Log.w(LOG_TAG, "Latency: " + latency + ". Flush to " + flushTo);
+						for (Recorder r : recorders)
+							r.flushTo(flushTo);
+						relativeTargetTime = flushTo - globalStartTime;
+
+						lastT = t;
+						sleep(INC);
+						continue;
+					}
+
+					for (Recorder r : recorders) {
+						if (r.isSynchronize())
+							r.startRecord(absoluteTargetTime + INTERVAL);
+					}
+
+					lastT = t;
+					sleep(INC);
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "Controller stopped");

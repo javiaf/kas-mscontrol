@@ -17,8 +17,7 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.graphics.Bitmap;
@@ -52,7 +51,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	private int screenHeight;
 	private SurfaceControl surfaceControl = null;
 
-	private Map<VideoFrame, VideoFeeder> framesMap;
+	private BlockingQueue<VideoFeeder> feedersQueue;
 
 	public View getVideoSurfaceRx() {
 		return videoSurfaceRx;
@@ -63,9 +62,10 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		return isRecording();
 	}
 
-	public VideoRecorderComponent(int maxDelay, Parameters params)
+	public VideoRecorderComponent(int maxDelay, boolean syncMediaStreams,
+			Parameters params)
 			throws MsControlException {
-		super(maxDelay);
+		super(maxDelay, syncMediaStreams);
 
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
@@ -92,35 +92,31 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		mSurfaceReceive = mHolderReceive.getSurface();
 
 		this.packetsQueue = new LinkedBlockingQueue<RxPacket>();
-		this.framesMap = new ConcurrentHashMap<VideoFrame, VideoFeeder>();
+		this.feedersQueue = new LinkedBlockingQueue<VideoFeeder>();
 	}
 
 	@Override
 	public void putVideoFrame(VideoFrame videoFrame, VideoFeeder feeder) {
-		Log.i(LOG_TAG, "Enqueue video frame (ptsNorm/rxTime)"
-				+ calcPtsMillis(videoFrame) + "/" + videoFrame.getRxTime()
-				+ " queue size: " + packetsQueue.size());
-		// Log.d(LOG_TAG, "width: " + videoFrame.getWidth() + "\theight: "
-		// + videoFrame.getHeight());
-		if (videoFrame.getPts() < 0) {
+		if (!isRecording()) {
 			if (feeder != null)
 				feeder.freeVideoFrameRx(videoFrame);
 			return;
 		}
 		long ptsNorm = calcPtsMillis(videoFrame);
 		setLastPtsNorm(ptsNorm);
-		long estStartTime = caclEstimatedStartTime(ptsNorm,
-				videoFrame.getRxTime());
-		// Log.i(LOG_TAG, "estimated start time: " + estStartTime);
+		caclEstimatedStartTime(ptsNorm, videoFrame.getRxTime());
+		Log.i(LOG_TAG, "Enqueue video frame (ptsNorm/rxTime)"
+					+ ptsNorm + "/" + videoFrame.getRxTime()
+					+ " queue size: " + packetsQueue.size());
 		packetsQueue.offer(videoFrame);
-		this.framesMap.put(videoFrame, feeder);
+		this.feedersQueue.offer(feeder);
 	}
 
 	@Override
 	public void start() {
 		surfaceControl = new SurfaceControl();
 		surfaceControl.start();
-		// startRecord();
+		setRecording(true);
 		controller = getRecorderController();
 		controller.addRecorder(this);
 		Log.d(LOG_TAG, "add to controller");
@@ -128,9 +124,9 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 	@Override
 	public void stop() {
+		stopRecord();
 		if (controller != null)
 			controller.deleteRecorder(this);
-		stopRecord();
 		if (surfaceControl != null)
 			surfaceControl.interrupt();
 	}
@@ -155,10 +151,10 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 				Rect dirty = null;
 				Bitmap srcBitmap = null;
 
-				long tStart, tEnd;
-				long i = 1;
-				long t;
-				long total = 0;
+//				long tStart, tEnd;
+//				long i = 1;
+//				long t;
+//				long total = 0;
 
 				for (;;) {
 					if (!isRecording()) {
@@ -175,11 +171,8 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					long targetTime = getTargetTime();
 					if (targetTime != -1) {
 						long ptsMillis = calcPtsMillis(packetsQueue.peek());
-						// Log.d(LOG_TAG, "ptsMillis: " + ptsMillis
-						// + " targetTime: " + targetTime);
 						if ((ptsMillis == -1)
 								|| (ptsMillis + getEstimatedStartTime() > targetTime)) {
-							Log.d(LOG_TAG, "wait");
 							synchronized (controll) {
 								controll.wait();
 							}
@@ -188,9 +181,9 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					}
 
 					videoFrameProcessed = (VideoFrame) packetsQueue.take();
-					Log.d(LOG_TAG, "play frame "
-							+ calcPtsMillis(videoFrameProcessed));
-					tStart = System.currentTimeMillis();
+//					Log.d(LOG_TAG, "play frame "
+//							+ calcPtsMillis(videoFrameProcessed));
+//					tStart = System.currentTimeMillis();
 
 					rgb = videoFrameProcessed.getDataFrame();
 					width = videoFrameProcessed.getWidth();
@@ -219,6 +212,11 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 											"Can not create bitmap. No such memory.");
 									Log.w(LOG_TAG, e);
 									mSurfaceReceive.unlockCanvasAndPost(canvas);
+
+									VideoFeeder feeder = feedersQueue.poll();
+									if (feeder != null)
+										feeder.freeVideoFrameRx(videoFrameProcessed);
+
 									continue;
 								}
 								lastWidth = width;
@@ -246,19 +244,31 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 						Log.e(LOG_TAG, "Exception: " + e.toString());
 					}
 
-					tEnd = System.currentTimeMillis();
-					t = tEnd - tStart;
-					total += t;
-					Log.d(LOG_TAG, "frame played in: " + t + " ms. Average: "
-							+ (total / i));
-					VideoFeeder feeder = framesMap.get(videoFrameProcessed);
+//					tEnd = System.currentTimeMillis();
+//					t = tEnd - tStart;
+//					total += t;
+//					Log.d(LOG_TAG, "frame played in: " + t + " ms. Average: "
+//							+ (total / i));
+					VideoFeeder feeder = feedersQueue.poll();
 					if (feeder != null)
 						feeder.freeVideoFrameRx(videoFrameProcessed);
-					i++;
+//					i++;
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "SurfaceControl stopped");
 			}
+		}
+	}
+
+	@Override
+	public void flushAll() {
+		VideoFrame vf = (VideoFrame) packetsQueue.peek();
+		while (vf != null) {
+			VideoFeeder feeder = feedersQueue.poll();
+			if (feeder != null)
+				feeder.freeVideoFrameRx(vf);
+			packetsQueue.remove(vf);
+			vf = (VideoFrame) packetsQueue.peek();
 		}
 	}
 
@@ -268,7 +278,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		while (vf != null) {
 			if ((calcPtsMillis(vf) + getEstimatedStartTime()) > time)
 				break;
-			VideoFeeder feeder = framesMap.get(vf);
+			VideoFeeder feeder = feedersQueue.poll();
 			if (feeder != null)
 				feeder.freeVideoFrameRx(vf);
 			packetsQueue.remove(vf);

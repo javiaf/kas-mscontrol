@@ -75,12 +75,12 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			return new AudioPlayerComponent();
 		else if (MediaComponentAndroid.AUDIO_RECORDER.equals(predefinedConfig))
 			return new AudioRecorderComponent(mediaSessionConfig.getMaxDelay(),
-					params);
+					mediaSessionConfig.getSyncMediaStreams(), params);
 		else if (MediaComponentAndroid.VIDEO_PLAYER.equals(predefinedConfig))
 			return new VideoPlayerComponent(params);
 		else if (MediaComponentAndroid.VIDEO_RECORDER.equals(predefinedConfig))
 			return new VideoRecorderComponent(mediaSessionConfig.getMaxDelay(),
-					params);
+					mediaSessionConfig.getSyncMediaStreams(), params);
 
 		throw new MsControlException("Configuration is not supported: "
 				+ predefinedConfig);
@@ -258,10 +258,20 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		else
 			framesQueueSize = (Integer) obj;
 
+		Boolean syncMediaStreams = null;
+		obj = params.get(SYNCHRONIZE_MEDIA_STREAMS);
+		if (obj == null) {
+			syncMediaStreams = false;
+		} else if (!(obj instanceof Boolean))
+			throw new MsControlException(
+					"Parameter MediaSessionAndroid.SYNCHRONIZE_MEDIA_STREAMS must be instance of Boolean");
+		else
+			syncMediaStreams = (Boolean) obj;
+
 		return new MediaSessionConfig(netIF, localAddress, maxBW, maxDelay,
 				mediaTypeModes, audioCodecs, audioPortRange, videoCodecs, videoPortRange,
 				frameWidth, frameHeight, maxFrameRate, gopSize, framesQueueSize,
-				stunHost, stunPort);
+				syncMediaStreams, stunHost, stunPort);
 	}
 
 	@Override

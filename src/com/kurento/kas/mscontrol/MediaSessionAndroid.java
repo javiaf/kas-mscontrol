@@ -134,6 +134,13 @@ public interface MediaSessionAndroid extends MediaSession {
 	};
 
 	/**
+	 * Boolean to indicate if the received media streams must be synchronized
+	 * when they are show to the user.
+	 */
+	public static final Parameter SYNCHRONIZE_MEDIA_STREAMS = new Parameter() {
+	};
+
+	/**
 	 * Create a MediaComponentAndroid.
 	 * 
 	 * @param predefinedConfig
