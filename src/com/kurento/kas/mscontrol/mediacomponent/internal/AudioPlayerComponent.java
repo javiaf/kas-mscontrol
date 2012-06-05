@@ -153,9 +153,10 @@ public class AudioPlayerComponent extends MediaComponentBase {
 						if (j instanceof AudioSink)
 							((AudioSink) j).putAudioSamples(buffer, bufferReadResult, time);
 				}
-				releaseAudioRecord();
 			} catch (Throwable t) {
 				Log.e(LOG_TAG, "Recording error:" + t.toString());
+			} finally {
+				releaseAudioRecord();
 			}
 		}
 	}
