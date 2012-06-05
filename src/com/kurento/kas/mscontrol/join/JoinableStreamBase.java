@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.kurento.commons.media.format.MediaSpec;
+import com.kurento.commons.media.format.Payload;
 import com.kurento.commons.media.format.SessionSpec;
 import com.kurento.commons.media.format.enums.MediaType;
 import com.kurento.commons.media.format.enums.Mode;
@@ -68,13 +69,23 @@ public abstract class JoinableStreamBase extends JoinableImpl implements Joinabl
 	protected static SessionSpec filterMediaByType(SessionSpec session,
 			MediaType type) {
 		List<MediaSpec> mediaList = new ArrayList<MediaSpec>();
+		MediaSpec newM = new MediaSpec();
+
 		for (MediaSpec m : session.getMediaSpecs()) {
 			Set<MediaType> mediaTypes = m.getTypes();
 			if (mediaTypes.size() != 1)
 				continue;
 			for (MediaType t : mediaTypes) {
-				if (t == type)
-					mediaList.add(m);
+				if (t == type) {
+					for (Payload p : m.getPayloads()) {
+						newM.setMode(m.getMode());
+						newM.setTransport(m.getTransport());
+						newM.setTypes(m.getTypes());
+						newM.addPayload(p);
+						mediaList.add(newM);
+						break;
+					}
+				}
 				break;
 			}
 		}
