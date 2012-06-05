@@ -183,7 +183,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	private int[] createFrameBuffer(int length) {
 		int[] buffer = null;
 
-		long size = length * Integer.SIZE;
+		long size = length * Integer.SIZE / 8;
 		long freeMemory = Runtime.getRuntime().freeMemory();
 		long maxMemory = Runtime.getRuntime().maxMemory();
 		long nextTotalMemory = Runtime.getRuntime().totalMemory() + size;
