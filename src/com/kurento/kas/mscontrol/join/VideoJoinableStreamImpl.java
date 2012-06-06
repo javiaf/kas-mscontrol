@@ -71,6 +71,10 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	private Set<int[]> freeFrames;
 	private Map<int[], Integer> usedFrames;
 
+	private static final double MEMORY_TO_USE = 0.6;
+	private long maxMemory;
+	private long memoryUsed;
+
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
 	}
@@ -134,6 +138,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		this.timeFirstFrame = -1;
 		this.freeFrames = new CopyOnWriteArraySet<int[]>();
 		this.usedFrames = new HashMap<int[], Integer>();
+
+		maxMemory = (long) (Runtime.getRuntime().maxMemory() * MEMORY_TO_USE);
 	}
 
 	@Override
@@ -184,13 +190,12 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		int[] buffer = null;
 
 		long size = length * Integer.SIZE / 8;
-		long freeMemory = Runtime.getRuntime().freeMemory();
-		long maxMemory = Runtime.getRuntime().maxMemory();
-		long nextTotalMemory = Runtime.getRuntime().totalMemory() + size;
 
 		try {
-			if ((freeMemory >= size) || (nextTotalMemory <= maxMemory))
+			if (memoryUsed < maxMemory) {
 				buffer = new int[length];
+				memoryUsed += size;
+			}
 		} catch (OutOfMemoryError e) {
 			e.printStackTrace();
 			Log.w(LOG_TAG, e);
