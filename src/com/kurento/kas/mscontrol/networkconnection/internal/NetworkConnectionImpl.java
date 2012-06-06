@@ -159,7 +159,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			int audioRemainder = MediaPortManager.releaseAudioLocalPort();
 			int videoRemainder = MediaPortManager.releaseVideoLocalPort();
 
-			if ((audioRemainder > 0) || (videoRemainder > 0))
+			if ((audioRemainder != 0) || (videoRemainder != 0))
 				throw new MsControlException(
 						"Can not take ports, they are in use.");
 
