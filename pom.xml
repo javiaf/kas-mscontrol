@@ -19,7 +19,7 @@
 		<kcMsControlVersion>2.0.1-SNAPSHOT</kcMsControlVersion>
 		<kasMediaVersion>1.2.1-SNAPSHOT</kasMediaVersion>
 		<kcMediaSpecConversorVersion>1.0.1-SNAPSHOT</kcMediaSpecConversorVersion>
-		<kcStunVersion>1.0.1-SNAPSHOT</kcStunVersion>
+		<kcStunVersion>1.0.2-SNAPSHOT</kcStunVersion>
 	</properties>
 
 	<organization>
