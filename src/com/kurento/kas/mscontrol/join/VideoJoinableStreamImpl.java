@@ -246,6 +246,11 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		MediaTx.finishVideo();
 		Log.d(LOG_TAG, "stopVideoRx");
 		MediaRx.stopVideoRx();
+
+		freeFrames.clear();
+		usedFrames.clear();
+
+		System.gc();
 	}
 
 	private class VideoTxThread extends Thread {
