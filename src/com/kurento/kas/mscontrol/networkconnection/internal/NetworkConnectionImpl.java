@@ -73,6 +73,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	private int maxAudioBitrate;
 
+	private static boolean freePorts = true;
+
 	@Override
 	public void setLocalSessionSpec(SessionSpec arg0) {
 		this.localSessionSpec = arg0;
@@ -127,6 +129,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			videoJoinableStreamImpl.stop();
 		if (audioJoinableStreamImpl != null)
 			audioJoinableStreamImpl.stop();
+
+		synchronized (NetworkConnectionImpl.class) {
+			freePorts = true;
+		}
 	}
 
 	private Payload addPayload(MediaSpec mediaSpec, int id, String codecName,
@@ -155,6 +161,12 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	private void takeMediaPort() throws MsControlException {
 		synchronized (NetworkConnectionImpl.class) {
+			if (!freePorts)
+				throw new MsControlException(
+						"Can not take ports, they are in use.");
+
+			freePorts = false;
+
 			Log.d(LOG_TAG, "takeMediaPortThreadSafe");
 			int audioRemainder = MediaPortManager.releaseAudioLocalPort();
 			int videoRemainder = MediaPortManager.releaseVideoLocalPort();
