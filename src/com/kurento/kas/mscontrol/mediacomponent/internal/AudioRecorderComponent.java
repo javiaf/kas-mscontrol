@@ -17,6 +17,7 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
+import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import android.media.AudioFormat;
@@ -31,6 +32,7 @@ import com.kurento.kas.media.rx.AudioRx;
 import com.kurento.kas.media.rx.AudioSamples;
 import com.kurento.kas.media.rx.RxPacket;
 import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
+import com.kurento.kas.mscontrol.mediacomponent.AndroidInfo;
 
 public class AudioRecorderComponent extends RecorderComponentBase implements
 		Recorder, AudioRx {
@@ -167,6 +169,19 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 				Log.d(LOG_TAG, "AudioTrackControl stopped");
 			}
 		}
+	}
+
+	@Override
+	public Object getInfo(AndroidInfo info) throws MsControlException {
+		if (info == null)
+			throw new MsControlException("Info not found");
+
+		if (AndroidInfo.BIT_RATE.equals(info)) {
+			Random r = new Random(System.currentTimeMillis());
+			return r.nextInt(100);
+		}
+
+		throw new MsControlException("Info not found");
 	}
 
 }
