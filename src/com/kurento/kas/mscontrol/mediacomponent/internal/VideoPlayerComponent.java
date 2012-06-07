@@ -298,8 +298,8 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 				mCamera.takePicture(myShutterCallback, myPictureCallback_RAW,
 						myPictureCallback_JPG);
 			}
-		}
-		throw new MsControlException("Action not supported");
+		} else
+			throw new MsControlException("Action not supported");
 	}
 
 	ShutterCallback myShutterCallback = new ShutterCallback() {
