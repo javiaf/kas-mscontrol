@@ -519,4 +519,28 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		return videoProfiles;
 	}
 
+	@Override
+	public long getBitrate(StreamType streamType, Direction direction) {
+		if (StreamType.video.equals(streamType)
+				&& videoJoinableStreamImpl != null) {
+			if (Direction.SEND.equals(direction))
+				return videoJoinableStreamImpl.getOutBitrate();
+			else if (Direction.RECV.equals(direction))
+				return videoJoinableStreamImpl.getInBitrate();
+			else if (Direction.SEND.equals(direction))
+				return videoJoinableStreamImpl.getOutBitrate()
+						+ videoJoinableStreamImpl.getInBitrate();
+		} else if (StreamType.audio.equals(streamType)
+				&& audioJoinableStreamImpl != null) {
+			if (Direction.SEND.equals(direction))
+				return audioJoinableStreamImpl.getOutBitrate();
+			else if (Direction.RECV.equals(direction))
+				return audioJoinableStreamImpl.getInBitrate();
+			else if (Direction.SEND.equals(direction))
+				return audioJoinableStreamImpl.getOutBitrate()
+						+ audioJoinableStreamImpl.getInBitrate();
+		}
+		return 0;
+	}
+
 }
