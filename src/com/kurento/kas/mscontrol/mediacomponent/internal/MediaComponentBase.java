@@ -20,6 +20,7 @@ package com.kurento.kas.mscontrol.mediacomponent.internal;
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.kas.mscontrol.join.JoinableContainerImpl;
 import com.kurento.kas.mscontrol.mediacomponent.AndroidAction;
+import com.kurento.kas.mscontrol.mediacomponent.AndroidInfo;
 import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
 
 public abstract class MediaComponentBase extends JoinableContainerImpl
@@ -46,6 +47,11 @@ public abstract class MediaComponentBase extends JoinableContainerImpl
 	@Override
 	public void onAction(AndroidAction action) throws MsControlException {
 		throw new MsControlException("Action not supported");
+	}
+
+	@Override
+	public Object getInfo(AndroidInfo info) throws MsControlException {
+		throw new MsControlException("Info not found");
 	}
 
 }

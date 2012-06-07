@@ -106,4 +106,6 @@ public interface MediaComponentAndroid extends MediaComponent {
 
 	public void onAction(AndroidAction action) throws MsControlException;
 
+	public Object getInfo(AndroidInfo info) throws MsControlException;
+
 }
