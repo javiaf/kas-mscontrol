@@ -17,7 +17,6 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
-import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -35,7 +34,6 @@ import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.commons.mscontrol.Parameters;
 import com.kurento.kas.media.rx.RxPacket;
 import com.kurento.kas.media.rx.VideoFrame;
-import com.kurento.kas.mscontrol.mediacomponent.AndroidInfo;
 
 public class VideoRecorderComponent extends RecorderComponentBase implements
 		Recorder, VideoRecorder {
@@ -286,19 +284,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 			packetsQueue.remove(vf);
 			vf = (VideoFrame) packetsQueue.peek();
 		}
-	}
-
-	@Override
-	public Object getInfo(AndroidInfo info) throws MsControlException {
-		if (info == null)
-			throw new MsControlException("Info not found");
-
-		if (AndroidInfo.BIT_RATE.equals(info)) {
-			Random r = new Random(System.currentTimeMillis());
-			return r.nextInt(100);
-		}
-
-		throw new MsControlException("Info not found");
 	}
 
 }
