@@ -257,6 +257,10 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		usedFrames.clear();
 
 		System.gc();
+
+		Log.d(LOG_TAG, "freeMemory: " + Runtime.getRuntime().freeMemory()/1024
+				+ "KB maxMemory: " + Runtime.getRuntime().maxMemory()/1024
+				+ "KB totalMemory: " + Runtime.getRuntime().totalMemory()/1024 + "KB");
 	}
 
 	private class VideoTxThread extends Thread {
