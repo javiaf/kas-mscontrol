@@ -116,7 +116,10 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 			n = diffFirstFrame - (diffFirstFrame % audioPacketTime);
 			Log.w(LOG_TAG, "n set to " + n);
 		}
-		MediaTx.putAudioSamples(in_buffer, in_size, n);
+
+		int nBytes = MediaTx.putAudioSamples(in_buffer, in_size, n);
+		computeOutBytes(nBytes);
+
 		timeLastSamples = time;
 		n += audioPacketTime;
 	}

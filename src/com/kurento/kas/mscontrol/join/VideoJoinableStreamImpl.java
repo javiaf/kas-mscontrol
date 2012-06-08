@@ -329,7 +329,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					timePts = tCurrentFrame - tFirstFrame;
 					frameProcessed.setTime(timePts);
 
-					MediaTx.putVideoFrame(frameProcessed);
+					int nBytes = MediaTx.putVideoFrame(frameProcessed);
+					computeOutBytes(nBytes);
 
 					lastT = t;
 					n++;
