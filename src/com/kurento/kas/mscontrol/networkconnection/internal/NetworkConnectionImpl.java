@@ -165,8 +165,6 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				throw new MsControlException(
 						"Can not take ports, they are in use.");
 
-			freePorts = false;
-
 			Log.d(LOG_TAG, "takeMediaPortThreadSafe");
 			int audioRemainder = MediaPortManager.releaseAudioLocalPort();
 			int videoRemainder = MediaPortManager.releaseVideoLocalPort();
@@ -296,6 +294,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				audioPort = MediaPortManager.takeAudioLocalPort();
 				videoPort = MediaPortManager.takeVideoLocalPort();
 			}
+
+			freePorts = false;
 		}
 	}
 
