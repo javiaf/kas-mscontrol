@@ -4,6 +4,7 @@ import java.util.concurrent.BlockingQueue;
 
 import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.kas.media.rx.RxPacket;
+import com.kurento.kas.mscontrol.mediacomponent.AndroidInfo;
 
 public abstract class RecorderComponentBase extends MediaComponentBase
 		implements Recorder {
@@ -164,6 +165,13 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 		}
 		recorderControllerInstance.setMaxDelay(maxDelay);
 		return recorderControllerInstance;
+	}
+
+	@Override
+	public Object getInfo(AndroidInfo info) throws MsControlException {
+		if (AndroidInfo.RECORDER_QUEUE.equals(info))
+			return packetsQueue.size();
+		throw new MsControlException("Info not found");
 	}
 
 }
