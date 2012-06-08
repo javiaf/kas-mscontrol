@@ -160,6 +160,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 	@Override
 	public synchronized void putVideoFrameRx(VideoFrame videoFrame) {
+		computeInBytes(videoFrame.getEncodedSize());
 		int n = 1;
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))

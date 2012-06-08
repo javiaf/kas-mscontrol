@@ -123,6 +123,7 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 
 	@Override
 	public void putAudioSamplesRx(AudioSamples audioSamples) {
+		computeInBytes(audioSamples.getEncodedSize());
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof AudioRx)
