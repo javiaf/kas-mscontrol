@@ -18,10 +18,8 @@
 package com.kurento.kas.mscontrol.join;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
@@ -29,7 +27,6 @@ import com.kurento.commons.media.format.MediaSpec;
 import com.kurento.commons.media.format.Payload;
 import com.kurento.commons.media.format.SessionSpec;
 import com.kurento.commons.media.format.enums.MediaType;
-import com.kurento.commons.media.format.enums.Mode;
 import com.kurento.commons.mscontrol.join.JoinableContainer;
 import com.kurento.commons.mscontrol.join.JoinableStream;
 
@@ -135,21 +132,6 @@ public abstract class JoinableStreamBase extends JoinableImpl implements
 
 	protected void computeOutBytes(long outBytes) {
 		setOutBitrate(outBitrateCalc.computeBytes(outBytes));
-	}
-
-	protected static Map<MediaType, Mode> getModesOfMediaTypes(
-			SessionSpec session) {
-		Map<MediaType, Mode> map = new HashMap<MediaType, Mode>();
-		for (MediaSpec m : session.getMediaSpecs()) {
-			Set<MediaType> mediaTypes = m.getTypes();
-			if (mediaTypes.size() != 1)
-				continue;
-			for (MediaType t : mediaTypes) {
-				map.put(t, m.getMode());
-				break;
-			}
-		}
-		return map;
 	}
 
 	protected static SessionSpec filterMediaByType(SessionSpec session,

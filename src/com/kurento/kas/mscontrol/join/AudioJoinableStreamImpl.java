@@ -17,8 +17,6 @@
 
 package com.kurento.kas.mscontrol.join;
 
-import java.util.Map;
-
 import javax.sdp.SdpException;
 
 import android.util.Log;
@@ -65,17 +63,16 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
 
-		Map<MediaType, Mode> mediaTypesModes = getModesOfMediaTypes(localSessionSpec);
-		Mode audioMode = mediaTypesModes.get(MediaType.AUDIO);
 		RTPInfo remoteRTPInfo = new RTPInfo(remoteSessionSpec);
+		Mode audioMode = remoteRTPInfo.getAudioMode();
 
-		if (audioMode != null) {
+		if (audioMode != null && !Mode.INACTIVE.equals(audioMode)) {
 			AudioCodecType audioCodecType = remoteRTPInfo.getAudioCodecType();
 			AudioProfile audioProfile = AudioProfile
 					.getAudioProfileFromAudioCodecType(audioCodecType);
 
 			if (audioProfile != null) {
-				this.audioInfo = new AudioInfoTx(audioProfile);
+				audioInfo = new AudioInfoTx(audioProfile);
 				audioInfo.setOut(remoteRTPInfo.getAudioRTPDir());
 				audioInfo.setPayloadType(remoteRTPInfo.getAudioPayloadType());
 

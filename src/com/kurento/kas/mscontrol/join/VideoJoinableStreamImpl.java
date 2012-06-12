@@ -91,11 +91,10 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 		framesQueue = new ArrayBlockingQueue<VideoFrameTx>(QUEUE_SIZE);
 
-		Map<MediaType, Mode> mediaTypesModes = getModesOfMediaTypes(localSessionSpec);
-		Mode videoMode = mediaTypesModes.get(MediaType.VIDEO);
 		RTPInfo remoteRTPInfo = new RTPInfo(remoteSessionSpec);
+		Mode videoMode = remoteRTPInfo.getVideoMode();
 
-		if (videoMode != null) {
+		if (videoMode != null && !Mode.INACTIVE.equals(videoMode)) {
 			VideoCodecType videoCodecType = remoteRTPInfo.getVideoCodecType();
 			VideoProfile videoProfile = getVideoProfileFromVideoCodecType(
 					videoProfiles, videoCodecType);
