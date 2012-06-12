@@ -57,10 +57,15 @@ public class AudioPlayerComponent extends MediaComponentBase {
 	 *         minBufferSize
 	 */
 	private int calculateBufferSize(int minBufferSize, int frameSizeEncode) {
-		int finalSize = frameSizeEncode;
-		while (finalSize < minBufferSize)
-			finalSize += frameSizeEncode;
-		return finalSize;
+		if (frameSizeEncode <= 0)
+			throw new IllegalArgumentException(
+					"frameSizeEncode must be greater than 0.");
+
+		int mod = minBufferSize % frameSizeEncode;
+		if (mod == 0)
+			return frameSizeEncode * (minBufferSize / frameSizeEncode);
+		else
+			return frameSizeEncode * ((minBufferSize / frameSizeEncode) + 1);
 	}
 
 	@Override
