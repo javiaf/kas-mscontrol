@@ -78,12 +78,18 @@ public class AudioPlayerComponent extends MediaComponentBase {
 		if (audioInfo == null)
 			throw new MsControlException("Cannot get audio info.");
 
-		this.frameSize = audioInfo.getFrameSize();
+		frameSize = audioInfo.getFrameSize();
 		int frequency = audioInfo.getAudioProfile().getSampleRate();
+
+		if (frameSize <= 0)
+			throw new MsControlException(
+					"Audio info error. Audio frame size must be greater than 0.");
+		if (frequency <= 0)
+			throw new MsControlException(
+					"Audio info error. Audio sample rate must be greater than 0.");
 
 		int minBufferSize = AudioRecord.getMinBufferSize(frequency, channelConfiguration,
 				audioEncoding);
-
 		int bufferSize = calculateBufferSize(minBufferSize, this.frameSize);
 
 		buffer = new short[bufferSize];
