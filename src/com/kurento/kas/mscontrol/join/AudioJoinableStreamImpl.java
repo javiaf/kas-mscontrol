@@ -77,7 +77,8 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 				audioInfo.setOut(remoteRTPInfo.getAudioRTPDir());
 				audioInfo.setPayloadType(remoteRTPInfo.getAudioPayloadType());
 
-				if (Mode.SENDRECV.equals(audioMode) || Mode.SENDONLY.equals(audioMode)) {
+				if (Mode.SENDRECV.equals(audioMode)
+						|| Mode.RECVONLY.equals(audioMode)) {
 					audioInfo.setFrameSize(MediaTx.initAudio(audioInfo));
 					if (audioInfo.getFrameSize() < 0) {
 						Log.e(LOG_TAG, "Error in initAudio");
@@ -86,7 +87,8 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 					}
 				}
 
-				if ((Mode.SENDRECV.equals(audioMode) || Mode.RECVONLY.equals(audioMode))) {
+				if ((Mode.SENDRECV.equals(audioMode) || Mode.SENDONLY
+						.equals(audioMode))) {
 					this.audioRxThread = new AudioRxThread(this, maxDelayRx);
 					this.audioRxThread.start();
 				}

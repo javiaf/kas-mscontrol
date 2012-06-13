@@ -110,7 +110,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 						.getDenominator());
 			}
 
-			if ((Mode.SENDRECV.equals(videoMode) || Mode.SENDONLY
+			if ((Mode.SENDRECV.equals(videoMode) || Mode.RECVONLY
 					.equals(videoMode)) && videoProfile != null) {
 				if (remoteRTPInfo.getVideoBandwidth() > 0)
 					videoProfile.setBitRate(remoteRTPInfo.getVideoBandwidth()*1000);
@@ -127,7 +127,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 				this.videoTxThread.start();
 			}
 
-			if ((Mode.SENDRECV.equals(videoMode) || Mode.RECVONLY
+			if ((Mode.SENDRECV.equals(videoMode) || Mode.SENDONLY
 					.equals(videoMode))) {
 				this.videoRxThread = new VideoRxThread(this, maxDelayRx);
 				this.videoRxThread.start();
