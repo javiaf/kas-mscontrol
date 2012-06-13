@@ -34,6 +34,7 @@ import com.kurento.kas.media.rx.AudioRx;
 import com.kurento.kas.media.rx.AudioSamples;
 import com.kurento.kas.media.rx.MediaRx;
 import com.kurento.kas.media.tx.AudioInfoTx;
+import com.kurento.kas.media.tx.AudioSamplesTx;
 import com.kurento.kas.media.tx.MediaTx;
 import com.kurento.kas.mscontrol.mediacomponent.internal.AudioSink;
 import com.kurento.kas.mscontrol.networkconnection.internal.RTPInfo;
@@ -98,7 +99,7 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 	}
 
 	@Override
-	public void putAudioSamples(short[] in_buffer, int in_size, long time) {
+	public AudioSamplesTx putAudioSamples(short[] data, int size, long time) {
 		if (timeFirstSamples == -1) {
 			n = 0;
 			timeFirstSamples = time;
@@ -114,11 +115,14 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 			Log.w(LOG_TAG, "n set to " + n);
 		}
 
-		int nBytes = MediaTx.putAudioSamples(in_buffer, in_size, n);
+		AudioSamplesTx as = new AudioSamplesTx(data, size, n);
+		int nBytes = MediaTx.putAudioSamples(as);
 		computeOutBytes(nBytes);
 
 		timeLastSamples = time;
 		n += audioPacketTime;
+
+		return as;
 	}
 
 	@Override
