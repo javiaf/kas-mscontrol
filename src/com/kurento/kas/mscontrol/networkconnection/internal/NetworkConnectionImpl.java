@@ -295,6 +295,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				videoPort = MediaPortManager.takeVideoLocalPort();
 			}
 
+			if (audioPort < 0 || videoPort < 0)
+				throw new MsControlException("Can not take ports.");
+
 			freePorts = false;
 		}
 	}
