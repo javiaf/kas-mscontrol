@@ -355,7 +355,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			int bitrate = (int) Math.ceil(maxAudioBitrate / 1000.0);
 			for (AudioProfile ap : audioProfiles) {
 				if (AudioProfile.MP2.equals(ap))
-					addPayload(audioMedia, 14, "MPA", 8000, bitrate);
+					addPayload(audioMedia, 14, "MPA", 90000, bitrate);
 				else if (AudioProfile.AMR.equals(ap)) {
 					Payload p = addPayload(audioMedia, payloadId, "AMR", 8000,
 							bitrate, 1);
