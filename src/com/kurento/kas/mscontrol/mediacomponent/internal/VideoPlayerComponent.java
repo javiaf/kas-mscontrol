@@ -29,7 +29,6 @@ import android.hardware.Camera.Size;
 import android.os.Build.VERSION;
 import android.util.Log;
 import android.view.SurfaceHolder;
-import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.view.View;
 
@@ -41,24 +40,20 @@ import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
 import com.kurento.kas.mscontrol.mediacomponent.AndroidAction;
 
 public class VideoPlayerComponent extends MediaComponentBase implements
-		PreviewCallback {
-	// SurfaceHolder.Callback, {
+		SurfaceHolder.Callback, PreviewCallback {
 
 	private static final String LOG_TAG = "VideoPlayer";
 
-	private SurfaceView mVideoView;
-	// private SurfaceHolder mHolder;
+	private int width;
+	private int height;
 
 	private Camera mCamera;
 	private int cameraFacing = 0;
-	private View videoSurfaceTx;
 
-	private int width;
-	private int height;
 	private int screenOrientation;
-	private SurfaceHolder mHolder2;
-	private Callback cb;
-	private static boolean isMholderCreated = false;
+
+	private View videoSurfaceTx;
+	private SurfaceHolder surfaceHolder;
 	private boolean isReleased;
 
 	public View getVideoSurfaceTx() {
@@ -87,19 +82,14 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		} catch (Exception e) {
 			cameraFacing = 0;
 		}
-		Log.d(LOG_TAG, "VideoPlayerComponent " + videoSurfaceTx.toString());
-
 	}
 
-	// TODO: Review orientation camera when you use front camera.
 	private Camera openFrontFacingCameraGingerbread() {
 		int cameraCount = 0;
 		Camera cam = null;
 		Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
 		cameraCount = Camera.getNumberOfCameras();
-		Log.d(LOG_TAG, "Num Camera is " + cameraCount
-				+ ". User wants Camera = " + cameraFacing);
-		// TODO: if only have one camera, open camera 0.
+
 		if (cameraCount == 1) {
 			try {
 				cam = Camera.open(0);
@@ -111,7 +101,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		} else {
 			for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
 				Camera.getCameraInfo(camIdx, cameraInfo);
-				if (cameraInfo.facing == cameraFacing) {// Camera.CameraInfo.CAMERA_FACING_BACK)
+				if (cameraInfo.facing == cameraFacing) {
 					try {
 						cam = Camera.open(camIdx);
 					} catch (RuntimeException e) {
@@ -132,7 +122,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		if (data == null)
 			return;
 		long time = System.currentTimeMillis();
-		// Send frame to subscribers
 		try {
 			for (Joinable j : getJoinees(Direction.SEND))
 				if (j instanceof VideoSink)
@@ -145,7 +134,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 
 	@Override
 	public void start() throws MsControlException {
-
 		VideoProfile videoProfile = null;
 		for (Joinable j : getJoinees(Direction.SEND))
 			if (j instanceof VideoJoinableStreamImpl) {
@@ -157,65 +145,32 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		this.width = videoProfile.getWidth();
 		this.height = videoProfile.getHeight();
 
-		mVideoView = (SurfaceView) videoSurfaceTx;
-		Log.d(LOG_TAG, "Starting");
-
-		mHolder2 = mVideoView.getHolder();
-		mHolder2.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-
-		if (isMholderCreated)
-			startCamera();
-
-		cb = new Callback() {
-			public void surfaceDestroyed(SurfaceHolder holder) {
-				Log.d(LOG_TAG, "Surface Destroy");
-				if (mCamera != null) {
-					mCamera.setPreviewCallback(null);
-					mCamera.stopPreview();
-					mCamera.release();
-					isMholderCreated = false;
-					mCamera = null;
-				}
-			}
-
-			public void surfaceCreated(SurfaceHolder holder) {
-				Log.d(LOG_TAG, "Surface Create");
-				isMholderCreated = true;
-				startCamera();
-			}
-
-			public void surfaceChanged(SurfaceHolder holder, int format,
-					int width, int height) {
-				Log.d(LOG_TAG, "Surface Changed");
-				// mCamera.setPreviewCallback(VideoPlayerComponent.this);
-			}
-		};
-
-		mHolder2.addCallback(cb);
+		surfaceHolder = ((SurfaceView) videoSurfaceTx).getHolder();
+		surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		surfaceHolder.addCallback(this);
 	}
 
-	private void startCamera() {
+	private void startCamera(SurfaceHolder surfHold) {
+		Log.d(LOG_TAG, "start camera");
 		if (isReleased)
 			return;
 
-		Log.d(LOG_TAG, "Start Camera");
 		if (mCamera == null) {
 			if (VERSION.SDK_INT < 9) {
 				mCamera = Camera.open();
 			} else
 				mCamera = openFrontFacingCameraGingerbread();
 		}
+
 		mCamera.setErrorCallback(new ErrorCallback() {
 			public void onError(int error, Camera camera) {
 				Log.e(LOG_TAG, "Camera error : " + error);
 			}
 		});
 
-		Log.d(LOG_TAG, "mCamera = " + mCamera.toString());
 		Camera.Parameters parameters = mCamera.getParameters();
-
 		List<Size> sizes = parameters.getSupportedPreviewSizes();
-		// Video Preferences is support?
+
 		boolean isSupport = false;
 		int sizeSelected = -1;
 		for (int i = 0; i < sizes.size(); i++) {
@@ -248,38 +203,55 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		Log.d(LOG_TAG, "getSupportedPreviewSizes:\n" + cad);
 
 		try {
-
-			mCamera.setPreviewDisplay(mHolder2);
+			mCamera.setPreviewDisplay(surfHold);
 		} catch (IOException e) {
 			e.printStackTrace();
+			Log.e(LOG_TAG, "Can not set preview display.");
 		}
 		try {
 			mCamera.startPreview();
 			mCamera.setPreviewCallback(VideoPlayerComponent.this);
 		} catch (Throwable e) {
-			Log.e(LOG_TAG, "Can't start camera preview");
+			e.printStackTrace();
+			Log.e(LOG_TAG, "Can not start camera preview");
 		}
-
 	}
 
 	@Override
 	public void stop() {
-		Log.d(LOG_TAG, "Stop");
 		if (mCamera != null) {
 			mCamera.setPreviewCallback(null);
 			mCamera.stopPreview();
 			mCamera.release();
 			mCamera = null;
 		}
-		Log.d(LOG_TAG, "mCamera release all");
 	}
 
 	@Override
 	public void release() {
-		Log.d(LOG_TAG, "Release");
 		stop();
 		isReleased = true;
-		mHolder2.removeCallback(cb);
+		surfaceHolder.removeCallback(this);
+	}
+
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		Log.d(LOG_TAG, "Surface destroyed");
+		if (mCamera != null) {
+			mCamera.setPreviewCallback(null);
+			mCamera.stopPreview();
+			mCamera.release();
+			mCamera = null;
+		}
+	}
+
+	public void surfaceCreated(SurfaceHolder holder) {
+		Log.d(LOG_TAG, "Surface created");
+		startCamera(surfaceHolder);
+	}
+
+	public void surfaceChanged(SurfaceHolder holder, int format, int width,
+			int height) {
+		Log.d(LOG_TAG, "Surface changed");
 	}
 
 	@Override
