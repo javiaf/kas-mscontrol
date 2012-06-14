@@ -90,8 +90,8 @@ public class SdpPortManagerImpl implements SdpPortManager {
 			log.error(e.getMessage(), e);
 			event = new SdpPortManagerEventImpl(null, this, null,
 					SdpPortManagerEvent.RESOURCE_UNAVAILABLE);
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Throwable t) {
+			log.error(t.getMessage(), t);
 		} finally {
 			notifyEvent(event);
 		}
@@ -110,38 +110,46 @@ public class SdpPortManagerImpl implements SdpPortManager {
 		SdpPortManagerEventImpl event = null;
 
 		try {
-			userAgentSDP = offer;
-			SessionSpec[] intersectionSessions = SessionSpec.intersect(
-					resource.generateSessionSpec(), offer);
-			List<MediaSpec> combinedMediaList = intersectionSessions[1]
-					.getMediaSpecs();
-
-			userAgentSDP.deleteAllMediaSpecs();
-			userAgentSDP.addMediaSpecs(combinedMediaList);
-			resource.setRemoteSessionSpec(userAgentSDP);
-			localSpec = intersectionSessions[0];
-			resource.setLocalSessionSpec(localSpec);
-
-			boolean sdpNotAcceptable = true;
-			for (MediaSpec ms : combinedMediaList) {
-				if (!ms.getPayloads().isEmpty()) {
-					sdpNotAcceptable = false;
-					break;
-				}
-			}
-
-			if (sdpNotAcceptable) {
+			if (offer == null) {
 				event = new SdpPortManagerEventImpl(null, this, localSpec,
 						SdpPortManagerEvent.SDP_NOT_ACCEPTABLE);
 			} else {
-				event = new SdpPortManagerEventImpl(
-						SdpPortManagerEvent.ANSWER_GENERATED, this, localSpec,
-						SdpPortManagerEvent.NO_ERROR);
+
+				userAgentSDP = offer;
+				SessionSpec[] intersectionSessions = SessionSpec.intersect(
+						resource.generateSessionSpec(), offer);
+				List<MediaSpec> combinedMediaList = intersectionSessions[1]
+						.getMediaSpecs();
+
+				userAgentSDP.deleteAllMediaSpecs();
+				userAgentSDP.addMediaSpecs(combinedMediaList);
+				resource.setRemoteSessionSpec(userAgentSDP);
+				localSpec = intersectionSessions[0];
+				resource.setLocalSessionSpec(localSpec);
+
+				boolean sdpNotAcceptable = true;
+				for (MediaSpec ms : combinedMediaList) {
+					if (!ms.getPayloads().isEmpty()) {
+						sdpNotAcceptable = false;
+						break;
+					}
+				}
+
+				if (sdpNotAcceptable) {
+					event = new SdpPortManagerEventImpl(null, this, localSpec,
+							SdpPortManagerEvent.SDP_NOT_ACCEPTABLE);
+				} else {
+					event = new SdpPortManagerEventImpl(
+							SdpPortManagerEvent.ANSWER_GENERATED, this,
+							localSpec, SdpPortManagerEvent.NO_ERROR);
+				}
 			}
 		} catch (MsControlException e) {
 			log.error(e.getMessage(), e);
 			event = new SdpPortManagerEventImpl(null, this, null,
 					SdpPortManagerEvent.RESOURCE_UNAVAILABLE);
+		} catch (Throwable t) {
+			log.error(t.getMessage(), t);
 		} finally {
 			notifyEvent(event);
 		}
