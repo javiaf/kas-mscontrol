@@ -18,7 +18,8 @@
 package com.kurento.kas.mscontrol.networkconnection.internal;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,8 +40,8 @@ public class SdpPortManagerImpl implements SdpPortManager {
 	private NetworkConnectionBase resource;
 	private SessionSpec userAgentSDP; // this is remote session spec
 
-	@SuppressWarnings("unchecked")
-	private CopyOnWriteArrayList<MediaEventListener> mediaListenerList = new CopyOnWriteArrayList<MediaEventListener>();
+	private Set<MediaEventListener<SdpPortManagerEvent>> mediaListenerList =
+				new CopyOnWriteArraySet<MediaEventListener<SdpPortManagerEvent>>();
 
 	private SessionSpec localSpec;
 
