@@ -232,7 +232,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 				sizeSelected = i;
 		}
 		if (sizeSelected == -1)
-			sizeSelected = 0;
+			sizeSelected = sizes.size() - 1;
 		if (!isSupport) {
 			width = sizes.get(sizeSelected).width;
 			height = sizes.get(sizeSelected).height;
@@ -303,7 +303,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	}
 
 	ShutterCallback myShutterCallback = new ShutterCallback() {
-
 		@Override
 		public void onShutter() {
 
@@ -311,7 +310,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	};
 
 	PictureCallback myPictureCallback_RAW = new PictureCallback() {
-
 		@Override
 		public void onPictureTaken(byte[] arg0, Camera arg1) {
 
@@ -319,7 +317,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	};
 
 	PictureCallback myPictureCallback_JPG = new PictureCallback() {
-
 		@Override
 		public void onPictureTaken(byte[] arg0, Camera arg1) {
 			Log.d(LOG_TAG, "onPictureTaken");
