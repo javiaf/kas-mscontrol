@@ -159,15 +159,43 @@ public class SdpPortManagerImpl implements SdpPortManager {
 	@Override
 	public void processSdpAnswer(SessionSpec answer)
 			throws SdpPortManagerException {
-		userAgentSDP = answer;
-		resource.setRemoteSessionSpec(SessionSpec.intersect(localSpec,
-				userAgentSDP)[1]);
-		localSpec = SessionSpec.intersect(localSpec, userAgentSDP)[0];
-		resource.setLocalSessionSpec(localSpec);
+		log.info("processSdpAnswer");
+		SdpPortManagerEventImpl event = null;
 
-		notifyEvent(new SdpPortManagerEventImpl(
-				SdpPortManagerEvent.ANSWER_PROCESSED, this, null,
-				SdpPortManagerEvent.NO_ERROR));
+		try {
+			if (answer == null) {
+				event = new SdpPortManagerEventImpl(null, this, localSpec,
+						SdpPortManagerEvent.SDP_NOT_ACCEPTABLE);
+			} else {
+				userAgentSDP = answer;
+				SessionSpec[] intersectionSessions = SessionSpec.intersect(
+						localSpec, userAgentSDP);
+				resource.setRemoteSessionSpec(intersectionSessions[1]);
+				localSpec = intersectionSessions[0];
+				resource.setLocalSessionSpec(localSpec);
+
+				boolean sdpNotAcceptable = true;
+				for (MediaSpec ms : localSpec.getMediaSpecs()) {
+					if (!ms.getPayloads().isEmpty()) {
+						sdpNotAcceptable = false;
+						break;
+					}
+				}
+
+				if (sdpNotAcceptable) {
+					event = new SdpPortManagerEventImpl(null, this, localSpec,
+							SdpPortManagerEvent.SDP_NOT_ACCEPTABLE);
+				} else {
+					event = new SdpPortManagerEventImpl(
+							SdpPortManagerEvent.ANSWER_PROCESSED, this, null,
+							SdpPortManagerEvent.NO_ERROR);
+				}
+			}
+		} catch (Throwable t) {
+			log.error(t.getMessage(), t);
+		} finally {
+			notifyEvent(event);
+		}
 	}
 
 	@Override
