@@ -14,8 +14,10 @@
 		<menu name="Kurento MsControl">
 			<item name="Media management" href="./media-management.html" />
 			<item name="Media buffering" href="./buffer-controller.html" />
-			<item name="Test Plan" href="./test-plan.html" />
-			
+			<item name="Test plan" href="">
+				<item name="Streaming test plan" href="./test-plan.html" />
+				<item name="SdpPortManager test plan" href="./SdpPortManager-test-plan.html" />
+			</item>
 		</menu>
 		<menu ref="reports" />
 
