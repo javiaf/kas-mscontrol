@@ -258,6 +258,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					throw new MsControlException(
 							"Error when retrieve public address.");
 
+				publicAddress = audioPublicIp;
+
 				int audioLocalPort = MediaPortManager
 						.takeAudioLocalPort(audioInfo.getLocalPort());
 				int videoLocalPort = MediaPortManager
