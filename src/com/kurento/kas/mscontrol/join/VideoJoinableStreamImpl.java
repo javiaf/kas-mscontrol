@@ -87,7 +87,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		this.localSessionSpec = localSessionSpec;
 		if (framesQueueSize != null && framesQueueSize > QUEUE_SIZE)
 			QUEUE_SIZE = framesQueueSize;
-		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
+		Log.d(LOG_TAG, "Video TX frames queue size: " + QUEUE_SIZE);
+		Log.d(LOG_TAG, "Max delay RX: " + maxDelayRx + " ms");
 
 		framesQueue = new ArrayBlockingQueue<VideoFrameTx>(QUEUE_SIZE);
 
@@ -147,7 +148,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		if (timeFirstFrame == -1)
 			timeFirstFrame = time;
 		if (framesQueue.size() >= QUEUE_SIZE) {
-			Log.w(LOG_TAG, "Buffer overflow: Video frames queue is full");
+			Log.d(LOG_TAG, "Buffer overflow: Video TX frames queue is full");
 			framesQueue.poll();
 		}
 		VideoFrameTx vf = new VideoFrameTx(data, width, height, time
@@ -210,18 +211,9 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 	@Override
 	public synchronized int[] getFrameBuffer(int size) {
-//		Log.d(LOG_TAG, "freeFrames.size(): " + freeFrames.size()
-//				+ " usedFrames.size(): " + usedFrames.size());
-//
-//		Log.d(LOG_TAG, "freeMemory: " + Runtime.getRuntime().freeMemory()/1024
-//				+ "KB maxMemory: " + Runtime.getRuntime().maxMemory()/1024
-//				+ "KB totalMemory: " + Runtime.getRuntime().totalMemory()/1024 + "KB");
-
 		if (size % (Integer.SIZE / 8) != 0) {
 			Log.w(LOG_TAG, "Size must be multiple of " + (Integer.SIZE / 8));
 			return null;
-			// throw new IllegalArgumentException("Size must be multiple of "
-			// + (Integer.SIZE / 8));
 		}
 
 		int l = size / (Integer.SIZE / 8);
@@ -257,7 +249,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 		System.gc();
 
-		Log.d(LOG_TAG, "freeMemory: " + Runtime.getRuntime().freeMemory()/1024
+		Log.i(LOG_TAG, "freeMemory: " + Runtime.getRuntime().freeMemory()/1024
 				+ "KB maxMemory: " + Runtime.getRuntime().maxMemory()/1024
 				+ "KB totalMemory: " + Runtime.getRuntime().totalMemory()/1024 + "KB");
 	}
@@ -316,7 +308,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					h = caclFrameTimeLuis(h, n, tFrame);
 
 					if (framesQueue.isEmpty())
-						Log.w(LOG_TAG,
+						Log.d(LOG_TAG,
 								"Buffer underflow: Video frames queue is empty");
 					frameProcessed = framesQueue.take();
 					tCurrentFrame = System.currentTimeMillis();
@@ -354,7 +346,6 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		public VideoRxThread(VideoRx videoRx, int maxDelayRx) {
 			this.videoRx = videoRx;
 			this.maxDelayRx = maxDelayRx;
-			Log.d(LOG_TAG, "maxDelayRx: " + maxDelayRx);
 		}
 
 		@Override
