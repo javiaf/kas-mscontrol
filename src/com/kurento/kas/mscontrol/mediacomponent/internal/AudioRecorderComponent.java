@@ -70,9 +70,6 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 
 	@Override
 	public synchronized void putAudioSamplesRx(AudioSamples audioSamples) {
-//		Log.i(LOG_TAG, "Enqueue audio samples (ptsNorm/rxTime)"
-//				+ calcPtsMillis(audioSamples) + "/" + audioSamples.getRxTime()
-//				+ " queue size: " + packetsQueue.size());
 		long ptsNorm = calcPtsMillis(audioSamples);
 		setLastPtsNorm(ptsNorm);
 		caclEstimatedStartTime(ptsNorm, audioSamples.getRxTime());
@@ -95,7 +92,6 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 		int minBufferSize = AudioTrack.getMinBufferSize(frequency,
 				channelConfiguration, audioEncoding);
 
-		Log.d(LOG_TAG, "minBufferSize: " + minBufferSize);
 		audioTrack = new AudioTrack(this.streamType, frequency,
 				channelConfiguration, audioEncoding, minBufferSize,
 				AudioTrack.MODE_STREAM);
@@ -110,7 +106,6 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 
 		controller = getRecorderController();
 		controller.addRecorder(this);
-		Log.d(LOG_TAG, "add to controller");
 	}
 
 	@Override

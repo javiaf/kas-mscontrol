@@ -105,9 +105,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		long ptsNorm = calcPtsMillis(videoFrame);
 		setLastPtsNorm(ptsNorm);
 		caclEstimatedStartTime(ptsNorm, videoFrame.getRxTime());
-		Log.i(LOG_TAG, "Enqueue video frame (ptsNorm/rxTime)"
-					+ ptsNorm + "/" + videoFrame.getRxTime()
-					+ " queue size: " + packetsQueue.size());
+
 		packetsQueue.offer(videoFrame);
 		this.feedersQueue.offer(feeder);
 	}
@@ -119,7 +117,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		setRecording(true);
 		controller = getRecorderController();
 		controller.addRecorder(this);
-		Log.d(LOG_TAG, "add to controller");
 	}
 
 	@Override
