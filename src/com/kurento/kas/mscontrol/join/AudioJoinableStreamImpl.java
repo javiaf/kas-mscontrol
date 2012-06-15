@@ -107,14 +107,10 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 			timeFirstSamples = time;
 		}
 		long diffFirstFrame = time - timeFirstSamples;
-		long diffLastFrame = time - timeLastSamples;
 		long drift = n - diffFirstFrame;
 		if (drift < -2 * audioPacketTime) {
-			Log.w(LOG_TAG, "GAP. Expected time: " + n + "  diffFirstFrame: "
-					+ diffFirstFrame + "  diffLastFrame: " + diffLastFrame
-					+ "  drift: " + drift);
+			Log.w(LOG_TAG, "Audio TX gap. Drift: " + drift);
 			n = diffFirstFrame - (diffFirstFrame % audioPacketTime);
-			Log.w(LOG_TAG, "n set to " + n);
 		}
 
 		AudioSamplesTx as = new AudioSamplesTx(data, size, n);
