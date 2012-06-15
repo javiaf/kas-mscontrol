@@ -26,6 +26,7 @@ import com.kurento.commons.media.format.MediaSpec;
 import com.kurento.commons.media.format.Payload;
 import com.kurento.commons.media.format.SessionSpec;
 import com.kurento.commons.media.format.enums.MediaType;
+import com.kurento.commons.media.format.enums.Mode;
 import com.kurento.commons.media.format.exceptions.ArgumentNotSetException;
 import com.kurento.commons.media.format.payload.PayloadRtp;
 import com.kurento.kas.media.codecs.AudioCodecType;
@@ -38,6 +39,7 @@ public class RTPInfo {
 
 	private String dstIp;
 
+	private Mode videoMode;
 	private int dstVideoPort;
 	private VideoCodecType videoCodecType;
 	private int videoPayloadType = -1;
@@ -46,12 +48,17 @@ public class RTPInfo {
 	private int frameHeight = -1;
 	private Fraction frameRate;
 
+	private Mode audioMode;
 	private int dstAudioPort;
 	private AudioCodecType audioCodecType;
 	private int audioPayloadType;
 
 	public String getDstIp() {
 		return dstIp;
+	}
+
+	public Mode getVideoMode() {
+		return videoMode;
 	}
 
 	public int getDstVideoPort() {
@@ -86,6 +93,10 @@ public class RTPInfo {
 		this.frameRate = frameRate;
 	}
 
+	public Mode getAudioMode() {
+		return audioMode;
+	}
+
 	public int getDstAudioPort() {
 		return dstAudioPort;
 	}
@@ -100,7 +111,7 @@ public class RTPInfo {
 
 	public RTPInfo(SessionSpec se) {
 		Log.d(LOG_TAG, "sessionSpec:\n" + se);
-		// try {
+
 		List<MediaSpec> medias = se.getMediaSpecs();
 		if (medias.isEmpty())
 			return;
@@ -114,17 +125,23 @@ public class RTPInfo {
 			}
 		}
 
+		videoMode = Mode.INACTIVE;
+		audioMode = Mode.INACTIVE;
+
 		for (MediaSpec m : medias) {
 			Set<MediaType> mediaTypes = m.getTypes();
 			if (mediaTypes.size() != 1)
 				continue;
 			for (MediaType t : mediaTypes) {
-				if (t == MediaType.AUDIO) {
+				if (Mode.INACTIVE.equals(audioMode) && t == MediaType.AUDIO) {
+					audioMode = m.getMode();
+					if (Mode.INACTIVE.equals(audioMode))
+						continue;
 					try {
 						this.dstAudioPort = m.getTransport().getRtp().getPort();
 					} catch (ArgumentNotSetException e) {
-						Log.w(LOG_TAG,
-								"Can not get port for audio" + e.toString());
+						Log.w(LOG_TAG, "Can not get port for audio " + e.toString());
+						continue;
 					}
 					List<Payload> payloads = m.getPayloads();
 					if ((payloads != null) && !payloads.isEmpty()) {
@@ -142,12 +159,16 @@ public class RTPInfo {
 							Log.w(LOG_TAG, encodingName + " not supported.");
 						}
 					}
-				} else if (t == MediaType.VIDEO) {
+				} else if (Mode.INACTIVE.equals(videoMode)
+						&& t == MediaType.VIDEO) {
+					videoMode = m.getMode();
+					if (Mode.INACTIVE.equals(videoMode))
+						continue;
 					try {
 						this.dstVideoPort = m.getTransport().getRtp().getPort();
 					} catch (ArgumentNotSetException e) {
-						Log.w(LOG_TAG,
-								"Can not get port for video" + e.toString());
+						Log.w(LOG_TAG, "Can not get port for video " + e.toString());
+						continue;
 					}
 					List<Payload> payloads = m.getPayloads();
 					if ((payloads != null) && !payloads.isEmpty()) {

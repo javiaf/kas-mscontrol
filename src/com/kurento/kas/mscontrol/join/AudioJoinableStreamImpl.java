@@ -17,8 +17,6 @@
 
 package com.kurento.kas.mscontrol.join;
 
-import java.util.Map;
-
 import javax.sdp.SdpException;
 
 import android.util.Log;
@@ -36,6 +34,7 @@ import com.kurento.kas.media.rx.AudioRx;
 import com.kurento.kas.media.rx.AudioSamples;
 import com.kurento.kas.media.rx.MediaRx;
 import com.kurento.kas.media.tx.AudioInfoTx;
+import com.kurento.kas.media.tx.AudioSamplesTx;
 import com.kurento.kas.media.tx.MediaTx;
 import com.kurento.kas.mscontrol.mediacomponent.internal.AudioSink;
 import com.kurento.kas.mscontrol.networkconnection.internal.RTPInfo;
@@ -65,21 +64,21 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
 
-		Map<MediaType, Mode> mediaTypesModes = getModesOfMediaTypes(localSessionSpec);
-		Mode audioMode = mediaTypesModes.get(MediaType.AUDIO);
 		RTPInfo remoteRTPInfo = new RTPInfo(remoteSessionSpec);
+		Mode audioMode = remoteRTPInfo.getAudioMode();
 
-		if (audioMode != null) {
+		if (audioMode != null && !Mode.INACTIVE.equals(audioMode)) {
 			AudioCodecType audioCodecType = remoteRTPInfo.getAudioCodecType();
 			AudioProfile audioProfile = AudioProfile
 					.getAudioProfileFromAudioCodecType(audioCodecType);
 
 			if (audioProfile != null) {
-				this.audioInfo = new AudioInfoTx(audioProfile);
+				audioInfo = new AudioInfoTx(audioProfile);
 				audioInfo.setOut(remoteRTPInfo.getAudioRTPDir());
 				audioInfo.setPayloadType(remoteRTPInfo.getAudioPayloadType());
 
-				if (Mode.SENDRECV.equals(audioMode) || Mode.SENDONLY.equals(audioMode)) {
+				if (Mode.SENDRECV.equals(audioMode)
+						|| Mode.RECVONLY.equals(audioMode)) {
 					audioInfo.setFrameSize(MediaTx.initAudio(audioInfo));
 					if (audioInfo.getFrameSize() < 0) {
 						Log.e(LOG_TAG, "Error in initAudio");
@@ -88,7 +87,8 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 					}
 				}
 
-				if ((Mode.SENDRECV.equals(audioMode) || Mode.RECVONLY.equals(audioMode))) {
+				if ((Mode.SENDRECV.equals(audioMode) || Mode.SENDONLY
+						.equals(audioMode))) {
 					this.audioRxThread = new AudioRxThread(this, maxDelayRx);
 					this.audioRxThread.start();
 				}
@@ -101,27 +101,26 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 	}
 
 	@Override
-	public void putAudioSamples(short[] in_buffer, int in_size, long time) {
+	public AudioSamplesTx putAudioSamples(short[] data, int size, long time) {
 		if (timeFirstSamples == -1) {
 			n = 0;
 			timeFirstSamples = time;
 		}
 		long diffFirstFrame = time - timeFirstSamples;
-		long diffLastFrame = time - timeLastSamples;
 		long drift = n - diffFirstFrame;
 		if (drift < -2 * audioPacketTime) {
-			Log.w(LOG_TAG, "GAP. Expected time: " + n + "  diffFirstFrame: "
-					+ diffFirstFrame + "  diffLastFrame: " + diffLastFrame
-					+ "  drift: " + drift);
+			Log.w(LOG_TAG, "Audio TX gap. Drift: " + drift);
 			n = diffFirstFrame - (diffFirstFrame % audioPacketTime);
-			Log.w(LOG_TAG, "n set to " + n);
 		}
 
-		int nBytes = MediaTx.putAudioSamples(in_buffer, in_size, n);
+		AudioSamplesTx as = new AudioSamplesTx(data, size, n);
+		int nBytes = MediaTx.putAudioSamples(as);
 		computeOutBytes(nBytes);
 
 		timeLastSamples = time;
 		n += audioPacketTime;
+
+		return as;
 	}
 
 	@Override

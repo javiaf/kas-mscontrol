@@ -17,8 +17,10 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
+import com.kurento.kas.media.tx.AudioSamplesTx;
+
 public interface AudioSink {
 
-	public void putAudioSamples(short[] in_buffer, int in_size, long time);
-	
+	public AudioSamplesTx putAudioSamples(short[] data, int size, long time);
+
 }

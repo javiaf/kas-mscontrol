@@ -87,15 +87,15 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		this.localSessionSpec = localSessionSpec;
 		if (framesQueueSize != null && framesQueueSize > QUEUE_SIZE)
 			QUEUE_SIZE = framesQueueSize;
-		Log.d(LOG_TAG, "QUEUE_SIZE: " + QUEUE_SIZE);
+		Log.d(LOG_TAG, "Video TX frames queue size: " + QUEUE_SIZE);
+		Log.d(LOG_TAG, "Max delay RX: " + maxDelayRx + " ms");
 
 		framesQueue = new ArrayBlockingQueue<VideoFrameTx>(QUEUE_SIZE);
 
-		Map<MediaType, Mode> mediaTypesModes = getModesOfMediaTypes(localSessionSpec);
-		Mode videoMode = mediaTypesModes.get(MediaType.VIDEO);
 		RTPInfo remoteRTPInfo = new RTPInfo(remoteSessionSpec);
+		Mode videoMode = remoteRTPInfo.getVideoMode();
 
-		if (videoMode != null) {
+		if (videoMode != null && !Mode.INACTIVE.equals(videoMode)) {
 			VideoCodecType videoCodecType = remoteRTPInfo.getVideoCodecType();
 			VideoProfile videoProfile = getVideoProfileFromVideoCodecType(
 					videoProfiles, videoCodecType);
@@ -111,7 +111,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 						.getDenominator());
 			}
 
-			if ((Mode.SENDRECV.equals(videoMode) || Mode.SENDONLY
+			if ((Mode.SENDRECV.equals(videoMode) || Mode.RECVONLY
 					.equals(videoMode)) && videoProfile != null) {
 				if (remoteRTPInfo.getVideoBandwidth() > 0)
 					videoProfile.setBitRate(remoteRTPInfo.getVideoBandwidth()*1000);
@@ -128,7 +128,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 				this.videoTxThread.start();
 			}
 
-			if ((Mode.SENDRECV.equals(videoMode) || Mode.RECVONLY
+			if ((Mode.SENDRECV.equals(videoMode) || Mode.SENDONLY
 					.equals(videoMode))) {
 				this.videoRxThread = new VideoRxThread(this, maxDelayRx);
 				this.videoRxThread.start();
@@ -148,7 +148,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		if (timeFirstFrame == -1)
 			timeFirstFrame = time;
 		if (framesQueue.size() >= QUEUE_SIZE) {
-			Log.w(LOG_TAG, "Buffer overflow: Video frames queue is full");
+			Log.v(LOG_TAG, "Buffer overflow: Video TX frames queue is full");
 			framesQueue.poll();
 		}
 		VideoFrameTx vf = new VideoFrameTx(data, width, height, time
@@ -211,18 +211,9 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 	@Override
 	public synchronized int[] getFrameBuffer(int size) {
-//		Log.d(LOG_TAG, "freeFrames.size(): " + freeFrames.size()
-//				+ " usedFrames.size(): " + usedFrames.size());
-//
-//		Log.d(LOG_TAG, "freeMemory: " + Runtime.getRuntime().freeMemory()/1024
-//				+ "KB maxMemory: " + Runtime.getRuntime().maxMemory()/1024
-//				+ "KB totalMemory: " + Runtime.getRuntime().totalMemory()/1024 + "KB");
-
 		if (size % (Integer.SIZE / 8) != 0) {
 			Log.w(LOG_TAG, "Size must be multiple of " + (Integer.SIZE / 8));
 			return null;
-			// throw new IllegalArgumentException("Size must be multiple of "
-			// + (Integer.SIZE / 8));
 		}
 
 		int l = size / (Integer.SIZE / 8);
@@ -258,7 +249,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 		System.gc();
 
-		Log.d(LOG_TAG, "freeMemory: " + Runtime.getRuntime().freeMemory()/1024
+		Log.i(LOG_TAG, "freeMemory: " + Runtime.getRuntime().freeMemory()/1024
 				+ "KB maxMemory: " + Runtime.getRuntime().maxMemory()/1024
 				+ "KB totalMemory: " + Runtime.getRuntime().totalMemory()/1024 + "KB");
 	}
@@ -279,8 +270,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 		@Override
 		public void run() {
-			int tr = 1000 / (videoProfile.getFrameRateNum() / videoProfile
-					.getFrameRateDen());
+			int fr = videoProfile.getFrameRateNum() / videoProfile.getFrameRateDen();
+			int tr = 1000 / fr;
 			VideoFrameTx frameProcessed;
 
 			long tFrame = tr;
@@ -295,9 +286,11 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			long tCurrentFrame;
 			long tInit = System.currentTimeMillis();
 			long timePts;
-			long tTotal = 0;
+			long tEncTotal = 0;
+			long nBytesTotal = 0;
 
-			System.out.println("tr: " + tr); //
+			Log.d(LOG_TAG, "Target frame rate: " + fr
+					+ "fps. Target frame time: " + tr + " ms.");
 
 			try {
 				for (;;) {
@@ -317,8 +310,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					h = caclFrameTimeLuis(h, n, tFrame);
 
 					if (framesQueue.isEmpty())
-						Log.w(LOG_TAG,
-								"Buffer underflow: Video frames queue is empty");
+						Log.v(LOG_TAG,
+								"Buffer underflow: Video TX frames queue is empty");
 					frameProcessed = framesQueue.take();
 					tCurrentFrame = System.currentTimeMillis();
 
@@ -329,19 +322,25 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					timePts = tCurrentFrame - tFirstFrame;
 					frameProcessed.setTime(timePts);
 
+					long t1 = System.currentTimeMillis();
 					int nBytes = MediaTx.putVideoFrame(frameProcessed);
+					tEncTotal += System.currentTimeMillis() - t1;
 					computeOutBytes(nBytes);
+					nBytesTotal += nBytes;
 
 					lastT = t;
 					n++;
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "VideoTxThread stopped");
-				long tFinish = System.currentTimeMillis();
-				Log.i(LOG_TAG, "time total: " + (tFinish - tInit)
-						+ " n frames: " + (n + 1) + " Average fr: "
-						+ ((1000.0 * (n + 1)) / (tFinish - tInit)) + "fps"
-						+ " Average encode time: " + (tTotal / (n + 1)));
+				long timeTx = System.currentTimeMillis() - tInit;
+				Log.i(LOG_TAG, "Time TX total: " + timeTx + "ms. Sent frames: "
+						+ n);
+				if (n > 0)
+					Log.i(LOG_TAG, "Average fr: " + (1000.0 * n / timeTx)
+							+ " fps." + " Average encode time: "
+							+ (tEncTotal / n) + " ms. Average bitrate: "
+							+ (8 * 1000 * nBytesTotal / timeTx) + " bps");
 				txFinished.release();
 			}
 
@@ -355,7 +354,6 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		public VideoRxThread(VideoRx videoRx, int maxDelayRx) {
 			this.videoRx = videoRx;
 			this.maxDelayRx = maxDelayRx;
-			Log.d(LOG_TAG, "maxDelayRx: " + maxDelayRx);
 		}
 
 		@Override

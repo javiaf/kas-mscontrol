@@ -35,7 +35,7 @@ import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
 public class AudioRecorderComponent extends RecorderComponentBase implements
 		Recorder, AudioRx {
 
-	private static final String LOG_TAG = "NDK-audio-rx"; // "AudioRecorder";
+	private static final String LOG_TAG = "AudioRecorderComponent";
 
 	private int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
 	private int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
@@ -70,9 +70,6 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 
 	@Override
 	public synchronized void putAudioSamplesRx(AudioSamples audioSamples) {
-//		Log.i(LOG_TAG, "Enqueue audio samples (ptsNorm/rxTime)"
-//				+ calcPtsMillis(audioSamples) + "/" + audioSamples.getRxTime()
-//				+ " queue size: " + packetsQueue.size());
 		long ptsNorm = calcPtsMillis(audioSamples);
 		setLastPtsNorm(ptsNorm);
 		caclEstimatedStartTime(ptsNorm, audioSamples.getRxTime());
@@ -95,7 +92,6 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 		int minBufferSize = AudioTrack.getMinBufferSize(frequency,
 				channelConfiguration, audioEncoding);
 
-		Log.d(LOG_TAG, "minBufferSize: " + minBufferSize);
 		audioTrack = new AudioTrack(this.streamType, frequency,
 				channelConfiguration, audioEncoding, minBufferSize,
 				AudioTrack.MODE_STREAM);
@@ -110,7 +106,6 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 
 		controller = getRecorderController();
 		controller.addRecorder(this);
-		Log.d(LOG_TAG, "add to controller");
 	}
 
 	@Override
@@ -142,7 +137,8 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 					}
 
 					if (packetsQueue.isEmpty())
-						Log.w(LOG_TAG, "jitter_buffer_underflow: Audio frames queue is empty");
+						Log.w(LOG_TAG,
+								"Jitter buffer underflow: Audio RX frames queue is empty");
 
 					long targetTime = getTargetTime();
 					if (targetTime != -1) {

@@ -38,7 +38,7 @@ import com.kurento.kas.media.rx.VideoFrame;
 public class VideoRecorderComponent extends RecorderComponentBase implements
 		Recorder, VideoRecorder {
 
-	private static final String LOG_TAG = "NDK-video-rx";
+	private static final String LOG_TAG = "VideoRecorderComponent";
 
 	private SurfaceView mVideoReceiveView;
 	private SurfaceHolder mHolderReceive;
@@ -105,9 +105,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		long ptsNorm = calcPtsMillis(videoFrame);
 		setLastPtsNorm(ptsNorm);
 		caclEstimatedStartTime(ptsNorm, videoFrame.getRxTime());
-		Log.i(LOG_TAG, "Enqueue video frame (ptsNorm/rxTime)"
-					+ ptsNorm + "/" + videoFrame.getRxTime()
-					+ " queue size: " + packetsQueue.size());
+
 		packetsQueue.offer(videoFrame);
 		this.feedersQueue.offer(feeder);
 	}
@@ -119,7 +117,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		setRecording(true);
 		controller = getRecorderController();
 		controller.addRecorder(this);
-		Log.d(LOG_TAG, "add to controller");
 	}
 
 	@Override
@@ -166,7 +163,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 					if (packetsQueue.isEmpty())
 						Log.w(LOG_TAG,
-								"jitter_buffer_underflow: Video frames queue is empty");
+								"Jitter buffer underflow: Video RX frames queue is empty");
 
 					long targetTime = getTargetTime();
 					if (targetTime != -1) {
