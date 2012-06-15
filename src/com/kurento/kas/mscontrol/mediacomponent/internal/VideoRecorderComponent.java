@@ -38,7 +38,7 @@ import com.kurento.kas.media.rx.VideoFrame;
 public class VideoRecorderComponent extends RecorderComponentBase implements
 		Recorder, VideoRecorder {
 
-	private static final String LOG_TAG = "NDK-video-rx";
+	private static final String LOG_TAG = "VideoRecorderComponent";
 
 	private SurfaceView mVideoReceiveView;
 	private SurfaceHolder mHolderReceive;
