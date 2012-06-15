@@ -163,7 +163,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 					if (packetsQueue.isEmpty())
 						Log.w(LOG_TAG,
-								"jitter_buffer_underflow: Video frames queue is empty");
+								"Jitter buffer underflow: Video RX frames queue is empty");
 
 					long targetTime = getTargetTime();
 					if (targetTime != -1) {

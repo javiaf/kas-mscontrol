@@ -137,7 +137,8 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 					}
 
 					if (packetsQueue.isEmpty())
-						Log.w(LOG_TAG, "jitter_buffer_underflow: Audio frames queue is empty");
+						Log.w(LOG_TAG,
+								"Jitter buffer underflow: Audio RX frames queue is empty");
 
 					long targetTime = getTargetTime();
 					if (targetTime != -1) {
