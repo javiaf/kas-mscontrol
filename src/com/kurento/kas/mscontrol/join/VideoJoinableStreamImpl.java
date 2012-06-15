@@ -270,8 +270,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 		@Override
 		public void run() {
-			int tr = 1000 / (videoProfile.getFrameRateNum() / videoProfile
-					.getFrameRateDen());
+			int fr = videoProfile.getFrameRateNum() / videoProfile.getFrameRateDen();
+			int tr = 1000 / fr;
 			VideoFrameTx frameProcessed;
 
 			long tFrame = tr;
@@ -286,9 +286,11 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			long tCurrentFrame;
 			long tInit = System.currentTimeMillis();
 			long timePts;
-			long tTotal = 0;
+			long tEncTotal = 0;
+			long nBytesTotal = 0;
 
-			System.out.println("tr: " + tr); //
+			Log.d(LOG_TAG, "Target frame rate: " + fr
+					+ "fps. Target frame time: " + tr + " ms.");
 
 			try {
 				for (;;) {
@@ -320,19 +322,25 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					timePts = tCurrentFrame - tFirstFrame;
 					frameProcessed.setTime(timePts);
 
+					long t1 = System.currentTimeMillis();
 					int nBytes = MediaTx.putVideoFrame(frameProcessed);
+					tEncTotal += System.currentTimeMillis() - t1;
 					computeOutBytes(nBytes);
+					nBytesTotal += nBytes;
 
 					lastT = t;
 					n++;
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "VideoTxThread stopped");
-				long tFinish = System.currentTimeMillis();
-				Log.i(LOG_TAG, "time total: " + (tFinish - tInit)
-						+ " n frames: " + (n + 1) + " Average fr: "
-						+ ((1000.0 * (n + 1)) / (tFinish - tInit)) + "fps"
-						+ " Average encode time: " + (tTotal / (n + 1)));
+				long timeTx = System.currentTimeMillis() - tInit;
+				Log.i(LOG_TAG, "Time TX total: " + timeTx + "ms. Sent frames: "
+						+ n);
+				if (n > 0)
+					Log.i(LOG_TAG, "Average fr: " + (1000.0 * n / timeTx)
+							+ " fps." + " Average encode time: "
+							+ (tEncTotal / n) + " ms. Average bitrate: "
+							+ (8 * 1000 * nBytesTotal / timeTx) + " bps");
 				txFinished.release();
 			}
 
