@@ -419,3 +419,10 @@ mvn clean install
 ** Join RTP to loudspeaker
 
 ** Join RTP to screen
+
+
+
+Change camera test
+
+Destoy and create new surfaces test
+
