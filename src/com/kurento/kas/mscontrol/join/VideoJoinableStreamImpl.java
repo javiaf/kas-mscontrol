@@ -148,7 +148,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		if (timeFirstFrame == -1)
 			timeFirstFrame = time;
 		if (framesQueue.size() >= QUEUE_SIZE) {
-			Log.d(LOG_TAG, "Buffer overflow: Video TX frames queue is full");
+			Log.v(LOG_TAG, "Buffer overflow: Video TX frames queue is full");
 			framesQueue.poll();
 		}
 		VideoFrameTx vf = new VideoFrameTx(data, width, height, time
@@ -308,8 +308,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					h = caclFrameTimeLuis(h, n, tFrame);
 
 					if (framesQueue.isEmpty())
-						Log.d(LOG_TAG,
-								"Buffer underflow: Video frames queue is empty");
+						Log.v(LOG_TAG,
+								"Buffer underflow: Video TX frames queue is empty");
 					frameProcessed = framesQueue.take();
 					tCurrentFrame = System.currentTimeMillis();
 
