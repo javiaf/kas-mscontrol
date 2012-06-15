@@ -16,10 +16,10 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<!-- Dependency versions -->
-		<kcMsControlVersion>2.0.1-SNAPSHOT</kcMsControlVersion>
-		<kasMediaVersion>1.2.1-SNAPSHOT</kasMediaVersion>
-		<kcMediaSpecConversorVersion>1.0.1-SNAPSHOT</kcMediaSpecConversorVersion>
-		<kcStunVersion>1.0.2-SNAPSHOT</kcStunVersion>
+		<kcMsControlVersion>2.0.1</kcMsControlVersion>
+		<kasMediaVersion>1.2.1</kasMediaVersion>
+		<kcMediaSpecConversorVersion>1.0.1</kcMediaSpecConversorVersion>
+		<kcStunVersion>1.0.2</kcStunVersion>
 	</properties>
 
 	<organization>
