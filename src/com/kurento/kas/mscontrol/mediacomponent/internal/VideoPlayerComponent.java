@@ -54,6 +54,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 
 	private View videoSurfaceTx;
 	private SurfaceHolder surfaceHolder;
+	private static boolean surfaceCreated = false;
 	private boolean isReleased;
 
 	public View getVideoSurfaceTx() {
@@ -147,6 +148,9 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 
 		surfaceHolder = ((SurfaceView) videoSurfaceTx).getHolder();
 		surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
+		if (surfaceCreated)
+			startCamera(surfaceHolder);
 		surfaceHolder.addCallback(this);
 	}
 
@@ -210,7 +214,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		}
 		try {
 			mCamera.startPreview();
-			mCamera.setPreviewCallback(VideoPlayerComponent.this);
+			mCamera.setPreviewCallback(this);
 		} catch (Throwable e) {
 			e.printStackTrace();
 			Log.e(LOG_TAG, "Can not start camera preview");
@@ -242,11 +246,13 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 			mCamera.release();
 			mCamera = null;
 		}
+		surfaceCreated = false;
 	}
 
 	public void surfaceCreated(SurfaceHolder holder) {
 		Log.d(LOG_TAG, "Surface created");
 		startCamera(surfaceHolder);
+		surfaceCreated = true;
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
