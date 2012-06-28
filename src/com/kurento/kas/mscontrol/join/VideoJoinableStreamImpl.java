@@ -237,6 +237,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			} catch (InterruptedException e) {
 				Log.e(LOG_TAG, "Error while waiting to complete test", e);
 			}
+			videoTxThread = null;
 		}
 
 		Log.d(LOG_TAG, "finishVideo");
