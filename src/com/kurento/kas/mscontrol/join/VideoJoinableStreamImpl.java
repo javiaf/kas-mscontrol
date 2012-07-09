@@ -259,7 +259,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		private static final int ALPHA = 7;
 //		private static final int BETA = 10;
 
-		private long caclFrameTimeLuis(long frameTime, long it, long lastFrameTime) {
+		private long caclFrameTime(long frameTime, long it, long lastFrameTime) {
+			Log.d(LOG_TAG, "caclFrameTime");
 			long currentFrameTime;
 			if (it > ALPHA)
 				currentFrameTime = (ALPHA * frameTime + lastFrameTime)
@@ -294,22 +295,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					+ "fps. Target frame time: " + tr + " ms.");
 
 			try {
+				t = System.currentTimeMillis();
 				for (;;) {
-					if (lastT > 0) {
-						t = System.currentTimeMillis();
-						nextFrame = (ALPHA + 1) * tr - ALPHA * h;
-						s = nextFrame - (t - lastT);
-					} else
-						s = -1;
-
-					if (s > 0)
-						sleep(s);
-					t = System.currentTimeMillis();
-					if (lastT > 0)
-						tFrame = t - lastT;
-
-					h = caclFrameTimeLuis(h, n, tFrame);
-
 					if (framesQueue.isEmpty())
 						Log.v(LOG_TAG,
 								"Buffer underflow: Video TX frames queue is empty");
@@ -329,7 +316,18 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					computeOutBytes(nBytes);
 					nBytesTotal += nBytes;
 
+					h = caclFrameTime(h, n, tFrame);
 					lastT = t;
+					t = System.currentTimeMillis();
+					nextFrame = (ALPHA + 1) * tr - ALPHA * h;
+					s = nextFrame - (t - lastT);
+
+					if (s > 0)
+						sleep(s);
+
+					t = System.currentTimeMillis();
+					tFrame = t - lastT;
+
 					n++;
 				}
 			} catch (InterruptedException e) {
