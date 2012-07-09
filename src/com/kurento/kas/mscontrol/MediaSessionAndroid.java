@@ -17,13 +17,23 @@
 
 package com.kurento.kas.mscontrol;
 
-import com.kurento.commons.mscontrol.Configuration;
-import com.kurento.commons.mscontrol.MediaSession;
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.Parameter;
-import com.kurento.commons.mscontrol.Parameters;
-import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
+import java.net.InetAddress;
+import java.util.List;
+import java.util.Map;
+
+import com.kurento.commons.config.Parameter;
+import com.kurento.commons.config.Parameters;
+import com.kurento.kas.media.codecs.AudioCodecType;
+import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
+import com.kurento.kas.mscontrol.networkconnection.NetIF;
+import com.kurento.kas.mscontrol.networkconnection.PortRange;
+import com.kurento.mediaspec.MediaType;
+import com.kurento.mediaspec.Mode;
+import com.kurento.mscontrol.commons.Configuration;
+import com.kurento.mscontrol.commons.MediaSession;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.mediacomponent.MediaComponent;
 
 /**
  * MediaSessionAndroid is an interface that extends MediaSession.<br>
@@ -36,109 +46,108 @@ public interface MediaSessionAndroid extends MediaSession {
 	/**
 	 * String to indicate the stun server name
 	 */
-	public static final Parameter STUN_HOST = new Parameter() {
-	};
+	public static final Parameter<String> STUN_HOST = new Parameter<String>(
+			"STUN_HOST");
 
 	/**
 	 * Integer to indicate the stun server port
 	 */
-	public static final Parameter STUN_PORT = new Parameter() {
-	};
+	public static final Parameter<String> STUN_PORT = new Parameter<String>(
+			"STUN_PORT");
 
 	/**
 	 * MediaSessionAndoid.NetIF to indicate if the network interface is WIFI or
 	 * MOBILE.
 	 */
-	public static final Parameter NET_IF = new Parameter() {
-	};
+	public static final Parameter<NetIF> NET_IF = new Parameter<NetIF>("NET_IF");
 
 	/**
 	 * InetAddress to indicate the local IP address
 	 */
-	public static final Parameter LOCAL_ADDRESS = new Parameter() {
-	};
+	public static final Parameter<InetAddress> LOCAL_ADDRESS = new Parameter<InetAddress>(
+			"LOCAL_ADDRESS");
 
 	/**
 	 * Integer to indicate the max bandwidth will be used in bps(bits per
 	 * second).
 	 */
-	public static final Parameter MAX_BANDWIDTH = new Parameter() {
-	};
+	public static final Parameter<Integer> MAX_BANDWIDTH = new Parameter<Integer>(
+			"MAX_BANDWIDTH");
 
 	/**
 	 * Integer to indicate the max delay for media reception in ms
 	 * (miliseconds).
 	 */
-	public static final Parameter MAX_DELAY = new Parameter() {
-	};
+	public static final Parameter<Integer> MAX_DELAY = new Parameter<Integer>(
+			"MAX_DELAY");
 
 	/**
-	 * HashMap&lt;MediaType, Mode&gt; to indicate the mode of each media stream.
+	 * Map&lt;MediaType, Mode&gt; to indicate the mode of each media stream.
 	 */
-	public static final Parameter STREAMS_MODES = new Parameter() {
-	};
+	public static final Parameter<Map<MediaType, Mode>> STREAMS_MODES = new Parameter<Map<MediaType, Mode>>(
+			"STREAMS_MODES");
 
 	/**
-	 * ArrayList&lt;AudioCodecType&gt; to indicate the audio codecs supported.
+	 * List&lt;AudioCodecType&gt; to indicate the audio codecs supported.
 	 */
-	public static final Parameter AUDIO_CODECS = new Parameter() {
-	};
+	public static final Parameter<List<AudioCodecType>> AUDIO_CODECS = new Parameter<List<AudioCodecType>>(
+			"AUDIO_CODECS");
 
 	/**
 	 * PortRange to indicate local port interval to select an audio port.
 	 */
-	public static final Parameter AUDIO_LOCAL_PORT_RANGE = new Parameter() {
-	};
+	public static final Parameter<PortRange> AUDIO_LOCAL_PORT_RANGE = new Parameter<PortRange>(
+			"AUDIO_LOCAL_PORT_RANGE");
 
 	/**
-	 * ArrayList&lt;VideoCodecType&gt; to indicate the video codecs supported.
+	 * List&lt;VideoCodecType&gt; to indicate the video codecs supported.
 	 */
-	public static final Parameter VIDEO_CODECS = new Parameter() {
-	};
+	public static final Parameter<List<VideoCodecType>> VIDEO_CODECS = new Parameter<List<VideoCodecType>>(
+			"VIDEO_CODECS");
 
 	/**
 	 * PortRange to indicate local port interval to select a video port.
 	 */
-	public static final Parameter VIDEO_LOCAL_PORT_RANGE = new Parameter() {
-	};
+	public static final Parameter<PortRange> VIDEO_LOCAL_PORT_RANGE = new Parameter<PortRange>(
+			"VIDEO_LOCAL_PORT_RANGE");
 
 	/**
 	 * Integer to indicate the frame width in pixels.
 	 */
-	public static final Parameter FRAME_WIDTH = new Parameter() {
-	};
+	public static final Parameter<Integer> FRAME_WIDTH = new Parameter<Integer>(
+			"FRAME_WIDTH");
 
 	/**
 	 * Integer to indicate the frame height in pixels.
 	 */
-	public static final Parameter FRAME_HEIGHT = new Parameter() {
-	};
+	public static final Parameter<Integer> FRAME_HEIGHT = new Parameter<Integer>(
+			"FRAME_HEIGHT");
 
 	/**
 	 * Integer to indicate the max frame rate will be used.
 	 */
-	public static final Parameter MAX_FRAME_RATE = new Parameter() {
-	};
+	public static final Parameter<Integer> MAX_FRAME_RATE = new Parameter<Integer>(
+			"MAX_FRAME_RATE");
 	/**
 	 * Integer to indicate the max number of frames in a group of pictures, or 0
 	 * for intra_only.
 	 */
-	public static final Parameter GOP_SIZE = new Parameter() {
-	};
+	public static final Parameter<Integer> GOP_SIZE = new Parameter<Integer>(
+			"GOP_SIZE");
 
 	/**
 	 * Integer to indicate the number of frames will be buffered from the
 	 * camera.
 	 */
-	public static final Parameter FRAMES_QUEUE_SIZE = new Parameter() {
-	};
+	public static final Parameter<Integer> FRAMES_QUEUE_SIZE = new Parameter<Integer>(
+			"FRAMES_QUEUE_SIZE");
 
 	/**
 	 * Boolean to indicate if the received media streams must be synchronized
 	 * when they are show to the user.
 	 */
-	public static final Parameter SYNCHRONIZE_MEDIA_STREAMS = new Parameter() {
-	};
+	public static final Parameter<Boolean> SYNCHRONIZE_MEDIA_STREAMS = new Parameter<Boolean>(
+			"SYNCHRONIZE_MEDIA_STREAMS");
 
 	/**
 	 * Create a MediaComponentAndroid.

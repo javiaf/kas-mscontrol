@@ -17,11 +17,11 @@
 
 package com.kurento.kas.mscontrol.mediacomponent.internal;
 
-import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.kas.mscontrol.join.JoinableContainerImpl;
 import com.kurento.kas.mscontrol.mediacomponent.AndroidAction;
 import com.kurento.kas.mscontrol.mediacomponent.AndroidInfo;
 import com.kurento.kas.mscontrol.mediacomponent.MediaComponentAndroid;
+import com.kurento.mscontrol.commons.MsControlException;
 
 public abstract class MediaComponentBase extends JoinableContainerImpl
 		implements MediaComponentAndroid {

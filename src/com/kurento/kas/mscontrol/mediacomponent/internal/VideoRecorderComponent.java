@@ -30,10 +30,10 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.Parameters;
+import com.kurento.commons.config.Parameters;
 import com.kurento.kas.media.rx.RxPacket;
 import com.kurento.kas.media.rx.VideoFrame;
+import com.kurento.mscontrol.commons.MsControlException;
 
 public class VideoRecorderComponent extends RecorderComponentBase implements
 		Recorder, VideoRecorder {
@@ -70,15 +70,15 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
-		View surface = (View) params.get(VIEW_SURFACE);
+		View surface = params.get(VIEW_SURFACE).getValue();
 		if (surface == null)
 			throw new MsControlException(
 					"Params must have VideoRecorderComponent.VIEW_SURFACE param");
-		Integer displayWidth = (Integer) params.get(DISPLAY_WIDTH);
+		Integer displayWidth = params.get(DISPLAY_WIDTH).getValue();
 		if (displayWidth == null)
 			throw new MsControlException(
 					"Params must have VideoRecorderComponent.DISPLAY_WIDTH param");
-		Integer displayHeight = (Integer) params.get(DISPLAY_HEIGHT);
+		Integer displayHeight = params.get(DISPLAY_HEIGHT).getValue();
 		if (displayHeight == null)
 			throw new MsControlException(
 					"Params must have VideoRecorderComponent.DISPLAY_HEIGHT param");

@@ -19,11 +19,11 @@ package com.kurento.kas.mscontrol.networkconnection.internal;
 
 import java.net.InetAddress;
 
-import com.kurento.commons.media.format.SessionSpec;
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
-import com.kurento.commons.mscontrol.networkconnection.SdpPortManager;
 import com.kurento.kas.mscontrol.join.JoinableContainerImpl;
+import com.kurento.mediaspec.SessionSpec;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.networkconnection.NetworkConnection;
+import com.kurento.mscontrol.commons.networkconnection.SdpPortManager;
 
 public abstract class NetworkConnectionBase extends JoinableContainerImpl
 		implements NetworkConnection {

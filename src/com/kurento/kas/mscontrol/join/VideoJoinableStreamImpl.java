@@ -30,13 +30,8 @@ import javax.sdp.SdpException;
 
 import android.util.Log;
 
-import com.kurento.commons.media.format.SessionSpec;
 import com.kurento.commons.media.format.conversor.SdpConversor;
-import com.kurento.commons.media.format.enums.MediaType;
-import com.kurento.commons.media.format.enums.Mode;
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.join.Joinable;
-import com.kurento.commons.mscontrol.join.JoinableContainer;
+import com.kurento.commons.mediaspec.Direction;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.profiles.VideoProfile;
 import com.kurento.kas.media.rx.MediaRx;
@@ -49,6 +44,12 @@ import com.kurento.kas.mscontrol.mediacomponent.internal.VideoFeeder;
 import com.kurento.kas.mscontrol.mediacomponent.internal.VideoRecorder;
 import com.kurento.kas.mscontrol.mediacomponent.internal.VideoSink;
 import com.kurento.kas.mscontrol.networkconnection.internal.RTPInfo;
+import com.kurento.mediaspec.MediaType;
+import com.kurento.mediaspec.Mode;
+import com.kurento.mediaspec.SessionSpec;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.join.Joinable;
+import com.kurento.mscontrol.commons.join.JoinableContainer;
 
 public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		VideoSink, VideoRx, VideoFeeder {

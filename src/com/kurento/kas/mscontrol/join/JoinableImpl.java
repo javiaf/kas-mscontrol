@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.join.Joinable;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.join.Joinable;
 
 public class JoinableImpl implements Joinable {
 

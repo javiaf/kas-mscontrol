@@ -21,13 +21,7 @@ import javax.sdp.SdpException;
 
 import android.util.Log;
 
-import com.kurento.commons.media.format.SessionSpec;
 import com.kurento.commons.media.format.conversor.SdpConversor;
-import com.kurento.commons.media.format.enums.MediaType;
-import com.kurento.commons.media.format.enums.Mode;
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.join.Joinable;
-import com.kurento.commons.mscontrol.join.JoinableContainer;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.profiles.AudioProfile;
 import com.kurento.kas.media.rx.AudioRx;
@@ -38,6 +32,12 @@ import com.kurento.kas.media.tx.AudioSamplesTx;
 import com.kurento.kas.media.tx.MediaTx;
 import com.kurento.kas.mscontrol.mediacomponent.internal.AudioSink;
 import com.kurento.kas.mscontrol.networkconnection.internal.RTPInfo;
+import com.kurento.mediaspec.MediaType;
+import com.kurento.mediaspec.Mode;
+import com.kurento.mediaspec.SessionSpec;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.join.Joinable;
+import com.kurento.mscontrol.commons.join.JoinableContainer;
 
 public class AudioJoinableStreamImpl extends JoinableStreamBase implements AudioSink, AudioRx {
 

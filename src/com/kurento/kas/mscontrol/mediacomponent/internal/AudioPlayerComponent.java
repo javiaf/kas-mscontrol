@@ -22,10 +22,10 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.util.Log;
 
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.join.Joinable;
 import com.kurento.kas.media.tx.AudioInfoTx;
 import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.join.Joinable;
 
 public class AudioPlayerComponent extends MediaComponentBase {
 

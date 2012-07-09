@@ -22,16 +22,16 @@ import java.util.Set;
 
 import android.util.Log;
 
-import com.kurento.commons.media.format.MediaSpec;
-import com.kurento.commons.media.format.Payload;
-import com.kurento.commons.media.format.SessionSpec;
-import com.kurento.commons.media.format.enums.MediaType;
-import com.kurento.commons.media.format.enums.Mode;
-import com.kurento.commons.media.format.exceptions.ArgumentNotSetException;
-import com.kurento.commons.media.format.payload.PayloadRtp;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.exception.CodecNotSupportedException;
+import com.kurento.mediaspec.ArgumentNotSetException;
+import com.kurento.mediaspec.MediaSpec;
+import com.kurento.mediaspec.MediaType;
+import com.kurento.mediaspec.Mode;
+import com.kurento.mediaspec.Payload;
+import com.kurento.mediaspec.PayloadRtp;
+import com.kurento.mediaspec.SessionSpec;
 
 public class RTPInfo {
 

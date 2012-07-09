@@ -21,14 +21,14 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Map;
 
-import com.kurento.commons.media.format.enums.MediaType;
-import com.kurento.commons.media.format.enums.Mode;
-import com.kurento.commons.mscontrol.Configuration;
-import com.kurento.commons.mscontrol.MediaSession;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
 import com.kurento.kas.mscontrol.networkconnection.PortRange;
+import com.kurento.mediaspec.MediaType;
+import com.kurento.mediaspec.Mode;
+import com.kurento.mscontrol.commons.Configuration;
+import com.kurento.mscontrol.commons.MediaSession;
 
 public class MediaSessionConfig implements Configuration<MediaSession> {
 

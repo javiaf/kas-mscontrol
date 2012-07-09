@@ -24,14 +24,14 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.kurento.commons.media.format.MediaSpec;
-import com.kurento.commons.media.format.SessionSpec;
-import com.kurento.commons.mscontrol.MediaEventListener;
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
-import com.kurento.commons.mscontrol.networkconnection.SdpPortManager;
-import com.kurento.commons.mscontrol.networkconnection.SdpPortManagerEvent;
-import com.kurento.commons.mscontrol.networkconnection.SdpPortManagerException;
+import com.kurento.mediaspec.MediaSpec;
+import com.kurento.mediaspec.SessionSpec;
+import com.kurento.mscontrol.commons.MediaEventListener;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.networkconnection.NetworkConnection;
+import com.kurento.mscontrol.commons.networkconnection.SdpPortManager;
+import com.kurento.mscontrol.commons.networkconnection.SdpPortManagerEvent;
+import com.kurento.mscontrol.commons.networkconnection.SdpPortManagerException;
 
 public class SdpPortManagerImpl implements SdpPortManager {
 

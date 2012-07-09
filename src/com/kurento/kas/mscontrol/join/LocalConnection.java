@@ -17,8 +17,8 @@
 
 package com.kurento.kas.mscontrol.join;
 
-import com.kurento.commons.mscontrol.join.Joinable;
-import com.kurento.commons.mscontrol.join.Joinable.Direction;
+import com.kurento.mscontrol.commons.join.Joinable;
+import com.kurento.mscontrol.commons.join.Joinable.Direction;
 
 public class LocalConnection {
 

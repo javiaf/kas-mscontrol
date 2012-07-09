@@ -2,9 +2,9 @@ package com.kurento.kas.mscontrol.mediacomponent.internal;
 
 import java.util.concurrent.BlockingQueue;
 
-import com.kurento.commons.mscontrol.MsControlException;
 import com.kurento.kas.media.rx.RxPacket;
 import com.kurento.kas.mscontrol.mediacomponent.AndroidInfo;
+import com.kurento.mscontrol.commons.MsControlException;
 
 public abstract class RecorderComponentBase extends MediaComponentBase
 		implements Recorder {

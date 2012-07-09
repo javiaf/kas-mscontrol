@@ -32,12 +32,12 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.Parameters;
-import com.kurento.commons.mscontrol.join.Joinable;
+import com.kurento.commons.config.Parameters;
 import com.kurento.kas.media.profiles.VideoProfile;
 import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
 import com.kurento.kas.mscontrol.mediacomponent.AndroidAction;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.join.Joinable;
 
 public class VideoPlayerComponent extends MediaComponentBase implements
 		SurfaceHolder.Callback, PreviewCallback {
@@ -70,16 +70,16 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
-		final View sv = (View) params.get(PREVIEW_SURFACE);
+		final View sv = params.get(PREVIEW_SURFACE).getValue();
 		if (sv == null)
 			throw new MsControlException(
 					"Params must have VideoPlayerComponent.PREVIEW_SURFACE param");
 
 		videoSurfaceTx = sv;
-		screenOrientation = (Integer) params.get(DISPLAY_ORIENTATION) * 90;
+		screenOrientation = params.get(DISPLAY_ORIENTATION).getValue() * 90;
 		isReleased = false;
 		try {
-			cameraFacing = (Integer) params.get(CAMERA_FACING);
+			cameraFacing = params.get(CAMERA_FACING).getValue();
 		} catch (Exception e) {
 			cameraFacing = 0;
 		}

@@ -23,14 +23,14 @@ import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.util.Log;
 
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.Parameters;
-import com.kurento.commons.mscontrol.join.Joinable;
+import com.kurento.commons.config.Parameters;
 import com.kurento.kas.media.profiles.AudioProfile;
 import com.kurento.kas.media.rx.AudioRx;
 import com.kurento.kas.media.rx.AudioSamples;
 import com.kurento.kas.media.rx.RxPacket;
 import com.kurento.kas.mscontrol.join.AudioJoinableStreamImpl;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.join.Joinable;
 
 public class AudioRecorderComponent extends RecorderComponentBase implements
 		Recorder, AudioRx {
@@ -59,7 +59,7 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
-		Integer streamType = (Integer) params.get(STREAM_TYPE);
+		Integer streamType = params.get(STREAM_TYPE).getValue();
 		if (streamType == null)
 			throw new MsControlException(
 					"Params must have AudioRecorderComponent.STREAM_TYPE param.");

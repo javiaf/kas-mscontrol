@@ -24,17 +24,6 @@ import java.util.concurrent.Exchanger;
 
 import android.util.Log;
 
-import com.kurento.commons.media.format.MediaSpec;
-import com.kurento.commons.media.format.Payload;
-import com.kurento.commons.media.format.SessionSpec;
-import com.kurento.commons.media.format.Transport;
-import com.kurento.commons.media.format.enums.MediaType;
-import com.kurento.commons.media.format.enums.Mode;
-import com.kurento.commons.media.format.exceptions.ArgumentNotSetException;
-import com.kurento.commons.media.format.payload.PayloadRtp;
-import com.kurento.commons.media.format.transport.TransportRtp;
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.join.JoinableStream.StreamType;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.ports.MediaPortManager;
@@ -46,6 +35,17 @@ import com.kurento.kas.mscontrol.join.JoinableStreamBase;
 import com.kurento.kas.mscontrol.join.VideoJoinableStreamImpl;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
 import com.kurento.kas.mscontrol.networkconnection.PortRange;
+import com.kurento.mediaspec.ArgumentNotSetException;
+import com.kurento.mediaspec.MediaSpec;
+import com.kurento.mediaspec.MediaType;
+import com.kurento.mediaspec.Mode;
+import com.kurento.mediaspec.Payload;
+import com.kurento.mediaspec.PayloadRtp;
+import com.kurento.mediaspec.SessionSpec;
+import com.kurento.mediaspec.Transport;
+import com.kurento.mediaspec.TransportRtp;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.join.JoinableStream.StreamType;
 
 import de.javawi.jstun.test.DiscoveryInfo;
 import de.javawi.jstun.test.DiscoveryTest;
@@ -502,7 +502,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	}
 
 	@Override
-	public long getBitrate(StreamType streamType, Direction direction) {
+	public long getBitrate(StreamType streamType,
+			Direction direction) {
 		if (StreamType.video.equals(streamType)
 				&& videoJoinableStreamImpl != null) {
 			if (Direction.SEND.equals(direction))

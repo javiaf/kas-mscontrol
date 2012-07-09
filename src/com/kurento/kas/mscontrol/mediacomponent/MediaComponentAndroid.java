@@ -17,10 +17,12 @@
 
 package com.kurento.kas.mscontrol.mediacomponent;
 
-import com.kurento.commons.mscontrol.Configuration;
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.Parameter;
-import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
+import android.view.View;
+
+import com.kurento.commons.config.Parameter;
+import com.kurento.mscontrol.commons.Configuration;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.mediacomponent.MediaComponent;
 
 /**
  * MediaComponentAndroid is an interface that extends MediaComponent.<br>
@@ -45,11 +47,11 @@ public interface MediaComponentAndroid extends MediaComponent {
 	};
 
 	/**
-	 * Parameter whose value must be an int indicates the stream type in
+	 * Parameter whose value must be an Integer indicates the stream type in
 	 * Android, for example AudioManager.STREAM_MUSIC.
 	 */
-	public static final Parameter STREAM_TYPE = new Parameter() {
-	};
+	public static final Parameter<Integer> STREAM_TYPE = new Parameter<Integer>(
+			"STREAM_TYPE");
 
 	/**
 	 * To create a component that record video from camera.
@@ -58,16 +60,18 @@ public interface MediaComponentAndroid extends MediaComponent {
 	};
 
 	/**
-	 * Parameter whose value must be an int as Camera_Facing_Back or Camera_Facing_Front
+	 * Parameter whose value must be an Integer as Camera_Facing_Back or
+	 * Camera_Facing_Front
 	 */
-	public static final Parameter CAMERA_FACING = new Parameter(){};
+	public static final Parameter<Integer> CAMERA_FACING = new Parameter<Integer>(
+			"CAMERA_FACING");
 	
 	/**
 	 * Parameter whose value must be an Android View to preview the camera
 	 * video.
 	 */
-	public static final Parameter PREVIEW_SURFACE = new Parameter() {
-	};
+	public static final Parameter<View> PREVIEW_SURFACE = new Parameter<View>(
+			"PREVIEW_SURFACE");
 
 	/**
 	 * To create a component that show video in a display.
@@ -78,29 +82,29 @@ public interface MediaComponentAndroid extends MediaComponent {
 	/**
 	 * Parameter whose value must be an Android View to view the received video.
 	 */
-	public static final Parameter VIEW_SURFACE = new Parameter() {
-	};
+	public static final Parameter<View> VIEW_SURFACE = new Parameter<View>(
+			"VIEW_SURFACE");
 
 	/**
 	 * Parameter whose value must be an Integer value that indicate the display
 	 * width.
 	 */
-	public static final Parameter DISPLAY_WIDTH = new Parameter() {
-	};
+	public static final Parameter<Integer> DISPLAY_WIDTH = new Parameter<Integer>(
+			"DISPLAY_WIDTH");
 
 	/**
 	 * Parameter whose value must be an Integer value that indicate the display
 	 * height.
 	 */
-	public static final Parameter DISPLAY_HEIGHT = new Parameter() {
-	};
+	public static final Parameter<Integer> DISPLAY_HEIGHT = new Parameter<Integer>(
+			"DISPLAY_HEIGHT");
 	
 	/**
 	 * Parameter whose value must be an Integer value that indicate the display
 	 * orientation
 	 */
-	public static final Parameter DISPLAY_ORIENTATION = new Parameter() {
-	};
+	public static final Parameter<Integer> DISPLAY_ORIENTATION = new Parameter<Integer>(
+			"DISPLAY_ORIENTATION");
 
 	public boolean isStarted();
 

@@ -17,14 +17,13 @@
 
 package com.kurento.kas.mscontrol;
 
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.Parameters;
+import com.kurento.commons.config.Parameters;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.mscontrol.internal.MediaSessionImpl;
-import com.kurento.kas.mscontrol.internal.ParametersImpl;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
 import com.kurento.kas.mscontrol.networkconnection.PortRange;
+import com.kurento.mscontrol.commons.MsControlException;
 
 /**
  * This factory creates MediaSessionAndroid from a set of parameters.
@@ -98,7 +97,7 @@ public class MSControlFactory {
 	 *            <tr>
 	 *            <td>{@link MediaSessionAndroid#STREAMS_MODES STREAMS_MODES}</td>
 	 *            <td>O</td>
-	 *            <td>HashMap&lt; MediaType, Mode&gt;</td>
+	 *            <td>Map&lt; MediaType, Mode&gt;</td>
 	 *            <td>[SENDRECV, SENDONLY, RECVONLY]</td>
 	 *            <td>SENDRECV</td>
 	 *            <td>Indicate the mode of each media stream.</td>
@@ -107,7 +106,7 @@ public class MSControlFactory {
 	 *            <tr>
 	 *            <td>{@link MediaSessionAndroid#AUDIO_CODECS AUDIO_CODECS}</td>
 	 *            <td>O</td>
-	 *            <td>ArrayList&lt;{@link AudioCodecType}&gt;</td>
+	 *            <td>List&lt;{@link AudioCodecType}&gt;</td>
 	 *            <td>[AMR, MP2, PCMU, PCMA]</td>
 	 *            <td>[AMR, MP2, PCMU, PCMA]</td>
 	 *            <td>Indicate the audio codecs supported.</td>
@@ -127,7 +126,7 @@ public class MSControlFactory {
 	 *            <tr>
 	 *            <td>{@link MediaSessionAndroid#VIDEO_CODECS VIDEO_CODECS}</td>
 	 *            <td>O</td>
-	 *            <td>ArrayList&lt;{@link VideoCodecType}&gt;</td>
+	 *            <td>List&lt;{@link VideoCodecType}&gt;</td>
 	 *            <td>[H263, MPEG4, H.264]</td>
 	 *            <td>[H263, MPEG4, H.264]</td>
 	 *            <td>Indicate the video codecs supported.</td>
@@ -245,7 +244,7 @@ public class MSControlFactory {
 	 * @return Parameters
 	 */
 	public static Parameters createParameters() {
-		return new ParametersImpl();
+		return new Parameters();
 	}
 
 }

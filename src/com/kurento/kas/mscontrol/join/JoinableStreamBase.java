@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import com.kurento.commons.media.format.MediaSpec;
-import com.kurento.commons.media.format.Payload;
-import com.kurento.commons.media.format.SessionSpec;
-import com.kurento.commons.media.format.enums.MediaType;
-import com.kurento.commons.mscontrol.join.JoinableContainer;
-import com.kurento.commons.mscontrol.join.JoinableStream;
+import com.kurento.mediaspec.MediaSpec;
+import com.kurento.mediaspec.MediaType;
+import com.kurento.mediaspec.Payload;
+import com.kurento.mediaspec.SessionSpec;
+import com.kurento.mscontrol.commons.join.JoinableContainer;
+import com.kurento.mscontrol.commons.join.JoinableStream;
 
 public abstract class JoinableStreamBase extends JoinableImpl implements
 		JoinableStream {

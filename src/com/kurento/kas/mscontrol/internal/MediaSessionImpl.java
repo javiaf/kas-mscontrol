@@ -21,14 +21,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Map;
 
-import com.kurento.commons.media.format.enums.MediaType;
-import com.kurento.commons.media.format.enums.Mode;
-import com.kurento.commons.mscontrol.Configuration;
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.Parameters;
-import com.kurento.commons.mscontrol.mediacomponent.MediaComponent;
-import com.kurento.commons.mscontrol.mediamixer.MediaMixer;
-import com.kurento.commons.mscontrol.networkconnection.NetworkConnection;
+import com.kurento.commons.config.Parameters;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.rx.MediaRx;
@@ -41,6 +34,13 @@ import com.kurento.kas.mscontrol.mediacomponent.internal.VideoRecorderComponent;
 import com.kurento.kas.mscontrol.networkconnection.NetIF;
 import com.kurento.kas.mscontrol.networkconnection.PortRange;
 import com.kurento.kas.mscontrol.networkconnection.internal.NetworkConnectionImpl;
+import com.kurento.mediaspec.MediaType;
+import com.kurento.mediaspec.Mode;
+import com.kurento.mscontrol.commons.Configuration;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.mediacomponent.MediaComponent;
+import com.kurento.mscontrol.commons.mediamixer.MediaMixer;
+import com.kurento.mscontrol.commons.networkconnection.NetworkConnection;
 
 public class MediaSessionImpl implements MediaSessionAndroid {
 

@@ -17,10 +17,10 @@
 
 package com.kurento.kas.mscontrol.join;
 
-import com.kurento.commons.mscontrol.MsControlException;
-import com.kurento.commons.mscontrol.join.JoinableContainer;
-import com.kurento.commons.mscontrol.join.JoinableStream;
-import com.kurento.commons.mscontrol.join.JoinableStream.StreamType;
+import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.commons.join.JoinableContainer;
+import com.kurento.mscontrol.commons.join.JoinableStream;
+import com.kurento.mscontrol.commons.join.JoinableStream.StreamType;
 
 public class JoinableContainerImpl extends JoinableImpl implements
 		JoinableContainer {
