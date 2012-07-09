@@ -52,7 +52,7 @@ public interface MediaSessionAndroid extends MediaSession {
 	/**
 	 * Integer to indicate the stun server port
 	 */
-	public static final Parameter<String> STUN_PORT = new Parameter<String>(
+	public static final Parameter<Integer> STUN_PORT = new Parameter<Integer>(
 			"STUN_PORT");
 
 	/**
