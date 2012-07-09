@@ -63,8 +63,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	}
 
 	public VideoRecorderComponent(int maxDelay, boolean syncMediaStreams,
-			Parameters params)
-			throws MsControlException {
+			Parameters params) throws MsControlException {
 		super(maxDelay, syncMediaStreams);
 
 		if (params == null)
@@ -148,10 +147,10 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 				Rect dirty = null;
 				Bitmap srcBitmap = null;
 
-//				long tStart, tEnd;
-//				long i = 1;
-//				long t;
-//				long total = 0;
+				// long tStart, tEnd;
+				// long i = 1;
+				// long t;
+				// long total = 0;
 
 				for (;;) {
 					if (!isRecording()) {
@@ -178,9 +177,9 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					}
 
 					videoFrameProcessed = (VideoFrame) packetsQueue.take();
-//					Log.d(LOG_TAG, "play frame "
-//							+ calcPtsMillis(videoFrameProcessed));
-//					tStart = System.currentTimeMillis();
+					// Log.d(LOG_TAG, "play frame "
+					// + calcPtsMillis(videoFrameProcessed));
+					// tStart = System.currentTimeMillis();
 
 					rgb = videoFrameProcessed.getDataFrame();
 					width = videoFrameProcessed.getWidth();
@@ -191,8 +190,10 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 					try {
 						canvas = mSurfaceReceive.lockCanvas(null);
-						if (canvas == null)
+						if (canvas == null) {
+							mSurfaceReceive.unlockCanvasAndPost(canvas);
 							continue;
+						}
 
 						if (height != lastHeight) {
 							if (width != lastWidth || srcBitmap == null) {
@@ -236,20 +237,20 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 						}
 						mSurfaceReceive.unlockCanvasAndPost(canvas);
 					} catch (IllegalArgumentException e) {
-						Log.e(LOG_TAG, "Exception: " + e.toString());
+						Log.e(LOG_TAG, "Exception: " + e.toString(), e);
 					} catch (OutOfResourcesException e) {
-						Log.e(LOG_TAG, "Exception: " + e.toString());
+						Log.e(LOG_TAG, "Exception: " + e.toString(), e);
 					}
 
-//					tEnd = System.currentTimeMillis();
-//					t = tEnd - tStart;
-//					total += t;
-//					Log.d(LOG_TAG, "frame played in: " + t + " ms. Average: "
-//							+ (total / i));
+					// tEnd = System.currentTimeMillis();
+					// t = tEnd - tStart;
+					// total += t;
+					// Log.d(LOG_TAG, "frame played in: " + t + " ms. Average: "
+					// + (total / i));
 					VideoFeeder feeder = feedersQueue.poll();
 					if (feeder != null)
 						feeder.freeVideoFrameRx(videoFrameProcessed);
-//					i++;
+					// i++;
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "SurfaceControl stopped");
