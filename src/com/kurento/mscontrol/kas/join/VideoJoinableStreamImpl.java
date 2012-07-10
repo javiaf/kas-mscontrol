@@ -31,7 +31,6 @@ import javax.sdp.SdpException;
 import android.util.Log;
 
 import com.kurento.commons.media.format.conversor.SdpConversor;
-import com.kurento.commons.mediaspec.Direction;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.profiles.VideoProfile;
 import com.kurento.kas.media.rx.MediaRx;
@@ -261,7 +260,6 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 //		private static final int BETA = 10;
 
 		private long caclFrameTime(long frameTime, long it, long lastFrameTime) {
-			Log.d(LOG_TAG, "caclFrameTime");
 			long currentFrameTime;
 			if (it > ALPHA)
 				currentFrameTime = (ALPHA * frameTime + lastFrameTime)
