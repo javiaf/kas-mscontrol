@@ -18,7 +18,7 @@
 package com.kurento.mscontrol.kas.internal;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.kurento.kas.media.codecs.AudioCodecType;
@@ -41,9 +41,9 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	private Integer maxDelay;
 
 	private Map<MediaType, Mode> mediaTypeModes;
-	private ArrayList<AudioCodecType> audioCodecs;
+	private List<AudioCodecType> audioCodecs;
 	private PortRange audioPortRange;
-	private ArrayList<VideoCodecType> videoCodecs;
+	private List<VideoCodecType> videoCodecs;
 	private PortRange videoPortRange;
 
 	private Integer frameWidth;
@@ -82,7 +82,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 		return mediaTypeModes;
 	}
 
-	public ArrayList<AudioCodecType> getAudioCodecs() {
+	public List<AudioCodecType> getAudioCodecs() {
 		return audioCodecs;
 	}
 
@@ -90,7 +90,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 		return audioPortRange;
 	}
 
-	public ArrayList<VideoCodecType> getVideoCodecs() {
+	public List<VideoCodecType> getVideoCodecs() {
 		return videoCodecs;
 	}
 
@@ -125,8 +125,8 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	protected MediaSessionConfig(NetIF netIF, InetAddress localAddress,
 			Integer maxBW, Integer maxDelay,
 			Map<MediaType, Mode> mediaTypeModes,
-			ArrayList<AudioCodecType> audioCodecs, PortRange audioPortRange,
-			ArrayList<VideoCodecType> videoCodecs, PortRange videoPortRange,
+			List<AudioCodecType> audioCodecs, PortRange audioPortRange,
+			List<VideoCodecType> videoCodecs, PortRange videoPortRange,
 			Integer frameWidth, Integer frameHeight, Integer maxFrameRate,
 			Integer gopSize, Integer framesQueueSize, Boolean syncMediaStreams,
 			String stunHost, Integer stunPort) {

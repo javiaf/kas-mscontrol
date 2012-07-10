@@ -20,6 +20,7 @@ package com.kurento.mscontrol.kas.networkconnection.internal;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.Exchanger;
 
 import android.util.Log;
@@ -413,7 +414,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	private ArrayList<AudioProfile> getAudioProfiles(
 			MediaSessionConfig mediaSessionConfig) {
-		ArrayList<AudioCodecType> audioCodecs = mediaSessionConfig
+		List<AudioCodecType> audioCodecs = mediaSessionConfig
 				.getAudioCodecs();
 
 		ArrayList<AudioProfile> audioProfiles = new ArrayList<AudioProfile>(0);
@@ -439,7 +440,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	private ArrayList<VideoProfile> getVideoProfiles(
 			MediaSessionConfig mediaSessionConfig, int maxAudioBitrate) {
-		ArrayList<VideoCodecType> videoCodecs = mediaSessionConfig
+		List<VideoCodecType> videoCodecs = mediaSessionConfig
 				.getVideoCodecs();
 		NetIF netIF = mediaSessionConfig.getNetIF();
 

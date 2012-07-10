@@ -18,10 +18,11 @@
 package com.kurento.mscontrol.kas.internal;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.kurento.commons.config.Parameters;
+import com.kurento.commons.config.Value;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.rx.MediaRx;
@@ -59,7 +60,8 @@ public class MediaSessionImpl implements KasMediaSession {
 	}
 
 	@Override
-	public NetworkConnection createNetworkConnection() throws MsControlException {
+	public NetworkConnection createNetworkConnection()
+			throws MsControlException {
 		return new NetworkConnectionImpl(mediaSessionConfig);
 	}
 
@@ -91,199 +93,116 @@ public class MediaSessionImpl implements KasMediaSession {
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
-		Object obj;
-
-		obj = params.get(STUN_HOST);
-		if (obj == null)
+		Value<String> stunHostValue = params.get(STUN_HOST);
+		if (stunHostValue == null)
 			throw new MsControlException(
 					"Params must have KasMediaSession.STUN_HOST param");
-		if (!(obj instanceof String))
-			throw new MsControlException(
-					"Parameter KasMediaSession.STUN_HOST must be instance of String");
-		String stunHost = (String) obj;
+		String stunHost = stunHostValue.getValue();
 
-		obj = params.get(STUN_PORT);
-		if (obj == null)
+		Value<Integer> stunPortValue = params.get(STUN_PORT);
+		if (stunPortValue == null)
 			throw new MsControlException(
 					"Params must have KasMediaSession.STUN_PORT param");
-		if (!(obj instanceof Integer))
-			throw new MsControlException(
-					"Parameter KasMediaSession.STUN_PORT must be instance of Integer");
-		Integer stunPort = (Integer) obj;
+		Integer stunPort = stunPortValue.getValue();
 
-		obj = params.get(NET_IF);
-		if (obj == null)
+		Value<NetIF> netIFValue = params.get(NET_IF);
+		if (netIFValue == null)
 			throw new MsControlException(
 					"Params must have KasMediaSession.NET_IF param");
-		if (!(obj instanceof NetIF))
-			throw new MsControlException(
-					"Parameter KasMediaSession.NET_IF must be instance of NetIF");
-		NetIF netIF = (NetIF) obj;
+		NetIF netIF = netIFValue.getValue();
 
-		obj = params.get(LOCAL_ADDRESS);
-		if (obj == null) {
+		Value<InetAddress> localAddressValue = params.get(LOCAL_ADDRESS);
+		if (localAddressValue == null)
 			throw new MsControlException(
 					"Params must have KasMediaSession.LOCAL_ADDRESS param");
-		} else if (!(obj instanceof InetAddress))
-			throw new MsControlException(
-					"Parameter KasMediaSession.LOCAL_ADDRESS must be instance of InetAddress");
-		InetAddress localAddress = (InetAddress) obj;
+		InetAddress localAddress = localAddressValue.getValue();
 
 		Integer maxBW = null;
-		obj = params.get(MAX_BANDWIDTH);
-		if (obj == null) {
-			// Por defecto
-		} else if (!(obj instanceof Integer))
-			throw new MsControlException(
-					"Parameter KasMediaSession.MAX_BANDWIDTH must be instance of Integer");
-		else
-			maxBW = (Integer) obj;
+		Value<Integer> maxBWValue = params.get(MAX_BANDWIDTH);
+		if (maxBWValue != null)
+			maxBW = maxBWValue.getValue();
 
-		Integer maxDelay = null;
-		obj = params.get(MAX_DELAY);
-		if (obj == null) {
-			maxDelay = MediaRx.DEFAULT_MAX_DELAY;
-		} else if (!(obj instanceof Integer))
-			throw new MsControlException(
-					"Parameter KasMediaSession.DELAY must be instance of Integer");
-		else
-			maxDelay = (Integer) obj;
+		Integer maxDelay = MediaRx.DEFAULT_MAX_DELAY;
+		Value<Integer> maxDelayValue = params.get(MAX_DELAY);
+		if (maxDelayValue != null)
+			maxDelay = maxDelayValue.getValue();
 
 		Map<MediaType, Mode> mediaTypeModes = null;
-		obj = params.get(STREAMS_MODES);
-		if (obj == null) {
-			// Por defecto
-		} else
-			try {
-				mediaTypeModes = (Map<MediaType, Mode>) obj;
-			} catch (ClassCastException e) {
-				throw new MsControlException(
-						"Parameter KasMediaSession.STREAMS_MODES must be instance of Map<MediaType, Mode>",
-						e);
-			}
+		Value<Map<MediaType, Mode>> mediaTypeModesValue = params.get(STREAMS_MODES);
+		if (mediaTypeModesValue != null)
+			mediaTypeModes = mediaTypeModesValue.getValue();
 
-		ArrayList<AudioCodecType> audioCodecs = null;
-		obj = params.get(AUDIO_CODECS);
-		if (obj == null) {
-			// Por defecto
-		} else
-			try {
-				audioCodecs = (ArrayList<AudioCodecType>) obj;
-			} catch (ClassCastException e) {
-				throw new MsControlException(
-						"Parameter KasMediaSession.AUDIO_CODECS must be instance of ArrayList<AudioCodecType>",
-						e);
-			}
+		List<AudioCodecType> audioCodecs = null;
+		Value<List<AudioCodecType>> audioCodecsValue = params.get(AUDIO_CODECS);
+		if (audioCodecsValue != null)
+			audioCodecs = audioCodecsValue.getValue();
 
 		PortRange audioPortRange = null;
-		obj = params.get(AUDIO_LOCAL_PORT_RANGE);
-		if (obj == null) {
-			// Por defecto
-		} else if (!(obj instanceof PortRange))
-			throw new MsControlException(
-					"Parameter KasMediaSession.AUDIO_LOCAL_PORT_RANGE must be instance of PortRange");
-		else
-			audioPortRange = (PortRange) obj;
+		Value<PortRange> audioPortRangeValue = params
+				.get(AUDIO_LOCAL_PORT_RANGE);
+		if (audioPortRangeValue != null)
+			audioPortRange = audioPortRangeValue.getValue();
 
-		ArrayList<VideoCodecType> videoCodecs = null;
-		obj = params.get(VIDEO_CODECS);
-		if (obj == null) {
-			// Por defecto
-		} else
-			try {
-				videoCodecs = (ArrayList<VideoCodecType>) obj;
-			} catch (ClassCastException e) {
-				throw new MsControlException(
-						"Parameter KasMediaSession.VIDEO_CODECS must be instance of ArrayList<VideoCodecType>",
-						e);
-			}
+		List<VideoCodecType> videoCodecs = null;
+		Value<List<VideoCodecType>> videoCodecsValue = params.get(VIDEO_CODECS);
+		if (videoCodecsValue != null)
+			videoCodecs = videoCodecsValue.getValue();
 
 		PortRange videoPortRange = null;
-		obj = params.get(VIDEO_LOCAL_PORT_RANGE);
-		if (obj == null) {
-			// Por defecto
-		} else if (!(obj instanceof PortRange))
-			throw new MsControlException(
-					"Parameter KasMediaSession.VIDEO_LOCAL_PORT_RANGE must be instance of PortRange");
-		else
-			videoPortRange = (PortRange) obj;
+		Value<PortRange> videoPortRangeValue = params
+				.get(VIDEO_LOCAL_PORT_RANGE);
+		if (videoPortRangeValue != null)
+			videoPortRange = videoPortRangeValue.getValue();
 
 		Integer frameWidth = null;
-		obj = params.get(FRAME_WIDTH);
-		if (obj == null) {
-			// Por defecto
-		} else if (!(obj instanceof Integer))
-			throw new MsControlException(
-					"Parameter KasMediaSession.FRAME_WIDTH must be instance of Integer");
-		else
-			frameWidth = (Integer) obj;
+		Value<Integer> frameWidthValue = params.get(FRAME_WIDTH);
+		if (frameWidthValue != null)
+			frameWidth = frameWidthValue.getValue();
 
 		Integer frameHeight = null;
-		obj = params.get(FRAME_HEIGHT);
-		if (obj == null) {
-			// Por defecto
-		} else if (!(obj instanceof Integer))
-			throw new MsControlException(
-					"Parameter KasMediaSession.FRAME_HEIGHT must be instance of Integer");
-		else
-			frameHeight = (Integer) obj;
+		Value<Integer> frameHeightValue = params.get(FRAME_HEIGHT);
+		if (frameHeightValue != null)
+			frameHeight = frameHeightValue.getValue();
 
 		Integer maxFrameRate = null;
-		obj = params.get(MAX_FRAME_RATE);
-		if (obj == null) {
-			// Por defecto
-		} else if (!(obj instanceof Integer))
-			throw new MsControlException(
-					"Parameter KasMediaSession.MAX_FRAME_RATE must be instance of Integer");
-		else
-			maxFrameRate = (Integer) obj;
+		Value<Integer> maxFrameRateValue = params.get(MAX_FRAME_RATE);
+		if (maxFrameRateValue != null)
+			maxFrameRate = maxFrameRateValue.getValue();
 
 		Integer gopSize = null;
-		obj = params.get(GOP_SIZE);
-		if (obj == null) {
-			// Por defecto
-		} else if (!(obj instanceof Integer))
-			throw new MsControlException(
-					"Parameter KasMediaSession.GOP_SIZE must be instance of Integer");
-		else
-			gopSize = (Integer) obj;
+		Value<Integer> gopSizeValue = params.get(GOP_SIZE);
+		if (gopSizeValue != null)
+			gopSize = gopSizeValue.getValue();
 
 		Integer framesQueueSize = null;
-		obj = params.get(FRAMES_QUEUE_SIZE);
-		if (obj == null) {
-			// Por defecto
-		} else if (!(obj instanceof Integer))
-			throw new MsControlException(
-					"Parameter KasMediaSession.FRAMES_QUEUE_SIZE must be instance of Integer");
-		else
-			framesQueueSize = (Integer) obj;
+		Value<Integer> framesQueueSizeValue = params.get(FRAMES_QUEUE_SIZE);
+		if (framesQueueSizeValue != null)
+			framesQueueSize = framesQueueSizeValue.getValue();
 
-		Boolean syncMediaStreams = null;
-		obj = params.get(SYNCHRONIZE_MEDIA_STREAMS);
-		if (obj == null) {
-			syncMediaStreams = false;
-		} else if (!(obj instanceof Boolean))
-			throw new MsControlException(
-					"Parameter KasMediaSession.SYNCHRONIZE_MEDIA_STREAMS must be instance of Boolean");
-		else
-			syncMediaStreams = (Boolean) obj;
+		Boolean syncMediaStreams = false;
+		Value<Boolean> syncMediaStreamsValue = params
+				.get(SYNCHRONIZE_MEDIA_STREAMS);
+		if (syncMediaStreamsValue != null)
+			syncMediaStreams = syncMediaStreamsValue.getValue();
 
 		return new MediaSessionConfig(netIF, localAddress, maxBW, maxDelay,
-				mediaTypeModes, audioCodecs, audioPortRange, videoCodecs, videoPortRange,
-				frameWidth, frameHeight, maxFrameRate, gopSize, framesQueueSize,
-				syncMediaStreams, stunHost, stunPort);
+				mediaTypeModes, audioCodecs, audioPortRange, videoCodecs,
+				videoPortRange, frameWidth, frameHeight, maxFrameRate, gopSize,
+				framesQueueSize, syncMediaStreams, stunHost, stunPort);
 	}
 
 	@Override
 	public NetworkConnection createNetworkConnection(
-			Configuration<NetworkConnection> predefinedConfig) throws MsControlException {
+			Configuration<NetworkConnection> predefinedConfig)
+			throws MsControlException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public MediaMixer createMediaMixer(Configuration<MediaMixer> predefinedConfig,
-			Parameters params) throws MsControlException {
+	public MediaMixer createMediaMixer(
+			Configuration<MediaMixer> predefinedConfig, Parameters params)
+			throws MsControlException {
 		// TODO Auto-generated method stub
 		return null;
 	}
