@@ -26,16 +26,16 @@ import com.kurento.mscontrol.kas.networkconnection.NetIF;
 import com.kurento.mscontrol.kas.networkconnection.PortRange;
 
 /**
- * This factory creates MediaSessionAndroid from a set of parameters.
+ * This factory creates KasMediaSession from a set of parameters.
  * 
  */
-public class MSControlFactory {
+public class KasMsControlFactory {
 
 	/**
-	 * Create a MediaSessionAndroid from a set of parameters.
+	 * Create a KasMediaSession from a set of parameters.
 	 * 
 	 * @param params
-	 *            Parameters to create a MediaSessionAndroid. The possible
+	 *            Parameters to create a KasMediaSession. The possible
 	 *            parameters are:
 	 * 
 	 * 
@@ -53,7 +53,7 @@ public class MSControlFactory {
 	 * 
 	 *            <tbody>
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#NET_IF NET_IF}</td>
+	 *            <td>{@link KasMediaSession#NET_IF NET_IF}</td>
 	 *            <td>M</td>
 	 *            <td>{@link NetIF}</td>
 	 *            <td>[WIFI, MOBILE]</td>
@@ -62,7 +62,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#LOCAL_ADDRESS LOCAL_ADDRESS}</td>
+	 *            <td>{@link KasMediaSession#LOCAL_ADDRESS LOCAL_ADDRESS}</td>
 	 *            <td>M</td>
 	 *            <td>InetAddress</td>
 	 *            <td>NA</td>
@@ -71,7 +71,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#MAX_BANDWIDTH MAX_BANDWIDTH}</td>
+	 *            <td>{@link KasMediaSession#MAX_BANDWIDTH MAX_BANDWIDTH}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>
@@ -85,7 +85,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#MAX_DELAY MAX_DELAY}</td>
+	 *            <td>{@link KasMediaSession#MAX_DELAY MAX_DELAY}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>[0, {@link Integer#MAX_VALUE}]</td>
@@ -95,7 +95,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#STREAMS_MODES STREAMS_MODES}</td>
+	 *            <td>{@link KasMediaSession#STREAMS_MODES STREAMS_MODES}</td>
 	 *            <td>O</td>
 	 *            <td>Map&lt; MediaType, Mode&gt;</td>
 	 *            <td>[SENDRECV, SENDONLY, RECVONLY]</td>
@@ -104,7 +104,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#AUDIO_CODECS AUDIO_CODECS}</td>
+	 *            <td>{@link KasMediaSession#AUDIO_CODECS AUDIO_CODECS}</td>
 	 *            <td>O</td>
 	 *            <td>List&lt;{@link AudioCodecType}&gt;</td>
 	 *            <td>[AMR, MP2, PCMU, PCMA]</td>
@@ -113,7 +113,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#AUDIO_LOCAL_PORT_RANGE
+	 *            <td>{@link KasMediaSession#AUDIO_LOCAL_PORT_RANGE
 	 *            AUDIO_LOCAL_PORT_RANGE}</td>
 	 *            <td>O</td>
 	 *            <td>{@link PortRange}</td>
@@ -124,7 +124,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#VIDEO_CODECS VIDEO_CODECS}</td>
+	 *            <td>{@link KasMediaSession#VIDEO_CODECS VIDEO_CODECS}</td>
 	 *            <td>O</td>
 	 *            <td>List&lt;{@link VideoCodecType}&gt;</td>
 	 *            <td>[H263, MPEG4, H.264]</td>
@@ -133,7 +133,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#VIDEO_LOCAL_PORT_RANGE
+	 *            <td>{@link KasMediaSession#VIDEO_LOCAL_PORT_RANGE
 	 *            VIDEO_LOCAL_PORT_RANGE}</td>
 	 *            <td>O</td>
 	 *            <td>{@link PortRange}</td>
@@ -152,7 +152,7 @@ public class MSControlFactory {
 	 *            </thead> <tbody>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#FRAME_WIDTH FRAME_WIDTH}</td>
+	 *            <td>{@link KasMediaSession#FRAME_WIDTH FRAME_WIDTH}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>NA</td>
@@ -161,7 +161,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#FRAME_HEIGHT FRAME_HEIGHT}</td>
+	 *            <td>{@link KasMediaSession#FRAME_HEIGHT FRAME_HEIGHT}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>NA</td>
@@ -170,7 +170,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#MAX_FRAME_RATE MAX_FRAME_RATE}</td>
+	 *            <td>{@link KasMediaSession#MAX_FRAME_RATE MAX_FRAME_RATE}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>[1, {@link Integer#MAX_VALUE}]</td>
@@ -179,7 +179,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#GOP_SIZE GOP_SIZE}</td>
+	 *            <td>{@link KasMediaSession#GOP_SIZE GOP_SIZE}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
 	 *            <td>[0, {@link Integer#MAX_VALUE}]</td>
@@ -189,7 +189,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#FRAMES_QUEUE_SIZE
+	 *            <td>{@link KasMediaSession#FRAMES_QUEUE_SIZE
 	 *            FRAMES_QUEUE_SIZE}</td>
 	 *            <td>O</td>
 	 *            <td>Integer</td>
@@ -200,7 +200,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#SYNCHRONIZE_MEDIA_STREAMS
+	 *            <td>{@link KasMediaSession#SYNCHRONIZE_MEDIA_STREAMS
 	 *            SYNCHRONIZE_MEDIA_STREAMS}</td>
 	 *            <td>O</td>
 	 *            <td>Boolean</td>
@@ -210,7 +210,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#STUN_HOST STUN_HOST}</td>
+	 *            <td>{@link KasMediaSession#STUN_HOST STUN_HOST}</td>
 	 *            <td>M</td>
 	 *            <td>String</td>
 	 *            <td>NA</td>
@@ -219,7 +219,7 @@ public class MSControlFactory {
 	 *            </tr>
 	 * 
 	 *            <tr>
-	 *            <td>{@link MediaSessionAndroid#STUN_PORT STUN_PORT}</td>
+	 *            <td>{@link KasMediaSession#STUN_PORT STUN_PORT}</td>
 	 *            <td>M</td>
 	 *            <td>Integer</td>
 	 *            <td>[1024, 65535]</td>
@@ -230,10 +230,10 @@ public class MSControlFactory {
 	 *            </tbody>
 	 *            </table>
 	 * 
-	 * @return a MediaSessionAndroid
+	 * @return a KasMediaSession
 	 * @throws MsControlException
 	 */
-	public static MediaSessionAndroid createMediaSession(Parameters params)
+	public static KasMediaSession createMediaSession(Parameters params)
 			throws MsControlException {
 		return new MediaSessionImpl(params);
 	}

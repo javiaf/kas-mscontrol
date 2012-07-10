@@ -32,7 +32,7 @@ import com.kurento.mscontrol.commons.MsControlException;
 import com.kurento.mscontrol.commons.mediacomponent.MediaComponent;
 import com.kurento.mscontrol.commons.mediamixer.MediaMixer;
 import com.kurento.mscontrol.commons.networkconnection.NetworkConnection;
-import com.kurento.mscontrol.kas.MediaSessionAndroid;
+import com.kurento.mscontrol.kas.KasMediaSession;
 import com.kurento.mscontrol.kas.mediacomponent.MediaComponentAndroid;
 import com.kurento.mscontrol.kas.mediacomponent.internal.AudioPlayerComponent;
 import com.kurento.mscontrol.kas.mediacomponent.internal.AudioRecorderComponent;
@@ -42,7 +42,7 @@ import com.kurento.mscontrol.kas.networkconnection.NetIF;
 import com.kurento.mscontrol.kas.networkconnection.PortRange;
 import com.kurento.mscontrol.kas.networkconnection.internal.NetworkConnectionImpl;
 
-public class MediaSessionImpl implements MediaSessionAndroid {
+public class MediaSessionImpl implements KasMediaSession {
 
 	public final static String LOG_TAG = "MSImpl";
 
@@ -96,37 +96,37 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		obj = params.get(STUN_HOST);
 		if (obj == null)
 			throw new MsControlException(
-					"Params must have MediaSessionAndroid.STUN_HOST param");
+					"Params must have KasMediaSession.STUN_HOST param");
 		if (!(obj instanceof String))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.STUN_HOST must be instance of String");
+					"Parameter KasMediaSession.STUN_HOST must be instance of String");
 		String stunHost = (String) obj;
 
 		obj = params.get(STUN_PORT);
 		if (obj == null)
 			throw new MsControlException(
-					"Params must have MediaSessionAndroid.STUN_PORT param");
+					"Params must have KasMediaSession.STUN_PORT param");
 		if (!(obj instanceof Integer))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.STUN_PORT must be instance of Integer");
+					"Parameter KasMediaSession.STUN_PORT must be instance of Integer");
 		Integer stunPort = (Integer) obj;
 
 		obj = params.get(NET_IF);
 		if (obj == null)
 			throw new MsControlException(
-					"Params must have MediaSessionAndroid.NET_IF param");
+					"Params must have KasMediaSession.NET_IF param");
 		if (!(obj instanceof NetIF))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.NET_IF must be instance of NetIF");
+					"Parameter KasMediaSession.NET_IF must be instance of NetIF");
 		NetIF netIF = (NetIF) obj;
 
 		obj = params.get(LOCAL_ADDRESS);
 		if (obj == null) {
 			throw new MsControlException(
-					"Params must have MediaSessionAndroid.LOCAL_ADDRESS param");
+					"Params must have KasMediaSession.LOCAL_ADDRESS param");
 		} else if (!(obj instanceof InetAddress))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.LOCAL_ADDRESS must be instance of InetAddress");
+					"Parameter KasMediaSession.LOCAL_ADDRESS must be instance of InetAddress");
 		InetAddress localAddress = (InetAddress) obj;
 
 		Integer maxBW = null;
@@ -135,7 +135,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			// Por defecto
 		} else if (!(obj instanceof Integer))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.MAX_BANDWIDTH must be instance of Integer");
+					"Parameter KasMediaSession.MAX_BANDWIDTH must be instance of Integer");
 		else
 			maxBW = (Integer) obj;
 
@@ -145,7 +145,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			maxDelay = MediaRx.DEFAULT_MAX_DELAY;
 		} else if (!(obj instanceof Integer))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.DELAY must be instance of Integer");
+					"Parameter KasMediaSession.DELAY must be instance of Integer");
 		else
 			maxDelay = (Integer) obj;
 
@@ -158,7 +158,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 				mediaTypeModes = (Map<MediaType, Mode>) obj;
 			} catch (ClassCastException e) {
 				throw new MsControlException(
-						"Parameter MediaSessionAndroid.STREAMS_MODES must be instance of Map<MediaType, Mode>",
+						"Parameter KasMediaSession.STREAMS_MODES must be instance of Map<MediaType, Mode>",
 						e);
 			}
 
@@ -171,7 +171,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 				audioCodecs = (ArrayList<AudioCodecType>) obj;
 			} catch (ClassCastException e) {
 				throw new MsControlException(
-						"Parameter MediaSessionAndroid.AUDIO_CODECS must be instance of ArrayList<AudioCodecType>",
+						"Parameter KasMediaSession.AUDIO_CODECS must be instance of ArrayList<AudioCodecType>",
 						e);
 			}
 
@@ -181,7 +181,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			// Por defecto
 		} else if (!(obj instanceof PortRange))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.AUDIO_LOCAL_PORT_RANGE must be instance of PortRange");
+					"Parameter KasMediaSession.AUDIO_LOCAL_PORT_RANGE must be instance of PortRange");
 		else
 			audioPortRange = (PortRange) obj;
 
@@ -194,7 +194,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 				videoCodecs = (ArrayList<VideoCodecType>) obj;
 			} catch (ClassCastException e) {
 				throw new MsControlException(
-						"Parameter MediaSessionAndroid.VIDEO_CODECS must be instance of ArrayList<VideoCodecType>",
+						"Parameter KasMediaSession.VIDEO_CODECS must be instance of ArrayList<VideoCodecType>",
 						e);
 			}
 
@@ -204,7 +204,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			// Por defecto
 		} else if (!(obj instanceof PortRange))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.VIDEO_LOCAL_PORT_RANGE must be instance of PortRange");
+					"Parameter KasMediaSession.VIDEO_LOCAL_PORT_RANGE must be instance of PortRange");
 		else
 			videoPortRange = (PortRange) obj;
 
@@ -214,7 +214,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			// Por defecto
 		} else if (!(obj instanceof Integer))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.FRAME_WIDTH must be instance of Integer");
+					"Parameter KasMediaSession.FRAME_WIDTH must be instance of Integer");
 		else
 			frameWidth = (Integer) obj;
 
@@ -224,7 +224,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			// Por defecto
 		} else if (!(obj instanceof Integer))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.FRAME_HEIGHT must be instance of Integer");
+					"Parameter KasMediaSession.FRAME_HEIGHT must be instance of Integer");
 		else
 			frameHeight = (Integer) obj;
 
@@ -234,7 +234,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			// Por defecto
 		} else if (!(obj instanceof Integer))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.MAX_FRAME_RATE must be instance of Integer");
+					"Parameter KasMediaSession.MAX_FRAME_RATE must be instance of Integer");
 		else
 			maxFrameRate = (Integer) obj;
 
@@ -244,7 +244,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			// Por defecto
 		} else if (!(obj instanceof Integer))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.GOP_SIZE must be instance of Integer");
+					"Parameter KasMediaSession.GOP_SIZE must be instance of Integer");
 		else
 			gopSize = (Integer) obj;
 
@@ -254,7 +254,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			// Por defecto
 		} else if (!(obj instanceof Integer))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.FRAMES_QUEUE_SIZE must be instance of Integer");
+					"Parameter KasMediaSession.FRAMES_QUEUE_SIZE must be instance of Integer");
 		else
 			framesQueueSize = (Integer) obj;
 
@@ -264,7 +264,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 			syncMediaStreams = false;
 		} else if (!(obj instanceof Boolean))
 			throw new MsControlException(
-					"Parameter MediaSessionAndroid.SYNCHRONIZE_MEDIA_STREAMS must be instance of Boolean");
+					"Parameter KasMediaSession.SYNCHRONIZE_MEDIA_STREAMS must be instance of Boolean");
 		else
 			syncMediaStreams = (Boolean) obj;
 
