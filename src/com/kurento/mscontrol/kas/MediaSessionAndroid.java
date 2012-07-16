@@ -36,12 +36,12 @@ import com.kurento.mscontrol.kas.networkconnection.NetIF;
 import com.kurento.mscontrol.kas.networkconnection.PortRange;
 
 /**
- * KasMediaSession is an interface that extends MediaSession.<br>
+ * MediaSessionAndroid is an interface that extends MediaSession.<br>
  * 
  * Defines a set of parameters to configure a MediaSession instance.
  * 
  */
-public interface KasMediaSession extends MediaSession {
+public interface MediaSessionAndroid extends MediaSession {
 
 	/**
 	 * String to indicate the stun server name

@@ -33,7 +33,7 @@ import com.kurento.mscontrol.commons.MsControlException;
 import com.kurento.mscontrol.commons.mediacomponent.MediaComponent;
 import com.kurento.mscontrol.commons.mediamixer.MediaMixer;
 import com.kurento.mscontrol.commons.networkconnection.NetworkConnection;
-import com.kurento.mscontrol.kas.KasMediaSession;
+import com.kurento.mscontrol.kas.MediaSessionAndroid;
 import com.kurento.mscontrol.kas.mediacomponent.MediaComponentAndroid;
 import com.kurento.mscontrol.kas.mediacomponent.internal.AudioPlayerComponent;
 import com.kurento.mscontrol.kas.mediacomponent.internal.AudioRecorderComponent;
@@ -43,7 +43,7 @@ import com.kurento.mscontrol.kas.networkconnection.NetIF;
 import com.kurento.mscontrol.kas.networkconnection.PortRange;
 import com.kurento.mscontrol.kas.networkconnection.internal.NetworkConnectionImpl;
 
-public class MediaSessionImpl implements KasMediaSession {
+public class MediaSessionImpl implements MediaSessionAndroid {
 
 	public final static String LOG_TAG = "MSImpl";
 
@@ -96,25 +96,25 @@ public class MediaSessionImpl implements KasMediaSession {
 		Value<String> stunHostValue = params.get(STUN_HOST);
 		if (stunHostValue == null)
 			throw new MsControlException(
-					"Params must have KasMediaSession.STUN_HOST param");
+					"Params must have MediaSessionAndroid.STUN_HOST param");
 		String stunHost = stunHostValue.getValue();
 
 		Value<Integer> stunPortValue = params.get(STUN_PORT);
 		if (stunPortValue == null)
 			throw new MsControlException(
-					"Params must have KasMediaSession.STUN_PORT param");
+					"Params must have MediaSessionAndroid.STUN_PORT param");
 		Integer stunPort = stunPortValue.getValue();
 
 		Value<NetIF> netIFValue = params.get(NET_IF);
 		if (netIFValue == null)
 			throw new MsControlException(
-					"Params must have KasMediaSession.NET_IF param");
+					"Params must have MediaSessionAndroid.NET_IF param");
 		NetIF netIF = netIFValue.getValue();
 
 		Value<InetAddress> localAddressValue = params.get(LOCAL_ADDRESS);
 		if (localAddressValue == null)
 			throw new MsControlException(
-					"Params must have KasMediaSession.LOCAL_ADDRESS param");
+					"Params must have MediaSessionAndroid.LOCAL_ADDRESS param");
 		InetAddress localAddress = localAddressValue.getValue();
 
 		Integer maxBW = null;
