@@ -167,7 +167,7 @@ mvn clean install
 
 		[[1]] <<mpeg4 SVGA 800x600@3fps 1000kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.VideoStreamingTestCase#testMpeg4SVGA1000>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.VideoStreamingTestCase#testMpeg4SVGA1000>>>
 			
 			SUCCESS: no. Criteria not passed:
 
@@ -175,19 +175,19 @@ mvn clean install
 
 		[[2]] <<mpeg4 VGA 640x480@7fps 700kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.VideoStreamingTestCase#testMpeg4VGA700>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.VideoStreamingTestCase#testMpeg4VGA700>>>
 			
 			SUCCESS: yes
 
 		[[3]] <<mpeg4 CIF 352x288@15fps 384kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.VideoStreamingTestCase#testMpeg4CIF384>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.VideoStreamingTestCase#testMpeg4CIF384>>>
 			
 			SUCCESS: yes
 
 		[[4]] <<mpeg4 QCIF 176x144@30fps 192kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.VideoStreamingTestCase#testMpeg4QCIF192>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.VideoStreamingTestCase#testMpeg4QCIF192>>>
 			
 			SUCCESS: yes      
 
@@ -206,7 +206,7 @@ mvn clean install
 
 		[[1]] <<h263 SVGA 800x600@3fps 1200kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.VideoStreamingTestCase#testH263SVGA1200>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.VideoStreamingTestCase#testH263SVGA1200>>>
 			
 			SUCCESS: no. Criteria not passed:
 
@@ -214,19 +214,19 @@ mvn clean install
 
 		[[2]] <<h263 VGA 640x480@7fps 800kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.VideoStreamingTestCase#testH263VGA800>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.VideoStreamingTestCase#testH263VGA800>>>
 			
 			SUCCESS: yes
 
 		[[3]] <<h263 CIF 352x288@15fps 400kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.VideoStreamingTestCase#testH263CIF400>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.VideoStreamingTestCase#testH263CIF400>>>
 			
 			SUCCESS: yes
 
 		[[4]] <<h263 QCIF 176x144@30fps 200kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.VideoStreamingTestCase#testH263QCIF200>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.VideoStreamingTestCase#testH263QCIF200>>>
 			
 			SUCCESS: yes
 
@@ -246,25 +246,25 @@ mvn clean install
 
 		[[1]] <<h264 SVGA 800x600@3fps 600kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.VideoStreamingTestCase#testH264SVGA600>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.VideoStreamingTestCase#testH264SVGA600>>>
 			
 			SUCCESS: no (Test infrastructure error).
 
 		[[2]] <<h264 VGA 640x480@7fps 384kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.VideoStreamingTestCase#testH264VGA380>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.VideoStreamingTestCase#testH264VGA380>>>
 			
 			SUCCESS: no (Test infrastructure error).
 
 		[[3]] <<h264 CIF 352x288@15fps 96kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.VideoStreamingTestCase#testH264QCIF64>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.VideoStreamingTestCase#testH264QCIF64>>>
 			
 			SUCCESS: no (Test infrastructure error).
 
 		[[4]] <<h264 QCIF 176x144@30fps 64kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.VideoStreamingTestCase#>testH264CIF96>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.VideoStreamingTestCase#>testH264CIF96>>>
 			
 			SUCCESS: no (Test infrastructure error).
 
@@ -309,7 +309,7 @@ mvn clean install
 
 		[[1]] <<amr 12.2kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.AudioStreamingTestCase#testAMR>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.AudioStreamingTestCase#testAMR>>>
 			
 			SUCCESS: yes
 
@@ -328,7 +328,7 @@ mvn clean install
 
 		[[1]] <<mp2 64kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.AudioStreamingTestCase#testMP2>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.AudioStreamingTestCase#testMP2>>>
 			
 			SUCCESS: yes
 
@@ -347,7 +347,7 @@ mvn clean install
 
 		[[1]] <<pcmu 64kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.AudioStreamingTestCase#testPCMU>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.AudioStreamingTestCase#testPCMU>>>
 			
 			SUCCESS: yes
 
@@ -366,7 +366,7 @@ mvn clean install
 
 		[[1]] <<pcma 64kbps>>
 
-			Automated by <<<com.kurento.kas.mscontrol.test.AudioStreamingTestCase#testPCMA>>>
+			Automated by <<<com.kurento.mscontrol.kas.test.AudioStreamingTestCase#testPCMA>>>
 			
 			SUCCESS: yes
 
