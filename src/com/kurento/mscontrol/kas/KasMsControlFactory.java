@@ -26,7 +26,8 @@ import com.kurento.mscontrol.kas.networkconnection.NetIF;
 import com.kurento.mscontrol.kas.networkconnection.PortRange;
 
 /**
- * This factory creates KasMediaSession from a set of parameters.
+ * This factory must be used to create {@link KasMediaSession} objects from a
+ * set of parameters.
  * 
  */
 public class KasMsControlFactory {

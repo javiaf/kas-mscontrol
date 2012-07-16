@@ -108,8 +108,20 @@ public interface MediaComponentAndroid extends MediaComponent {
 
 	public boolean isStarted();
 
+	/**
+	 * Run the action requested on the component if it is supported.
+	 * 
+	 * @param action
+	 * @throws MsControlException
+	 */
 	public void onAction(AndroidAction action) throws MsControlException;
 
+	/**
+	 * @param info
+	 * @return the info of the media component requested if the media component
+	 *         can provide this type of info.
+	 * @throws MsControlException
+	 */
 	public Object getInfo(AndroidInfo info) throws MsControlException;
 
 }

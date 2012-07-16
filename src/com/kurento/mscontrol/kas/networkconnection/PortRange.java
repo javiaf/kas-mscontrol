@@ -18,9 +18,11 @@ public class PortRange {
 	 *            range max port. It must be greater than minPort and less than
 	 *            or equal 65535.
 	 * @throws IllegalArgumentException
-	 *             if minPort is less than 1.
-	 * @throws IllegalArgumentException
-	 *             if maxPort is less than minPort or greater than than 65535.
+	 *             <ul>
+	 *             <li>if minPort is less than 1024.</li>
+	 *             <li>if maxPort is less than minPort or greater than than
+	 *             65535.</li>
+	 *             </ul>
 	 */
 	public PortRange(int minPort, int maxPort) throws IllegalArgumentException {
 		if (minPort < 1024)
