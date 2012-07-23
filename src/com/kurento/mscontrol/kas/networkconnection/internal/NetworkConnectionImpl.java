@@ -53,7 +53,6 @@ import de.javawi.jstun.test.DiscoveryTest;
 
 public class NetworkConnectionImpl extends NetworkConnectionBase {
 
-	private static final long serialVersionUID = 1L;
 	public final static String LOG_TAG = "NW";
 
 	private MediaSessionConfig mediaSessionConfig;
@@ -296,9 +295,26 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		MediaSpec videoMedia = null;
 
 		if (videoProfiles != null && videoProfiles.size() > 0) {
-			videoMedia = new MediaSpec();
 			int bitrate = (int) Math
 					.ceil(videoProfiles.get(0).getBitRate() / 1000.0);
+
+			TransportRtp transRtp = new TransportRtp(publicAddress
+					.getHostAddress().toString(), videoPort);
+			Transport trans = new Transport();
+			trans.setRtp(transRtp);
+
+			HashSet<MediaType> types = new HashSet<MediaType>();
+			types.add(MediaType.VIDEO);
+
+			Mode videoMode = Mode.SENDRECV;
+			if (this.mediaSessionConfig.getMediaTypeModes() != null
+					&& this.mediaSessionConfig.getMediaTypeModes().get(
+							MediaType.VIDEO) != null)
+				videoMode = this.mediaSessionConfig.getMediaTypeModes().get(
+						MediaType.VIDEO);
+
+			videoMedia = new MediaSpec(null, types, trans, videoMode);
+
 			for (VideoProfile vp : videoProfiles) {
 				if (VideoCodecType.MPEG4.equals(vp.getVideoCodecType()))
 					addPayload(videoMedia, payloadId, "MP4V-ES", 90000, bitrate);
@@ -309,33 +325,31 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					addPayload(videoMedia, payloadId, "H264", 90000, bitrate);
 				payloadId++;
 			}
-
-			TransportRtp transRtp = new TransportRtp();
-			transRtp.setAddress(publicAddress.getHostAddress().toString());
-			transRtp.setPort(videoPort);
-			Transport trans = new Transport();
-			trans.setRtp(transRtp);
-			videoMedia.setTransport(trans);
-
-			HashSet<MediaType> types = new HashSet<MediaType>();
-			types.add(MediaType.VIDEO);
-			videoMedia.setTypes(types);
-
-			Mode videoMode = Mode.SENDRECV;
-			if (this.mediaSessionConfig.getMediaTypeModes() != null
-					&& this.mediaSessionConfig.getMediaTypeModes().get(
-							MediaType.VIDEO) != null)
-				videoMode = this.mediaSessionConfig.getMediaTypeModes().get(
-						MediaType.VIDEO);
-			videoMedia.setMode(videoMode);
 		}
 
 		// // AUDIO
 		MediaSpec audioMedia = null;
 
 		if (audioProfiles != null && audioProfiles.size() > 0) {
-			audioMedia = new MediaSpec();
 			int bitrate = (int) Math.ceil(maxAudioBitrate / 1000.0);
+
+			TransportRtp transRtp = new TransportRtp(publicAddress
+					.getHostAddress().toString(), audioPort);
+			Transport trans = new Transport();
+			trans.setRtp(transRtp);
+
+			HashSet<MediaType> types = new HashSet<MediaType>();
+			types.add(MediaType.AUDIO);
+
+			Mode audioMode = Mode.SENDRECV;
+			if (this.mediaSessionConfig.getMediaTypeModes() != null
+					&& this.mediaSessionConfig.getMediaTypeModes().get(
+							MediaType.AUDIO) != null)
+				audioMode = this.mediaSessionConfig.getMediaTypeModes().get(
+						MediaType.AUDIO);
+
+			audioMedia = new MediaSpec(null, types, trans, audioMode);
+
 			for (AudioProfile ap : audioProfiles) {
 				if (AudioProfile.MP2.equals(ap))
 					addPayload(audioMedia, 14, "MPA", 90000, bitrate);
@@ -353,36 +367,20 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					addPayload(audioMedia, 8, "PCMA", 8000, bitrate);
 				payloadId++;
 			}
-
-			TransportRtp transRtp = new TransportRtp();
-			transRtp.setAddress(publicAddress.getHostAddress().toString());
-			transRtp.setPort(audioPort);
-			Transport trans = new Transport();
-			trans.setRtp(transRtp);
-			audioMedia.setTransport(trans);
-
-			HashSet<MediaType> types = new HashSet<MediaType>();
-			types.add(MediaType.AUDIO);
-			audioMedia.setTypes(types);
-
-			Mode audioMode = Mode.SENDRECV;
-			if (this.mediaSessionConfig.getMediaTypeModes() != null
-					&& this.mediaSessionConfig.getMediaTypeModes().get(
-							MediaType.AUDIO) != null)
-				audioMode = this.mediaSessionConfig.getMediaTypeModes().get(
-						MediaType.AUDIO);
-			audioMedia.setMode(audioMode);
 		}
 
 		Log.d(LOG_TAG, "videoMedia: " + videoMedia);
 		Log.d(LOG_TAG, "audioMedia: " + audioMedia);
 
-		SessionSpec session = new SessionSpec();
+		List<MediaSpec> medias = new ArrayList<MediaSpec>();
+
 		if (videoMedia != null)
-			session.addMediaSpec(videoMedia);
+			medias.add(videoMedia);
+
 		if (audioMedia != null)
-			session.addMediaSpec(audioMedia);
-		session.setId("12345"); // ("KurentoAndroidClient");
+			medias.add(audioMedia);
+
+		SessionSpec session = new SessionSpec(medias, "12345");
 
 		return session;
 	}

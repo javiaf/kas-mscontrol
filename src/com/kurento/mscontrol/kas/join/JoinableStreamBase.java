@@ -137,7 +137,6 @@ public abstract class JoinableStreamBase extends JoinableImpl implements
 	protected static SessionSpec filterMediaByType(SessionSpec session,
 			MediaType type) {
 		List<MediaSpec> mediaList = new ArrayList<MediaSpec>();
-		MediaSpec newM = new MediaSpec();
 
 		for (MediaSpec m : session.getMediaSpecs()) {
 			Set<MediaType> mediaTypes = m.getTypes();
@@ -146,9 +145,9 @@ public abstract class JoinableStreamBase extends JoinableImpl implements
 			for (MediaType t : mediaTypes) {
 				if (t == type) {
 					for (Payload p : m.getPayloads()) {
-						newM.setMode(m.getMode());
-						newM.setTransport(m.getTransport());
-						newM.setTypes(m.getTypes());
+						MediaSpec newM = new MediaSpec(null, m.getTypes(),
+								m.getTransport(), m.getMode());
+						mediaList.add(newM);
 						newM.addPayload(p);
 						mediaList.add(newM);
 						break;
