@@ -276,6 +276,26 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 				mCamera.takePicture(myShutterCallback, myPictureCallback_RAW,
 						myPictureCallback_JPG);
 			}
+		} else if (AndroidAction.CAMERA_FLASH_ON.equals(action)) {
+			try {
+				Camera.Parameters params = mCamera.getParameters();
+				params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+				mCamera.setParameters(params);
+				mCamera.startPreview();
+			} catch (Exception e) {
+				Log.w(LOG_TAG,
+						"Camera does not support flash. " + e.getMessage(), e);
+			}
+		} else if (AndroidAction.CAMERA_FLASH_OFF.equals(action)) {
+			try {
+				Camera.Parameters params = mCamera.getParameters();
+				params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+				mCamera.setParameters(params);
+				mCamera.startPreview();
+			} catch (Exception e) {
+				Log.w(LOG_TAG,
+						"Camera does not support flash. " + e.getMessage(), e);
+			}
 		} else
 			throw new MsControlException("Action not supported");
 	}
