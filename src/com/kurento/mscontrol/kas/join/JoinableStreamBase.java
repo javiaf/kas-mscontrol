@@ -147,7 +147,6 @@ public abstract class JoinableStreamBase extends JoinableImpl implements
 					for (Payload p : m.getPayloads()) {
 						MediaSpec newM = new MediaSpec(null, m.getTypes(),
 								m.getTransport(), m.getMode());
-						mediaList.add(newM);
 						newM.addPayload(p);
 						mediaList.add(newM);
 						break;
