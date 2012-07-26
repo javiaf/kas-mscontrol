@@ -27,6 +27,7 @@ import android.util.Log;
 
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
+import com.kurento.kas.media.ports.MediaPort;
 import com.kurento.kas.media.ports.MediaPortManager;
 import com.kurento.kas.media.profiles.AudioProfile;
 import com.kurento.kas.media.profiles.VideoProfile;
@@ -68,6 +69,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	private static int videoPort = -1;
 	private static int audioPort = -1;
+	private static MediaPort videoMediaPort = null;
+	private static MediaPort audioMediaPort = null;
 
 	private VideoJoinableStreamImpl videoJoinableStreamImpl;
 	private AudioJoinableStreamImpl audioJoinableStreamImpl;
@@ -113,12 +116,13 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 		audioJoinableStreamImpl = new AudioJoinableStreamImpl(this,
 				StreamType.audio, remoteSessionSpec, localSessionSpec,
-				mediaSessionConfig.getMaxDelay());
+				audioMediaPort, mediaSessionConfig.getMaxDelay());
 		this.streams[0] = audioJoinableStreamImpl;
 
 		videoJoinableStreamImpl = new VideoJoinableStreamImpl(this,
 				StreamType.video, this.videoProfiles, remoteSessionSpec,
-				localSessionSpec, mediaSessionConfig.getMaxDelay(),
+				localSessionSpec, videoMediaPort,
+				mediaSessionConfig.getMaxDelay(),
 				mediaSessionConfig.getFramesQueueSize());
 		this.streams[1] = videoJoinableStreamImpl;
 	}
@@ -216,8 +220,15 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 						"Can not take ports, they are in use.");
 
 			Log.d(LOG_TAG, "takeMediaPortThreadSafe");
-			int audioRemainder = MediaPortManager.releaseAudioLocalPort();
-			int videoRemainder = MediaPortManager.releaseVideoLocalPort();
+			int audioRemainder = 0;
+			int videoRemainder = 0;
+
+			if (audioMediaPort != null)
+				audioRemainder = MediaPortManager
+						.releaseMediaPort(audioMediaPort);
+			if (videoMediaPort != null)
+				videoRemainder = MediaPortManager
+						.releaseMediaPort(videoMediaPort);
 
 			if ((audioRemainder != 0) || (videoRemainder != 0))
 				throw new MsControlException(
@@ -261,10 +272,13 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 				publicAddress = audioPublicIp;
 
-				int audioLocalPort = MediaPortManager
-						.takeAudioLocalPort(audioInfo.getLocalPort());
-				int videoLocalPort = MediaPortManager
-						.takeVideoLocalPort(videoInfo.getLocalPort());
+				audioMediaPort = MediaPortManager.takeMediaPort(audioInfo
+						.getLocalPort());
+				int audioLocalPort = audioMediaPort.getPort();
+
+				videoMediaPort = MediaPortManager.takeMediaPort(videoInfo
+						.getLocalPort());
+				int videoLocalPort = videoMediaPort.getPort();
 
 				if (audioLocalPort < 0 || videoLocalPort < 0)
 					throw new MsControlException("Can not take ports.");
@@ -272,8 +286,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				audioPort = audioInfo.getPublicPort();
 				videoPort = videoInfo.getPublicPort();
 			} else {
-				audioPort = MediaPortManager.takeAudioLocalPort();
-				videoPort = MediaPortManager.takeVideoLocalPort();
+				audioMediaPort = MediaPortManager.takeMediaPort();
+				audioPort = audioMediaPort.getPort();
+				videoMediaPort = MediaPortManager.takeMediaPort();
+				videoPort = videoMediaPort.getPort();
 			}
 
 			if (audioPort < 0 || videoPort < 0)

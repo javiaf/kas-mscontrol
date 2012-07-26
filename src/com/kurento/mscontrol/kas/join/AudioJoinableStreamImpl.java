@@ -23,6 +23,7 @@ import android.util.Log;
 
 import com.kurento.commons.media.format.conversor.SdpConversor;
 import com.kurento.kas.media.codecs.AudioCodecType;
+import com.kurento.kas.media.ports.MediaPort;
 import com.kurento.kas.media.profiles.AudioProfile;
 import com.kurento.kas.media.rx.AudioRx;
 import com.kurento.kas.media.rx.AudioSamples;
@@ -45,6 +46,7 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 
 	private AudioInfoTx audioInfo;
 	private SessionSpec localSessionSpec;
+	private MediaPort audioMediaPort;
 
 	private AudioRxThread audioRxThread = null;
 
@@ -60,9 +62,11 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 
 	public AudioJoinableStreamImpl(JoinableContainer container,
 			StreamType type, SessionSpec remoteSessionSpec,
-			SessionSpec localSessionSpec, Integer maxDelayRx) {
+			SessionSpec localSessionSpec, MediaPort audioMediaPort,
+			Integer maxDelayRx) {
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
+		this.audioMediaPort = audioMediaPort;
 
 		RTPInfo remoteRTPInfo = new RTPInfo(remoteSessionSpec);
 		Mode audioMode = remoteRTPInfo.getAudioMode();
@@ -79,7 +83,8 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 
 				if (Mode.SENDRECV.equals(audioMode)
 						|| Mode.RECVONLY.equals(audioMode)) {
-					audioInfo.setFrameSize(MediaTx.initAudio(audioInfo));
+					audioInfo.setFrameSize(MediaTx.initAudio(audioInfo,
+							this.audioMediaPort));
 					if (audioInfo.getFrameSize() < 0) {
 						Log.e(LOG_TAG, "Error in initAudio");
 						MediaTx.finishAudio();
@@ -159,7 +164,8 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 			if (!s.getMediaSpecs().isEmpty()) {
 				try {
 					String sdpAudio = SdpConversor.sessionSpec2Sdp(s);
-					MediaRx.startAudioRx(sdpAudio, maxDelayRx, this.audioRx);
+					MediaRx.startAudioRx(audioMediaPort, sdpAudio, maxDelayRx,
+							this.audioRx);
 				} catch (SdpException e) {
 					Log.e(LOG_TAG, "Could not start audio rx " + e.toString());
 				}

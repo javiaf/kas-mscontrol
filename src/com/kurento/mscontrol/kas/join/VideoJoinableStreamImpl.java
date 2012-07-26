@@ -32,6 +32,7 @@ import android.util.Log;
 
 import com.kurento.commons.media.format.conversor.SdpConversor;
 import com.kurento.kas.media.codecs.VideoCodecType;
+import com.kurento.kas.media.ports.MediaPort;
 import com.kurento.kas.media.profiles.VideoProfile;
 import com.kurento.kas.media.rx.MediaRx;
 import com.kurento.kas.media.rx.VideoFrame;
@@ -57,6 +58,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 	private VideoProfile videoProfile = null;
 	private SessionSpec localSessionSpec;
+	private MediaPort videoMediaPort;
 
 	private VideoTxThread videoTxThread = null;
 	private VideoRxThread videoRxThread = null;
@@ -82,9 +84,12 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	public VideoJoinableStreamImpl(JoinableContainer container,
 			StreamType type, ArrayList<VideoProfile> videoProfiles,
 			SessionSpec remoteSessionSpec, SessionSpec localSessionSpec,
-			Integer maxDelayRx, Integer framesQueueSize) {
+			MediaPort videoMediaPort, Integer maxDelayRx,
+			Integer framesQueueSize) {
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
+		this.videoMediaPort = videoMediaPort;
+
 		if (framesQueueSize != null && framesQueueSize > QUEUE_SIZE)
 			QUEUE_SIZE = framesQueueSize;
 		Log.d(LOG_TAG, "Video TX frames queue size: " + QUEUE_SIZE);
@@ -118,7 +123,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 				VideoInfoTx videoInfo = new VideoInfoTx(videoProfile);
 				videoInfo.setOut(remoteRTPInfo.getVideoRTPDir());
 				videoInfo.setPayloadType(remoteRTPInfo.getVideoPayloadType());
-				int ret = MediaTx.initVideo(videoInfo);
+				int ret = MediaTx.initVideo(videoInfo, this.videoMediaPort);
 				if (ret < 0) {
 					Log.e(LOG_TAG, "Error in initVideo");
 					MediaTx.finishVideo();
@@ -361,7 +366,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			if (!s.getMediaSpecs().isEmpty()) {
 				try {
 					String sdpVideo = SdpConversor.sessionSpec2Sdp(s);
-					MediaRx.startVideoRx(sdpVideo, maxDelayRx, this.videoRx);
+					MediaRx.startVideoRx(videoMediaPort, sdpVideo, maxDelayRx,
+							this.videoRx);
 				} catch (SdpException e) {
 					Log.e(LOG_TAG, "Could not start video rx " + e.toString());
 				}
