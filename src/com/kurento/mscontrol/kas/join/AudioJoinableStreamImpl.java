@@ -31,7 +31,6 @@ import com.kurento.kas.media.tx.AudioInfoTx;
 import com.kurento.kas.media.tx.AudioSamplesTx;
 import com.kurento.kas.media.tx.MediaTx;
 import com.kurento.mediaspec.MediaType;
-import com.kurento.mediaspec.Mode;
 import com.kurento.mediaspec.SessionSpec;
 import com.kurento.mscontrol.commons.MsControlException;
 import com.kurento.mscontrol.commons.join.Joinable;
@@ -65,9 +64,11 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 		this.localSessionSpec = localSessionSpec;
 
 		RTPInfo remoteRTPInfo = new RTPInfo(remoteSessionSpec);
-		Mode audioMode = remoteRTPInfo.getAudioMode();
+		com.kurento.mediaspec.Direction audioMode = remoteRTPInfo
+				.getAudioMode();
 
-		if (audioMode != null && !Mode.INACTIVE.equals(audioMode)) {
+		if (audioMode != null
+				&& !com.kurento.mediaspec.Direction.INACTIVE.equals(audioMode)) {
 			AudioCodecType audioCodecType = remoteRTPInfo.getAudioCodecType();
 			AudioProfile audioProfile = AudioProfile
 					.getAudioProfileFromAudioCodecType(audioCodecType);
@@ -77,8 +78,9 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 				audioInfo.setOut(remoteRTPInfo.getAudioRTPDir());
 				audioInfo.setPayloadType(remoteRTPInfo.getAudioPayloadType());
 
-				if (Mode.SENDRECV.equals(audioMode)
-						|| Mode.RECVONLY.equals(audioMode)) {
+				if (com.kurento.mediaspec.Direction.SENDRECV.equals(audioMode)
+						|| com.kurento.mediaspec.Direction.RECVONLY
+								.equals(audioMode)) {
 					audioInfo.setFrameSize(MediaTx.initAudio(audioInfo));
 					if (audioInfo.getFrameSize() < 0) {
 						Log.e(LOG_TAG, "Error in initAudio");
@@ -87,7 +89,7 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 					}
 				}
 
-				if ((Mode.SENDRECV.equals(audioMode) || Mode.SENDONLY
+				if ((com.kurento.mediaspec.Direction.SENDRECV.equals(audioMode) || com.kurento.mediaspec.Direction.SENDONLY
 						.equals(audioMode))) {
 					this.audioRxThread = new AudioRxThread(this, maxDelayRx);
 					this.audioRxThread.start();
@@ -156,7 +158,7 @@ public class AudioJoinableStreamImpl extends JoinableStreamBase implements Audio
 		public void run() {
 			Log.d(LOG_TAG, "startAudioRx");
 			SessionSpec s = filterMediaByType(localSessionSpec, MediaType.AUDIO);
-			if (!s.getMediaSpecs().isEmpty()) {
+			if (!s.getMedias().isEmpty()) {
 				try {
 					String sdpAudio = SdpConversor.sessionSpec2Sdp(s);
 					MediaRx.startAudioRx(sdpAudio, maxDelayRx, this.audioRx);

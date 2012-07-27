@@ -30,10 +30,8 @@ import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.ports.MediaPortManager;
 import com.kurento.kas.media.profiles.AudioProfile;
 import com.kurento.kas.media.profiles.VideoProfile;
-import com.kurento.mediaspec.ArgumentNotSetException;
 import com.kurento.mediaspec.MediaSpec;
 import com.kurento.mediaspec.MediaType;
-import com.kurento.mediaspec.Mode;
 import com.kurento.mediaspec.Payload;
 import com.kurento.mediaspec.PayloadRtp;
 import com.kurento.mediaspec.SessionSpec;
@@ -145,7 +143,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 		Payload payload = new Payload();
 		payload.setRtp(rtpInfo);
-		mediaSpec.addPayload(payload);
+		mediaSpec.addToPayloads(payload);
 
 		Log.d(LOG_TAG, "payload: " + payload);
 		Log.d(LOG_TAG, "mediaSpec: " + mediaSpec);
@@ -306,7 +304,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			HashSet<MediaType> types = new HashSet<MediaType>();
 			types.add(MediaType.VIDEO);
 
-			Mode videoMode = Mode.SENDRECV;
+			com.kurento.mediaspec.Direction videoMode = com.kurento.mediaspec.Direction.SENDRECV;
 			if (this.mediaSessionConfig.getMediaTypeModes() != null
 					&& this.mediaSessionConfig.getMediaTypeModes().get(
 							MediaType.VIDEO) != null)
@@ -341,7 +339,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			HashSet<MediaType> types = new HashSet<MediaType>();
 			types.add(MediaType.AUDIO);
 
-			Mode audioMode = Mode.SENDRECV;
+			com.kurento.mediaspec.Direction audioMode = com.kurento.mediaspec.Direction.SENDRECV;
 			if (this.mediaSessionConfig.getMediaTypeModes() != null
 					&& this.mediaSessionConfig.getMediaTypeModes().get(
 							MediaType.AUDIO) != null)
@@ -356,11 +354,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				else if (AudioProfile.AMR.equals(ap)) {
 					Payload p = addPayload(audioMedia, payloadId, "AMR", 8000,
 							bitrate, 1);
-					try {
-						p.getRtp().setParameterValue("octet-align", "1");
-					} catch (ArgumentNotSetException e) {
-						Log.w(LOG_TAG, "error while asign \"octet-align=1\"");
-					}
+					if (p.isSetRtp())
+						p.getRtp().putToExtraParams("octet-align", "1");
 				} else if (AudioProfile.PCMU.equals(ap))
 					addPayload(audioMedia, 0, "PCMU", 8000, bitrate);
 				else if (AudioProfile.PCMA.equals(ap))

@@ -25,13 +25,14 @@ import android.util.Log;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.exception.CodecNotSupportedException;
-import com.kurento.mediaspec.ArgumentNotSetException;
+import com.kurento.mediaspec.Direction;
 import com.kurento.mediaspec.MediaSpec;
 import com.kurento.mediaspec.MediaType;
-import com.kurento.mediaspec.Mode;
 import com.kurento.mediaspec.Payload;
 import com.kurento.mediaspec.PayloadRtp;
 import com.kurento.mediaspec.SessionSpec;
+import com.kurento.mediaspec.Transport;
+import com.kurento.mediaspec.TransportRtp;
 
 public class RTPInfo {
 
@@ -39,7 +40,7 @@ public class RTPInfo {
 
 	private String dstIp;
 
-	private Mode videoMode;
+	private Direction videoMode;
 	private int dstVideoPort;
 	private VideoCodecType videoCodecType;
 	private int videoPayloadType = -1;
@@ -48,7 +49,7 @@ public class RTPInfo {
 	private int frameHeight = -1;
 	private Fraction frameRate;
 
-	private Mode audioMode;
+	private Direction audioMode;
 	private int dstAudioPort;
 	private AudioCodecType audioCodecType;
 	private int audioPayloadType;
@@ -57,7 +58,7 @@ public class RTPInfo {
 		return dstIp;
 	}
 
-	public Mode getVideoMode() {
+	public Direction getVideoMode() {
 		return videoMode;
 	}
 
@@ -93,7 +94,7 @@ public class RTPInfo {
 		this.frameRate = frameRate;
 	}
 
-	public Mode getAudioMode() {
+	public Direction getAudioMode() {
 		return audioMode;
 	}
 
@@ -112,77 +113,104 @@ public class RTPInfo {
 	public RTPInfo(SessionSpec se) {
 		Log.d(LOG_TAG, "sessionSpec:\n" + se);
 
-		List<MediaSpec> medias = se.getMediaSpecs();
+		List<MediaSpec> medias = se.getMedias();
 		if (medias.isEmpty())
 			return;
 
 		for (MediaSpec m : medias) {
-			try {
-				this.dstIp = m.getTransport().getRtp().getAddress();
-				break;
-			} catch (ArgumentNotSetException e) {
-				Log.w(LOG_TAG, e.toString());
+			if (!m.isSetTransport()) {
+				Log.w(LOG_TAG, "Media does not have transport");
+				continue;
 			}
+
+			Transport tr = m.getTransport();
+			if (!tr.isSetRtp()) {
+				Log.w(LOG_TAG, "Transport does not have transportRtp");
+				continue;
+			}
+
+			TransportRtp trtp = tr.getRtp();
+			if (!trtp.isSetAddress()) {
+				Log.w(LOG_TAG, "TransportRtp does not have address");
+				continue;
+			}
+
+			this.dstIp = trtp.getAddress();
+			break;
 		}
 
-		videoMode = Mode.INACTIVE;
-		audioMode = Mode.INACTIVE;
+		videoMode = Direction.INACTIVE;
+		audioMode = Direction.INACTIVE;
 
 		for (MediaSpec m : medias) {
-			Set<MediaType> mediaTypes = m.getTypes();
+			Set<MediaType> mediaTypes = m.getType();
 			if (mediaTypes.size() != 1)
 				continue;
 			for (MediaType t : mediaTypes) {
-				if (Mode.INACTIVE.equals(audioMode) && t == MediaType.AUDIO) {
-					audioMode = m.getMode();
-					if (Mode.INACTIVE.equals(audioMode))
+				if (Direction.INACTIVE.equals(audioMode)
+						&& t == MediaType.AUDIO) {
+					audioMode = m.getDirection();
+					if (Direction.INACTIVE.equals(audioMode))
 						continue;
-					try {
-						this.dstAudioPort = m.getTransport().getRtp().getPort();
-					} catch (ArgumentNotSetException e) {
-						Log.w(LOG_TAG, "Can not get port for audio " + e.toString());
+
+					if (!m.isSetTransport() || !m.getTransport().isSetRtp()
+							|| !m.getTransport().getRtp().isSetPort()) {
+						Log.w(LOG_TAG, "Can not get port for audio");
 						continue;
 					}
+
+					this.dstAudioPort = m.getTransport().getRtp().getPort();
+
 					List<Payload> payloads = m.getPayloads();
 					if ((payloads != null) && !payloads.isEmpty()) {
 						Payload p = payloads.get(0);
 						String encodingName = "";
 						try {
-							PayloadRtp rtpInfo = p.getRtp();
-							encodingName = rtpInfo.getCodecName();
-							this.audioCodecType = AudioCodecType
-									.getCodecTypeFromName(encodingName);
-							this.audioPayloadType = rtpInfo.getId();
-						} catch (ArgumentNotSetException e1) {
-							Log.w(LOG_TAG, "Can not get payload RTP info.");
+							if (p.isSetRtp()) {
+								PayloadRtp rtpInfo = p.getRtp();
+								if (rtpInfo.isSetCodecName()) {
+									encodingName = rtpInfo.getCodecName();
+									this.audioCodecType = AudioCodecType
+											.getCodecTypeFromName(encodingName);
+								}
+								if (rtpInfo.isSetId())
+									this.audioPayloadType = rtpInfo.getId();
+							}
 						} catch (CodecNotSupportedException e) {
 							Log.w(LOG_TAG, encodingName + " not supported.");
 						}
 					}
-				} else if (Mode.INACTIVE.equals(videoMode)
+				} else if (Direction.INACTIVE.equals(videoMode)
 						&& t == MediaType.VIDEO) {
-					videoMode = m.getMode();
-					if (Mode.INACTIVE.equals(videoMode))
+					videoMode = m.getDirection();
+					if (Direction.INACTIVE.equals(videoMode))
 						continue;
-					try {
-						this.dstVideoPort = m.getTransport().getRtp().getPort();
-					} catch (ArgumentNotSetException e) {
-						Log.w(LOG_TAG, "Can not get port for video " + e.toString());
+					if (!m.isSetTransport() || !m.getTransport().isSetRtp()
+							|| !m.getTransport().getRtp().isSetPort()) {
+						Log.w(LOG_TAG, "Can not get port for video");
 						continue;
 					}
+
+					this.dstVideoPort = m.getTransport().getRtp().getPort();
+
 					List<Payload> payloads = m.getPayloads();
 					if ((payloads != null) && !payloads.isEmpty()) {
 						Payload p = payloads.get(0);
 						String encodingName = "";
 						try {
-							PayloadRtp rtpInfo = p.getRtp();
-							encodingName = rtpInfo.getCodecName();
-							this.videoCodecType = VideoCodecType
-									.getCodecTypeFromName(encodingName);
-							this.videoPayloadType = rtpInfo.getId();
-							this.videoBandwidth = p.getRtp().getBitrate();
-						} catch (ArgumentNotSetException e1) {
-							Log.w(LOG_TAG, "Can not get payload RTP info.");
+							if (p.isSetRtp()) {
+								PayloadRtp rtpInfo = p.getRtp();
+								if (rtpInfo.isSetCodecName()) {
+									encodingName = rtpInfo.getCodecName();
+									this.videoCodecType = VideoCodecType
+											.getCodecTypeFromName(encodingName);
+								}
+								if (rtpInfo.isSetId())
+									this.videoPayloadType = rtpInfo.getId();
+
+								if (rtpInfo.isSetBitrate())
+									this.videoBandwidth = p.getRtp().getBitrate();
+							}
 						} catch (CodecNotSupportedException e) {
 							Log.w(LOG_TAG, encodingName + " not supported.");
 						}

@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.kurento.mediaspec.MediaSpec;
 import com.kurento.mediaspec.SessionSpec;
+import com.kurento.mediaspec.SessionSpecUtils;
 import com.kurento.mscontrol.commons.MediaEventListener;
 import com.kurento.mscontrol.commons.MsControlException;
 import com.kurento.mscontrol.commons.networkconnection.NetworkConnection;
@@ -117,13 +118,13 @@ public class SdpPortManagerImpl implements SdpPortManager {
 			} else {
 
 				userAgentSDP = offer;
-				SessionSpec[] intersectionSessions = SessionSpec.intersect(
-						resource.generateSessionSpec(), offer);
+				SessionSpec[] intersectionSessions = SessionSpecUtils
+						.intersect(resource.generateSessionSpec(), offer);
 				List<MediaSpec> combinedMediaList = intersectionSessions[1]
-						.getMediaSpecs();
+						.getMedias();
 
-				userAgentSDP.deleteAllMediaSpecs();
-				userAgentSDP.addMediaSpecs(combinedMediaList);
+				userAgentSDP.setMediasIsSet(false);
+				userAgentSDP.setMedias(combinedMediaList);
 				resource.setRemoteSessionSpec(userAgentSDP);
 				localSpec = intersectionSessions[0];
 				resource.setLocalSessionSpec(localSpec);
@@ -168,15 +169,15 @@ public class SdpPortManagerImpl implements SdpPortManager {
 						SdpPortManagerEvent.SDP_NOT_ACCEPTABLE);
 			} else {
 				userAgentSDP = answer;
-				SessionSpec[] intersectionSessions = SessionSpec.intersect(
-						localSpec, userAgentSDP);
+				SessionSpec[] intersectionSessions = SessionSpecUtils
+						.intersect(localSpec, userAgentSDP);
 				resource.setRemoteSessionSpec(intersectionSessions[1]);
 				localSpec = intersectionSessions[0];
 				resource.setLocalSessionSpec(localSpec);
 
 				boolean sdpNotAcceptable = true;
-				for (MediaSpec ms : localSpec.getMediaSpecs()) {
-					if (!ms.getPayloads().isEmpty()) {
+				for (MediaSpec ms : localSpec.getMedias()) {
+					if (ms.isSetPayloads() && !ms.getPayloads().isEmpty()) {
 						sdpNotAcceptable = false;
 						break;
 					}
