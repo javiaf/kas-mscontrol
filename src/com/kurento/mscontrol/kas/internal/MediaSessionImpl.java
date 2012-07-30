@@ -26,8 +26,8 @@ import com.kurento.commons.config.Value;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.rx.MediaRx;
+import com.kurento.mediaspec.Direction;
 import com.kurento.mediaspec.MediaType;
-import com.kurento.mediaspec.Mode;
 import com.kurento.mscontrol.commons.Configuration;
 import com.kurento.mscontrol.commons.MsControlException;
 import com.kurento.mscontrol.commons.mediacomponent.MediaComponent;
@@ -127,8 +127,9 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		if (maxDelayValue != null)
 			maxDelay = maxDelayValue.getValue();
 
-		Map<MediaType, Mode> mediaTypeModes = null;
-		Value<Map<MediaType, Mode>> mediaTypeModesValue = params.get(STREAMS_MODES);
+		Map<MediaType, Direction> mediaTypeModes = null;
+		Value<Map<MediaType, Direction>> mediaTypeModesValue = params
+				.get(STREAMS_MODES);
 		if (mediaTypeModesValue != null)
 			mediaTypeModes = mediaTypeModesValue.getValue();
 

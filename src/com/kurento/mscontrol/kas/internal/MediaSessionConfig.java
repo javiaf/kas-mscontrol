@@ -23,8 +23,8 @@ import java.util.Map;
 
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
+import com.kurento.mediaspec.Direction;
 import com.kurento.mediaspec.MediaType;
-import com.kurento.mediaspec.Mode;
 import com.kurento.mscontrol.commons.Configuration;
 import com.kurento.mscontrol.commons.MediaSession;
 import com.kurento.mscontrol.kas.networkconnection.NetIF;
@@ -40,7 +40,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 	private Integer maxBW;
 	private Integer maxDelay;
 
-	private Map<MediaType, Mode> mediaTypeModes;
+	private Map<MediaType, Direction> mediaTypeModes;
 	private List<AudioCodecType> audioCodecs;
 	private PortRange audioPortRange;
 	private List<VideoCodecType> videoCodecs;
@@ -78,7 +78,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 		return maxDelay;
 	}
 
-	public Map<MediaType, Mode> getMediaTypeModes() {
+	public Map<MediaType, Direction> getMediaTypeModes() {
 		return mediaTypeModes;
 	}
 
@@ -124,7 +124,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 
 	protected MediaSessionConfig(NetIF netIF, InetAddress localAddress,
 			Integer maxBW, Integer maxDelay,
-			Map<MediaType, Mode> mediaTypeModes,
+			Map<MediaType, Direction> mediaTypeModes,
 			List<AudioCodecType> audioCodecs, PortRange audioPortRange,
 			List<VideoCodecType> videoCodecs, PortRange videoPortRange,
 			Integer frameWidth, Integer frameHeight, Integer maxFrameRate,

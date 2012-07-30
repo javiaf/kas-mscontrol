@@ -25,8 +25,8 @@ import com.kurento.commons.config.Parameter;
 import com.kurento.commons.config.Parameters;
 import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
+import com.kurento.mediaspec.Direction;
 import com.kurento.mediaspec.MediaType;
-import com.kurento.mediaspec.Mode;
 import com.kurento.mscontrol.commons.Configuration;
 import com.kurento.mscontrol.commons.MediaSession;
 import com.kurento.mscontrol.commons.MsControlException;
@@ -84,7 +84,7 @@ public interface MediaSessionAndroid extends MediaSession {
 	/**
 	 * Map&lt;MediaType, Mode&gt; to indicate the mode of each media stream.
 	 */
-	public static final Parameter<Map<MediaType, Mode>> STREAMS_MODES = new Parameter<Map<MediaType, Mode>>(
+	public static final Parameter<Map<MediaType, Direction>> STREAMS_MODES = new Parameter<Map<MediaType, Direction>>(
 			"STREAMS_MODES");
 
 	/**

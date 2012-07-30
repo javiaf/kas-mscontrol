@@ -41,7 +41,6 @@ import com.kurento.kas.media.tx.MediaTx;
 import com.kurento.kas.media.tx.VideoFrameTx;
 import com.kurento.kas.media.tx.VideoInfoTx;
 import com.kurento.mediaspec.MediaType;
-import com.kurento.mediaspec.Mode;
 import com.kurento.mediaspec.SessionSpec;
 import com.kurento.mscontrol.commons.MsControlException;
 import com.kurento.mscontrol.commons.join.Joinable;
@@ -98,9 +97,11 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		framesQueue = new ArrayBlockingQueue<VideoFrameTx>(QUEUE_SIZE);
 
 		RTPInfo remoteRTPInfo = new RTPInfo(remoteSessionSpec);
-		Mode videoMode = remoteRTPInfo.getVideoMode();
+		com.kurento.mediaspec.Direction videoMode = remoteRTPInfo
+				.getVideoMode();
 
-		if (videoMode != null && !Mode.INACTIVE.equals(videoMode)) {
+		if (videoMode != null
+				&& !com.kurento.mediaspec.Direction.INACTIVE.equals(videoMode)) {
 			VideoCodecType videoCodecType = remoteRTPInfo.getVideoCodecType();
 			VideoProfile videoProfile = getVideoProfileFromVideoCodecType(
 					videoProfiles, videoCodecType);
@@ -116,7 +117,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 						.getDenominator());
 			}
 
-			if ((Mode.SENDRECV.equals(videoMode) || Mode.RECVONLY
+			if ((com.kurento.mediaspec.Direction.SENDRECV.equals(videoMode) || com.kurento.mediaspec.Direction.RECVONLY
 					.equals(videoMode)) && videoProfile != null) {
 				if (remoteRTPInfo.getVideoBandwidth() > 0)
 					videoProfile.setBitRate(remoteRTPInfo.getVideoBandwidth()*1000);
@@ -133,7 +134,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 				this.videoTxThread.start();
 			}
 
-			if ((Mode.SENDRECV.equals(videoMode) || Mode.SENDONLY
+			if ((com.kurento.mediaspec.Direction.SENDRECV.equals(videoMode) || com.kurento.mediaspec.Direction.SENDONLY
 					.equals(videoMode))) {
 				this.videoRxThread = new VideoRxThread(this, maxDelayRx);
 				this.videoRxThread.start();
@@ -363,7 +364,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		public void run() {
 			Log.d(LOG_TAG, "startVideoRx");
 			SessionSpec s = filterMediaByType(localSessionSpec, MediaType.VIDEO);
-			if (!s.getMediaSpecs().isEmpty()) {
+			if (!s.getMedias().isEmpty()) {
 				try {
 					String sdpVideo = SdpConversor.sessionSpec2Sdp(s);
 					MediaRx.startVideoRx(videoMediaPort, sdpVideo, maxDelayRx,
