@@ -220,12 +220,17 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			int audioRemainder = 0;
 			int videoRemainder = 0;
 
+			Log.d(LOG_TAG, "release audioMediaPort: " + audioMediaPort);
 			if (audioMediaPort != null)
 				audioRemainder = MediaPortManager
 						.releaseMediaPort(audioMediaPort);
+			audioMediaPort = null;
+
+			Log.d(LOG_TAG, "release videoMediaPort: " + videoMediaPort);
 			if (videoMediaPort != null)
 				videoRemainder = MediaPortManager
 						.releaseMediaPort(videoMediaPort);
+			videoMediaPort = null;
 
 			if ((audioRemainder != 0) || (videoRemainder != 0))
 				throw new MsControlException(
