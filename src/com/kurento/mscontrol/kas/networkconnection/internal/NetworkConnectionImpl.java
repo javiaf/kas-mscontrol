@@ -31,6 +31,7 @@ import com.kurento.kas.media.ports.MediaPort;
 import com.kurento.kas.media.ports.MediaPortManager;
 import com.kurento.kas.media.profiles.AudioProfile;
 import com.kurento.kas.media.profiles.VideoProfile;
+import com.kurento.mediaspec.Fraction;
 import com.kurento.mediaspec.MediaSpec;
 import com.kurento.mediaspec.MediaType;
 import com.kurento.mediaspec.Payload;
@@ -136,26 +137,28 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		}
 	}
 
-	private Payload addPayload(MediaSpec mediaSpec, int id, String codecName,
+	private PayloadRtp addPayload(MediaSpec mediaSpec, int id,
+			String codecName,
 			int clockRate, int bitrate, Integer channels) {
 		Log.d(LOG_TAG, "addPayload: " + codecName);
 
-		PayloadRtp rtpInfo = new PayloadRtp(id, codecName, clockRate);
-		rtpInfo.setBitrate(bitrate);
+		PayloadRtp payRtp = new PayloadRtp(id, codecName, clockRate);
+		payRtp.setBitrate(bitrate);
 		if (channels != null)
-			rtpInfo.setChannels(channels);
+			payRtp.setChannels(channels);
 
 		Payload payload = new Payload();
-		payload.setRtp(rtpInfo);
+		payload.setRtp(payRtp);
 		mediaSpec.addToPayloads(payload);
 
 		Log.d(LOG_TAG, "payload: " + payload);
 		Log.d(LOG_TAG, "mediaSpec: " + mediaSpec);
 
-		return payload;
+		return payRtp;
 	}
 
-	private Payload addPayload(MediaSpec mediaSpec, int id, String codecName,
+	private PayloadRtp addPayload(MediaSpec mediaSpec, int id,
+			String codecName,
 			int clockRate, int bitrate) {
 		return addPayload(mediaSpec, id, codecName, clockRate, bitrate, null);
 	}
@@ -335,13 +338,28 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			videoMedia = new MediaSpec(null, types, trans, videoMode);
 
 			for (VideoProfile vp : videoProfiles) {
+				PayloadRtp payRtp = null;
 				if (VideoCodecType.MPEG4.equals(vp.getVideoCodecType()))
-					addPayload(videoMedia, payloadId, "MP4V-ES", 90000, bitrate);
+					payRtp = addPayload(videoMedia, payloadId, "MP4V-ES",
+							90000, bitrate);
 				else if (VideoCodecType.H263.equals(vp.getVideoCodecType()))
 					addPayload(videoMedia, payloadId, "H263-1998", 90000,
 							bitrate);
 				else if (VideoCodecType.H264.equals(vp.getVideoCodecType()))
 					addPayload(videoMedia, payloadId, "H264", 90000, bitrate);
+
+				Integer w = mediaSessionConfig.getFrameWidth();
+				if (w != null)
+					payRtp.setWidth(w);
+
+				Integer h = mediaSessionConfig.getFrameHeight();
+				if (h != null)
+					payRtp.setHeight(h);
+
+				Integer fr = mediaSessionConfig.getMaxFrameRate();
+				if (fr != null)
+					payRtp.setFramerate(new Fraction(fr, 1));
+
 				payloadId++;
 			}
 		}
@@ -373,10 +391,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				if (AudioProfile.MP2.equals(ap))
 					addPayload(audioMedia, 14, "MPA", 90000, bitrate);
 				else if (AudioProfile.AMR.equals(ap)) {
-					Payload p = addPayload(audioMedia, payloadId, "AMR", 8000,
+					PayloadRtp payRtp = addPayload(audioMedia, payloadId,
+							"AMR", 8000,
 							bitrate, 1);
-					if (p.isSetRtp())
-						p.getRtp().putToExtraParams("octet-align", "1");
+					payRtp.putToExtraParams("octet-align", "1");
 				} else if (AudioProfile.PCMU.equals(ap))
 					addPayload(audioMedia, 0, "PCMU", 8000, bitrate);
 				else if (AudioProfile.PCMA.equals(ap))
