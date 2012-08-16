@@ -112,9 +112,9 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			}
 			if (remoteRTPInfo.getFrameRate() != null) {
 				videoProfile.setFrameRateNum(remoteRTPInfo.getFrameRate()
-						.getNumerator());
+						.getNum());
 				videoProfile.setFrameRateDen(remoteRTPInfo.getFrameRate()
-						.getDenominator());
+						.getDenom());
 			}
 
 			if ((com.kurento.mediaspec.Direction.SENDRECV.equals(videoMode) || com.kurento.mediaspec.Direction.RECVONLY

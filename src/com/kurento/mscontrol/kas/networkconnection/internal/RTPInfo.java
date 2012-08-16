@@ -26,6 +26,7 @@ import com.kurento.kas.media.codecs.AudioCodecType;
 import com.kurento.kas.media.codecs.VideoCodecType;
 import com.kurento.kas.media.exception.CodecNotSupportedException;
 import com.kurento.mediaspec.Direction;
+import com.kurento.mediaspec.Fraction;
 import com.kurento.mediaspec.MediaSpec;
 import com.kurento.mediaspec.MediaType;
 import com.kurento.mediaspec.Payload;
@@ -47,7 +48,7 @@ public class RTPInfo {
 	private int videoBandwidth = -1;
 	private int frameWidth = -1;
 	private int frameHeight = -1;
-	private Fraction frameRate;
+	private Fraction frameRate = null;
 
 	private Direction audioMode;
 	private int dstAudioPort;
@@ -199,17 +200,22 @@ public class RTPInfo {
 						String encodingName = "";
 						try {
 							if (p.isSetRtp()) {
-								PayloadRtp rtpInfo = p.getRtp();
-								if (rtpInfo.isSetCodecName()) {
-									encodingName = rtpInfo.getCodecName();
+								PayloadRtp payRtp = p.getRtp();
+								if (payRtp.isSetCodecName()) {
+									encodingName = payRtp.getCodecName();
 									this.videoCodecType = VideoCodecType
 											.getCodecTypeFromName(encodingName);
 								}
-								if (rtpInfo.isSetId())
-									this.videoPayloadType = rtpInfo.getId();
-
-								if (rtpInfo.isSetBitrate())
-									this.videoBandwidth = p.getRtp().getBitrate();
+								if (payRtp.isSetId())
+									this.videoPayloadType = payRtp.getId();
+								if (payRtp.isSetBitrate())
+									this.videoBandwidth = payRtp.getBitrate();
+								if (payRtp.isSetWidth())
+									this.frameWidth = payRtp.getWidth();
+								if (payRtp.isSetHeight())
+									this.frameHeight = payRtp.getHeight();
+								if (payRtp.isSetFramerate())
+									this.frameRate = payRtp.getFramerate();
 							}
 						} catch (CodecNotSupportedException e) {
 							Log.w(LOG_TAG, encodingName + " not supported.");
