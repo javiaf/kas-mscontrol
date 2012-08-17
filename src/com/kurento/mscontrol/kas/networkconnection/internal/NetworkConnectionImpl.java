@@ -343,24 +343,27 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					payRtp = addPayload(videoMedia, payloadId, "MP4V-ES",
 							90000, bitrate);
 				else if (VideoCodecType.H263.equals(vp.getVideoCodecType()))
-					addPayload(videoMedia, payloadId, "H263-1998", 90000,
-							bitrate);
+					payRtp = addPayload(videoMedia, payloadId, "H263-1998",
+							90000, bitrate);
 				else if (VideoCodecType.H264.equals(vp.getVideoCodecType()))
-					addPayload(videoMedia, payloadId, "H264", 90000, bitrate);
+					payRtp = addPayload(videoMedia, payloadId, "H264", 90000,
+							bitrate);
 
-				Integer w = mediaSessionConfig.getFrameWidth();
-				if (w != null)
-					payRtp.setWidth(w);
+				if (payRtp != null) {
+					Integer w = mediaSessionConfig.getFrameWidth();
+					if (w != null)
+						payRtp.setWidth(w);
 
-				Integer h = mediaSessionConfig.getFrameHeight();
-				if (h != null)
-					payRtp.setHeight(h);
+					Integer h = mediaSessionConfig.getFrameHeight();
+					if (h != null)
+						payRtp.setHeight(h);
 
-				Integer fr = mediaSessionConfig.getMaxFrameRate();
-				if (fr != null)
-					payRtp.setFramerate(new Fraction(fr, 1));
+					Integer fr = mediaSessionConfig.getMaxFrameRate();
+					if (fr != null)
+						payRtp.setFramerate(new Fraction(fr, 1));
 
-				payloadId++;
+					payloadId++;
+				}
 			}
 		}
 
