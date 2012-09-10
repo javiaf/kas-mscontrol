@@ -47,7 +47,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 	private RecorderController controller;
 
-	// private int screenWidth;
+	private int screenWidth;
 	private int screenHeight;
 	private SurfaceControl surfaceControl = null;
 
@@ -83,7 +83,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					"Params must have VideoRecorderComponent.DISPLAY_HEIGHT param");
 
 		this.videoSurfaceRx = surface;
-		// this.screenWidth = displayWidth;
+		this.screenWidth = displayWidth;
 		this.screenHeight = displayHeight;
 
 		mVideoReceiveView = (SurfaceView) videoSurfaceRx;
@@ -138,7 +138,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 				VideoFrame videoFrameProcessed;
 				int[] rgb;
-				int width, height, heighAux, widthAux;
+				int width, height, heighAux = 0, widthAux = 0;
 				int lastHeight = 0;
 				int lastWidth = 0;
 				double aux;
@@ -221,10 +221,25 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 								if (srcBitmap == null)
 									Log.w(LOG_TAG, "srcBitmap is null");
 							}
-
-							aux = (double) screenHeight / (double) height;
-							heighAux = screenHeight;
-							widthAux = (int) (aux * width);
+							if (width > screenWidth || height > screenHeight) {
+								float aspectScreen = (float) screenWidth
+										/ (float) screenHeight;
+								float aspectFrame = (float) width
+										/ (float) height;
+								if (aspectFrame > aspectScreen) {
+									aux = (double) screenWidth / (double) width;
+									heighAux = (int) (aux * height);
+									widthAux = screenWidth;
+								} else {
+									aux = (double) screenHeight
+											/ (double) height;
+									heighAux = screenHeight;
+									widthAux = (int) (aux * width);
+								}
+							} else {
+								widthAux = screenWidth;
+								heighAux = screenHeight;
+							}
 
 							dirty = new Rect(0, 0, widthAux, heighAux);
 
