@@ -182,6 +182,9 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 	@Override
 	public synchronized void freeVideoFrameRx(VideoFrame videoFrame) {
+		if (videoFrame == null || usedFrames == null)
+			return;
+
 		Integer count = usedFrames.get(videoFrame.getDataFrame());
 		if (count == null)
 			return;

@@ -125,11 +125,15 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 			controller.deleteRecorder(this);
 		if (surfaceControl != null)
 			surfaceControl.interrupt();
+
+		flushAll();
 	}
 
 	private class SurfaceControl extends Thread {
 		@Override
 		public void run() {
+			Bitmap srcBitmap = null;
+
 			try {
 				if (mSurfaceReceive == null) {
 					Log.e(LOG_TAG, "mSurfaceReceive is null");
@@ -145,7 +149,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 				Canvas canvas = null;
 				Rect dirty = null;
-				Bitmap srcBitmap = null;
 
 				// long tStart, tEnd;
 				// long i = 1;
@@ -269,6 +272,11 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "SurfaceControl stopped");
+				if (srcBitmap != null) {
+					srcBitmap.recycle();
+					srcBitmap = null;
+				}
+				System.gc();
 			}
 		}
 	}
