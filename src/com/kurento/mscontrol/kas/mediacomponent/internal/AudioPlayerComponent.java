@@ -31,7 +31,7 @@ public class AudioPlayerComponent extends MediaComponentBase {
 
 	private static final String LOG_TAG = "AudioPlayer";
 
-	private int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+	private int channelConfiguration = AudioFormat.CHANNEL_IN_MONO;
 	private int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 	private AudioRecord audioRecord;
 	private short[] buffer;
