@@ -20,6 +20,10 @@ package com.kurento.mscontrol.kas.mediacomponent.internal;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.media.audiofx.AcousticEchoCanceler;
+import android.media.audiofx.AudioEffect;
+import android.media.audiofx.AudioEffect.OnEnableStatusChangeListener;
+import android.os.Build.VERSION;
 import android.util.Log;
 
 import com.kurento.kas.media.tx.AudioInfoTx;
@@ -27,13 +31,15 @@ import com.kurento.mscontrol.commons.MsControlException;
 import com.kurento.mscontrol.commons.join.Joinable;
 import com.kurento.mscontrol.kas.join.AudioJoinableStreamImpl;
 
-public class AudioPlayerComponent extends MediaComponentBase {
+public class AudioPlayerComponent extends MediaComponentBase implements
+		OnEnableStatusChangeListener {
 
 	private static final String LOG_TAG = "AudioPlayer";
 
 	private int channelConfiguration = AudioFormat.CHANNEL_IN_MONO;
 	private int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 	private AudioRecord audioRecord;
+	private AudioEffect aec = null;
 	private short[] buffer;
 	private int frameSize;
 
@@ -96,6 +102,24 @@ public class AudioPlayerComponent extends MediaComponentBase {
 		audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, frequency,
 				channelConfiguration, audioEncoding, bufferSize);
 
+		if (VERSION.SDK_INT >= 16) {
+			if (!AcousticEchoCanceler.isAvailable()) {
+				Log.i(LOG_TAG,
+						"Acoustic Echo Canceler is not available in this device");
+			} else {
+				aec = AcousticEchoCanceler.create(audioRecord
+						.getAudioSessionId());
+				aec.setEnableStatusListener(this);
+				aec.setEnabled(true);
+				Log.d(LOG_TAG, "aec enabled: " + aec.getEnabled());
+				Log.d(LOG_TAG, "aec has control " + aec.hasControl());
+			}
+		} else {
+			Log.i(LOG_TAG,
+					"Acoustic Echo Canceler is not available in this API level ("
+							+ VERSION.SDK_INT + ")");
+		}
+
 		audioCapture = new AudioCapture();
 		audioCapture.start();
 	}
@@ -111,6 +135,9 @@ public class AudioPlayerComponent extends MediaComponentBase {
 			audioRecord.stop();
 			audioRecord.release();
 			audioRecord = null;
+		}
+		if (aec != null) {
+			aec.release();
 		}
 	}
 
@@ -170,6 +197,11 @@ public class AudioPlayerComponent extends MediaComponentBase {
 				releaseAudioRecord();
 			}
 		}
+	}
+
+	@Override
+	public void onEnableStatusChange(AudioEffect effect, boolean enabled) {
+		Log.d(LOG_TAG, effect + " onEnableStatusChange " + enabled);
 	}
 
 }
