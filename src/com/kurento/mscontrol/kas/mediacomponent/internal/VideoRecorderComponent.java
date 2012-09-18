@@ -331,9 +331,9 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	
 	@Override
 	public Object getInfo(AndroidInfo info) throws MsControlException {
-		if (AndroidInfo.FRAME_WIDTH.equals(info)) {
+		if (AndroidInfo.FRAME_RX_WIDTH.equals(info)) {
 			return getWidthInfo();
-		} else if (AndroidInfo.FRAME_HEIGHT.equals(info)) {
+		} else if (AndroidInfo.FRAME_RX_HEIGHT.equals(info)) {
 			return getHeightInfo();
 		} else
 			return super.getInfo(info);

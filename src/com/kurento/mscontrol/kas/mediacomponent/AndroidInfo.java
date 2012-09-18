@@ -15,12 +15,22 @@ public enum AndroidInfo {
 	 * {@link MediaComponentAndroid#VIDEO_RECORDER} object to obtain the frame
 	 * width
 	 */
-	FRAME_WIDTH,
+	FRAME_RX_WIDTH,
 	/**
 	 * This info can be asked to a a
 	 * {@link MediaComponentAndroid#VIDEO_RECORDER} object to obtain the frame
 	 * height
 	 */
-	FRAME_HEIGHT
+	FRAME_RX_HEIGHT,
+	/**
+	 * This info can be asked to a a {@link MediaComponentAndroid#VIDEO_PLAYER}
+	 * object to obtain the frame width
+	 */
+	FRAME_TX_WIDTH,
+	/**
+	 * This info can be asked to a a {@link MediaComponentAndroid#VIDEO_PLAYER}
+	 * object to obtain the frame height
+	 */
+	FRAME_TX_HEIGHT
 
 }
