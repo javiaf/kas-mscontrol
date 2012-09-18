@@ -10,4 +10,17 @@ public enum AndroidInfo {
 	 * media packet queue size.
 	 */
 	RECORDER_QUEUE,
+	/**
+	 * This info can be asked to a a
+	 * {@link MediaComponentAndroid#VIDEO_RECORDER} object to obtain the frame
+	 * width
+	 */
+	FRAME_WIDTH,
+	/**
+	 * This info can be asked to a a
+	 * {@link MediaComponentAndroid#VIDEO_RECORDER} object to obtain the frame
+	 * height
+	 */
+	FRAME_HEIGHT
+
 }
