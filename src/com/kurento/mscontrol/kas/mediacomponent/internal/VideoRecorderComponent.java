@@ -34,6 +34,7 @@ import com.kurento.commons.config.Parameters;
 import com.kurento.kas.media.rx.RxPacket;
 import com.kurento.kas.media.rx.VideoFrame;
 import com.kurento.mscontrol.commons.MsControlException;
+import com.kurento.mscontrol.kas.mediacomponent.AndroidInfo;
 
 public class VideoRecorderComponent extends RecorderComponentBase implements
 		Recorder, VideoRecorder {
@@ -49,12 +50,30 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 	private int screenWidth;
 	private int screenHeight;
+	private int widthInfo = 0;
+	private int heightInfo = 0;
 	private SurfaceControl surfaceControl = null;
 
 	private BlockingQueue<VideoFeeder> feedersQueue;
 
 	public View getVideoSurfaceRx() {
 		return videoSurfaceRx;
+	}
+
+	private synchronized int getWidthInfo() {
+		return widthInfo;
+	}
+
+	private synchronized void setWidthInfo(int widthInfo) {
+		this.widthInfo = widthInfo;
+	}
+
+	private synchronized int getHeightInfo() {
+		return heightInfo;
+	}
+
+	private synchronized void setHeightInfo(int heightInfo) {
+		this.heightInfo = heightInfo;
 	}
 
 	@Override
@@ -188,6 +207,9 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					width = videoFrameProcessed.getWidth();
 					height = videoFrameProcessed.getHeight();
 
+					setWidthInfo(width);
+					setHeightInfo(height);
+
 					if (rgb == null || rgb.length == 0)
 						continue;
 
@@ -305,6 +327,16 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 			packetsQueue.remove(vf);
 			vf = (VideoFrame) packetsQueue.peek();
 		}
+	}
+	
+	@Override
+	public Object getInfo(AndroidInfo info) throws MsControlException {
+		if (AndroidInfo.FRAME_WIDTH.equals(info)) {
+			return getWidthInfo();
+		} else if (AndroidInfo.FRAME_HEIGHT.equals(info)) {
+			return getHeightInfo();
+		} else
+			return super.getInfo(info);
 	}
 
 }
