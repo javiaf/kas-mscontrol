@@ -38,6 +38,7 @@ import com.kurento.mscontrol.commons.MsControlException;
 import com.kurento.mscontrol.commons.join.Joinable;
 import com.kurento.mscontrol.kas.join.VideoJoinableStreamImpl;
 import com.kurento.mscontrol.kas.mediacomponent.AndroidAction;
+import com.kurento.mscontrol.kas.mediacomponent.AndroidInfo;
 
 public class VideoPlayerComponent extends MediaComponentBase implements
 		SurfaceHolder.Callback, PreviewCallback {
@@ -46,6 +47,8 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 
 	private int width;
 	private int height;
+	private int widthInfo = 0;
+	private int heightInfo = 0;
 
 	private Camera mCamera;
 	private int cameraFacing = 0;
@@ -59,6 +62,22 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 
 	public View getVideoSurfaceTx() {
 		return videoSurfaceTx;
+	}
+
+	private synchronized int getWidthInfo() {
+		return widthInfo;
+	}
+
+	private synchronized void setWidthInfo(int widthInfo) {
+		this.widthInfo = widthInfo;
+	}
+
+	private synchronized int getHeightInfo() {
+		return heightInfo;
+	}
+
+	private synchronized void setHeightInfo(int heightInfo) {
+		this.heightInfo = heightInfo;
 	}
 
 	@Override
@@ -145,6 +164,8 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 
 		this.width = videoProfile.getWidth();
 		this.height = videoProfile.getHeight();
+		setWidthInfo(width);
+		setHeightInfo(height);
 
 		surfaceHolder = ((SurfaceView) videoSurfaceTx).getHolder();
 		surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -258,6 +279,16 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
 		Log.d(LOG_TAG, "Surface changed");
+	}
+
+	@Override
+	public Object getInfo(AndroidInfo info) throws MsControlException {
+		if (AndroidInfo.FRAME_TX_WIDTH.equals(info)) {
+			return getWidthInfo();
+		} else if (AndroidInfo.FRAME_TX_HEIGHT.equals(info)) {
+			return getHeightInfo();
+		} else
+			return super.getInfo(info);
 	}
 
 	@Override
