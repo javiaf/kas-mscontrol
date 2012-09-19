@@ -4,23 +4,25 @@
 	------
 	Date
 	------
-	
+
 Kurento Android Buffer Management
 
 * Introduction
 
-	Buffers are data storage units intended to minimize the effects of a bad 
-	media temporization in media quality. There is a direct tradeoff between
-	quality and latency. The better the quality required the larger the buffer
-	(and hence the latency).
+	Buffers are data storage units intended to avoid media quality degradation
+	due to transport delays or bad temporization. There is a natural tradeoff 
+	between latency and	sensitivity to jitter. The better the quality required
+	the larger the buffer (and hence the latency). It is easy to understand
+	that when buffers are reduced in transmission pipes, the stream is much
+	more affected by delays in packets, causing quality degradation.
 	
 	Latency is the delay between PDU generation and display. Large latencies
 	are acceptable for streaming services, but conversational quality, required
-	for telephone call services and the like allows a maximum delay of 250 ms. 
-	Over that number conversation becomes difficult and requires trained 
+	for telephone call services, allows a maximum delay of 250 ms. 
+	Above that delay figures conversation becomes difficult and requires trained 
 	speakers.
 		  
-	Figure below shows a typical multimedia transmission chain, where media flows from 
+	Picture below shows a typical multimedia transmission chain, where media flows from 
 	the source (origin) to the sink (destination). Buffers appears twice in this 
 	path to provide multiple functions: the transmission buffer, close to the source 
 	and the reception buffer, close to the sink
@@ -36,13 +38,50 @@ Kurento Android Buffer Management
 	
 		* <<PDU scheduling>>: Set up a timer to deliver data to transport channel
 		with negotiated periodicity. The scheduler provides a filter to the 
-		jitter injected by the source, that sometimes is quite relevant
-		reducing 
+		jitter injected by the source. 
+		
 		* <<PDU discard>>: Frame discarding takes place when 
 		generation pace is greater than transmission rate. This could be caused
 		by a negotiated transmission rate or because the generating device is 
-		unable to encode frames at the generation rate
+		unable to encode frames at the generation rate.
+		
+	Kurento Android SDK is specially conceived for conversational services, 
+	and consequently latency becomes the main quality attribute. It
+	implements a frame adaptation queue as a FIFO buffer of <N> positions
+	that discards oldest frames when full. It is specially designed to achieve
+	following objectives:
 	
+		* Adapt generation and transmission frame rates
+		
+		* Reduce jitter effects to improve video continuity for a given latency.
+		
+	The adaptation queue operates between the video source and transport channel.
+	It receives frames from the camera at generation rate and delivers them to
+	the network at target frame rate <Tfr>. There are two possible
+	operational modes
+	
+		* When generation rate is lower than target rate, the actual transmission rate will
+		equal generation. In this operation mode the queue is empty as frames are sent as they 
+		are received. Reception device is exposed completelly to jitter effect.
+		
+		* When generation rate (<Gfr>) is higher than target rate, one frame each <Gfr/Tfr>	has to be 
+		discarded. In this operation mode the queue is full and latency increases by a value <N> * 1/Tfr.
+		Transmission time for next frame is calculated as 
+		
+			[<tn = 1/Tfr * N + t_(n-N)>]
+			
+				* <tn>: Next transmission time
+				
+				* <N>: Queue size
+				
+				* <t_(n-N)>: Transmission time of frame <n-N>
+				
+			
+		 It has been found that Android camera is quite an important source of jitter. Video is delivered
+		 at 30 frames per second, but with high variability. Above formula is actually a jitter low 
+		 pass filter that improves time slots variability and hence a smooth video stream with the frame
+		 rate required for transmission.
+		
 ** Reception buffer
 
 	This buffer is placed as the entry point of the sink. Its main 
@@ -163,7 +202,6 @@ Kurento Android Buffer Management
  	This buffer operation allows jitter absorption with a significant quality
  	improvement. The effect in conversation are constant gaps with a period 
  	depending on accumulated jitter.
- 	
  	  
 * Buffer synchronization
 
