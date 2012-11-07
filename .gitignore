@@ -6,3 +6,4 @@ target/
 bin/
 *.DS_Store*
 project.properties
+.buildpath
