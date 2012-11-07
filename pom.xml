@@ -22,8 +22,8 @@
 		<kc-mediaspec-conversor.version>1.0.2</kc-mediaspec-conversor.version>
 		<kc-stun.version>1.0.2</kc-stun.version>
 
-		<!-- Plugin versions -->
-		<android-maven-plugin.version>3.2.0</android-maven-plugin.version>
+		<!-- Plugins versions -->
+
 	</properties>
 
 	<organization>
@@ -85,12 +85,6 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>commons-logging</groupId>
-			<artifactId>commons-logging</artifactId>
-			<version>1.1.1</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.google.android</groupId>
 			<artifactId>android</artifactId>
 			<version>4.1.1.4</version>
@@ -103,18 +97,11 @@
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
-				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
-				<artifactId>android-maven-plugin</artifactId>
-				<version>${android-maven-plugin.version}</version>
-				<extensions>true</extensions>
-			</plugin>
-			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
 				<version>3.0</version>
 				<configuration>
 					<siteDirectory>${basedir}/site</siteDirectory>
-					<tempWebappDirectory>${basedir}/target/site</tempWebappDirectory>
 				</configuration>
 			</plugin>
 
