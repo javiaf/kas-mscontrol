@@ -1,4 +1,4 @@
-package com.kurento.mscontrol.kas;
+package com.kurento.kas.mscontrol;
 
 public class MscontrolTest {
 
