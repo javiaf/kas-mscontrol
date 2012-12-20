@@ -53,11 +53,10 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	private Camera mCamera;
 	private int cameraFacing = 0;
 
-	private int screenOrientation;
+	private final int screenOrientation;
 
-	private View videoSurfaceTx;
+	private final View videoSurfaceTx;
 	private SurfaceHolder surfaceHolder;
-	private static boolean surfaceCreated = false;
 	private boolean isReleased;
 
 	public View getVideoSurfaceTx() {
@@ -170,8 +169,10 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		surfaceHolder = ((SurfaceView) videoSurfaceTx).getHolder();
 		surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
-		if (surfaceCreated)
+		if (videoSurfaceTx.isShown()) {
 			startCamera(surfaceHolder);
+		}
+
 		surfaceHolder.addCallback(this);
 	}
 
@@ -188,6 +189,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		}
 
 		mCamera.setErrorCallback(new ErrorCallback() {
+			@Override
 			public void onError(int error, Camera camera) {
 				Log.e(LOG_TAG, "Camera error : " + error);
 			}
@@ -259,6 +261,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		surfaceHolder.removeCallback(this);
 	}
 
+	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		Log.d(LOG_TAG, "Surface destroyed");
 		if (mCamera != null) {
@@ -267,15 +270,15 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 			mCamera.release();
 			mCamera = null;
 		}
-		surfaceCreated = false;
 	}
 
+	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		Log.d(LOG_TAG, "Surface created");
 		startCamera(surfaceHolder);
-		surfaceCreated = true;
 	}
 
+	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
 		Log.d(LOG_TAG, "Surface changed");
