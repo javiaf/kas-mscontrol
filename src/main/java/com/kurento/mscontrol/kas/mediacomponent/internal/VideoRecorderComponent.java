@@ -41,20 +41,19 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 	private static final String LOG_TAG = "VideoRecorderComponent";
 
-	private SurfaceView mVideoReceiveView;
-	private SurfaceHolder mHolderReceive;
-	private Surface mSurfaceReceive;
-	private View videoSurfaceRx;
+	private final SurfaceHolder mHolderReceive;
+	private final Surface mSurfaceReceive;
+	private final View videoSurfaceRx;
 
 	private RecorderController controller;
 
-	private int screenWidth;
-	private int screenHeight;
+	private final int screenWidth;
+	private final int screenHeight;
 	private int widthInfo = 0;
 	private int heightInfo = 0;
 	private SurfaceControl surfaceControl = null;
 
-	private BlockingQueue<VideoFeeder> feedersQueue;
+	private final BlockingQueue<VideoFeeder> feedersQueue;
 
 	public View getVideoSurfaceRx() {
 		return videoSurfaceRx;
@@ -105,7 +104,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		this.screenWidth = displayWidth;
 		this.screenHeight = displayHeight;
 
-		mVideoReceiveView = (SurfaceView) videoSurfaceRx;
+		SurfaceView mVideoReceiveView = (SurfaceView) videoSurfaceRx;
 		mHolderReceive = mVideoReceiveView.getHolder();
 		mSurfaceReceive = mHolderReceive.getSurface();
 
@@ -183,7 +182,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					}
 
 					if (packetsQueue.isEmpty())
-						Log.w(LOG_TAG,
+						Log.v(LOG_TAG,
 								"Jitter buffer underflow: Video RX frames queue is empty");
 
 					long targetTime = getTargetTime();

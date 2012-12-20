@@ -37,10 +37,10 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 
 	private static final String LOG_TAG = "AudioRecorderComponent";
 
-	private int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
-	private int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
+	private final int channelConfiguration = AudioFormat.CHANNEL_CONFIGURATION_MONO;
+	private final int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 	private AudioTrack audioTrack;
-	private int streamType;
+	private final int streamType;
 
 	private RecorderController controller;
 
@@ -137,7 +137,7 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 					}
 
 					if (packetsQueue.isEmpty())
-						Log.w(LOG_TAG,
+						Log.v(LOG_TAG,
 								"Jitter buffer underflow: Audio RX frames queue is empty");
 
 					long targetTime = getTargetTime();
