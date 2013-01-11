@@ -258,7 +258,8 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	public void release() {
 		stop();
 		isReleased = true;
-		surfaceHolder.removeCallback(this);
+		if (surfaceHolder != null)
+			surfaceHolder.removeCallback(this);
 	}
 
 	@Override
