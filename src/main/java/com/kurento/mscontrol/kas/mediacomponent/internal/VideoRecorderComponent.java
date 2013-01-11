@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceHolder;
+import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.view.View;
 
@@ -37,7 +38,7 @@ import com.kurento.mscontrol.commons.MsControlException;
 import com.kurento.mscontrol.kas.mediacomponent.AndroidInfo;
 
 public class VideoRecorderComponent extends RecorderComponentBase implements
-		Recorder, VideoRecorder {
+		Recorder, VideoRecorder, Callback {
 
 	private static final String LOG_TAG = "VideoRecorderComponent";
 
@@ -47,11 +48,12 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 	private RecorderController controller;
 
-	private final int screenWidth;
-	private final int screenHeight;
+	private Integer screenWidth;
+	private Integer screenHeight;
 	private int widthInfo = 0;
 	private int heightInfo = 0;
 	private SurfaceControl surfaceControl = null;
+	private final SurfaceHolder surfaceHolder;
 
 	private final BlockingQueue<VideoFeeder> feedersQueue;
 
@@ -91,18 +93,17 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		if (surface == null)
 			throw new MsControlException(
 					"Params must have VideoRecorderComponent.VIEW_SURFACE param");
-		Integer displayWidth = params.get(DISPLAY_WIDTH).getValue();
-		if (displayWidth == null)
-			throw new MsControlException(
-					"Params must have VideoRecorderComponent.DISPLAY_WIDTH param");
-		Integer displayHeight = params.get(DISPLAY_HEIGHT).getValue();
-		if (displayHeight == null)
-			throw new MsControlException(
-					"Params must have VideoRecorderComponent.DISPLAY_HEIGHT param");
+		try {
+			screenWidth = params.get(DISPLAY_WIDTH).getValue();
+		} catch (Throwable t) {
+		}
+		try {
+			screenHeight = params.get(DISPLAY_HEIGHT).getValue();
+		} catch (Throwable t) {
+		}
 
 		this.videoSurfaceRx = surface;
-		this.screenWidth = displayWidth;
-		this.screenHeight = displayHeight;
+		surfaceHolder = ((SurfaceView) videoSurfaceRx).getHolder();
 
 		SurfaceView mVideoReceiveView = (SurfaceView) videoSurfaceRx;
 		mHolderReceive = mVideoReceiveView.getHolder();
@@ -129,6 +130,14 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 	@Override
 	public void start() {
+		if (videoSurfaceRx.isShown()) {
+			doStart();
+		}
+
+		surfaceHolder.addCallback(this);
+	}
+
+	private void doStart() {
 		surfaceControl = new SurfaceControl();
 		surfaceControl.start();
 		setRecording(true);
@@ -336,6 +345,29 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 			return getHeightInfo();
 		} else
 			return super.getInfo(info);
+	}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		Log.d(LOG_TAG, "Surface destroyed");
+		stop();
+	}
+
+	@Override
+	public void surfaceCreated(SurfaceHolder holder) {
+		Log.d(LOG_TAG, "Surface created");
+		if (screenHeight == null)
+			screenHeight = videoSurfaceRx.getHeight();
+		if (screenWidth == null)
+			screenWidth = videoSurfaceRx.getWidth();
+
+		doStart();
+	}
+
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width,
+			int height) {
+		Log.d(LOG_TAG, "Surface changed");
 	}
 
 }
