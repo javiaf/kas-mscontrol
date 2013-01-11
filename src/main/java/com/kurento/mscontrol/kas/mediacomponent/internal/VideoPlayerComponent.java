@@ -56,7 +56,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	private final int screenOrientation;
 
 	private final View videoSurfaceTx;
-	private SurfaceHolder surfaceHolder;
+	private final SurfaceHolder surfaceHolder;
 	private boolean isReleased;
 
 	public View getVideoSurfaceTx() {
@@ -94,6 +94,10 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 					"Params must have VideoPlayerComponent.PREVIEW_SURFACE param");
 
 		videoSurfaceTx = sv;
+
+		surfaceHolder = ((SurfaceView) videoSurfaceTx).getHolder();
+		surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
 		screenOrientation = params.get(DISPLAY_ORIENTATION).getValue() * 90;
 		isReleased = false;
 		try {
@@ -165,9 +169,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		this.height = videoProfile.getHeight();
 		setWidthInfo(width);
 		setHeightInfo(height);
-
-		surfaceHolder = ((SurfaceView) videoSurfaceTx).getHolder();
-		surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
 		if (videoSurfaceTx.isShown()) {
 			startCamera(surfaceHolder);
