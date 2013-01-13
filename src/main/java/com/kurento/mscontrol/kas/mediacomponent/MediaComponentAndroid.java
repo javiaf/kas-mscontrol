@@ -18,6 +18,7 @@
 package com.kurento.mscontrol.kas.mediacomponent;
 
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.kurento.commons.config.Parameter;
 import com.kurento.mscontrol.commons.Configuration;
@@ -70,8 +71,8 @@ public interface MediaComponentAndroid extends MediaComponent {
 	 * Parameter whose value must be an Android View to preview the camera
 	 * video.
 	 */
-	public static final Parameter<View> PREVIEW_SURFACE = new Parameter<View>(
-			"PREVIEW_SURFACE");
+	public static final Parameter<ViewGroup> PREVIEW_SURFACE_HOLDER = new Parameter<ViewGroup>(
+			"PREVIEW_SURFACE_HOLDER");
 
 	/**
 	 * To create a component that show video in a display.

@@ -20,6 +20,7 @@ package com.kurento.mscontrol.kas.mediacomponent.internal;
 import java.io.IOException;
 import java.util.List;
 
+import android.content.Context;
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.PictureCallback;
@@ -31,6 +32,8 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 
 import com.kurento.commons.config.Parameters;
 import com.kurento.kas.media.profiles.VideoProfile;
@@ -55,13 +58,9 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 
 	private final int screenOrientation;
 
-	private final View videoSurfaceTx;
-	private final SurfaceHolder surfaceHolder;
+	private final Preview preview;
+	private final ViewGroup parent;
 	private boolean isReleased;
-
-	public View getVideoSurfaceTx() {
-		return videoSurfaceTx;
-	}
 
 	private synchronized int getWidthInfo() {
 		return widthInfo;
@@ -88,15 +87,15 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
-		final View sv = params.get(PREVIEW_SURFACE).getValue();
-		if (sv == null)
+		parent = params.get(PREVIEW_SURFACE_HOLDER).getValue();
+		if (parent == null)
 			throw new MsControlException(
 					"Params must have VideoPlayerComponent.PREVIEW_SURFACE param");
 
-		videoSurfaceTx = sv;
-
-		surfaceHolder = ((SurfaceView) videoSurfaceTx).getHolder();
-		surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+		preview = new Preview(parent.getContext());
+		preview.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT));
+		parent.addView(preview);
 
 		screenOrientation = params.get(DISPLAY_ORIENTATION).getValue() * 90;
 		isReleased = false;
@@ -170,11 +169,11 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		setWidthInfo(width);
 		setHeightInfo(height);
 
-		if (videoSurfaceTx.isShown()) {
-			startCamera(surfaceHolder);
+		if (preview.getSurface().isShown()) {
+			startCamera(preview.getHolder());
 		}
 
-		surfaceHolder.addCallback(this);
+		preview.getHolder().addCallback(this);
 	}
 
 	private void startCamera(SurfaceHolder surfHold) {
@@ -239,6 +238,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		try {
 			mCamera.startPreview();
 			mCamera.setPreviewCallback(this);
+			preview.requestLayout();
 		} catch (Throwable e) {
 			e.printStackTrace();
 			Log.e(LOG_TAG, "Can not start camera preview");
@@ -259,8 +259,10 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	public void release() {
 		stop();
 		isReleased = true;
-		if (surfaceHolder != null)
-			surfaceHolder.removeCallback(this);
+		if (preview.getHolder() != null)
+			preview.getHolder().removeCallback(this);
+
+		parent.removeView(preview);
 	}
 
 	@Override
@@ -277,7 +279,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		Log.d(LOG_TAG, "Surface created");
-		startCamera(surfaceHolder);
+		startCamera(preview.getHolder());
 	}
 
 	@Override
@@ -357,5 +359,64 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 			mCamera.startPreview();
 		}
 	};
+
+	class Preview extends ViewGroup {
+		private final String TAG = "Preview";
+
+		SurfaceView mSurfaceView;
+		SurfaceHolder mHolder;
+
+		Preview(Context context) {
+			super(context);
+
+			mSurfaceView = new SurfaceView(context);
+			mSurfaceView.setLayoutParams(new LayoutParams(
+					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+			addView(mSurfaceView);
+
+			mHolder = mSurfaceView.getHolder();
+		}
+
+		public SurfaceHolder getHolder() {
+			return mHolder;
+		}
+
+		public View getSurface() {
+			return mSurfaceView;
+		}
+
+		@Override
+		protected void onLayout(boolean changed, int l, int t, int r, int b) {
+			if (getChildCount() > 0) {
+				int previewWidth = getWidth();
+				int previewHeight = getHeight();
+
+				try {
+					float aspectScreen = (float) previewWidth
+							/ (float) previewHeight;
+					float aspectFrame = (float) width / (float) height;
+					double aux;
+					int heightAux, widthAux;
+					if (aspectFrame > aspectScreen) {
+						aux = (double) previewWidth / width;
+						heightAux = (int) (aux * height);
+						widthAux = previewWidth;
+					} else {
+						aux = (double) previewHeight / height;
+						heightAux = previewHeight;
+						widthAux = (int) (aux * width);
+					}
+
+					int left = (previewWidth - widthAux) / 2;
+					int top = (previewHeight - heightAux) / 2;
+
+					mSurfaceView.layout(left, top, left + widthAux, top
+							+ heightAux);
+				} catch (Throwable th) {
+					Log.e(TAG, "Error resizing: " + th.getMessage());
+				}
+			}
+		}
+	}
 
 }
