@@ -87,7 +87,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
-		parent = params.get(PREVIEW_SURFACE_HOLDER).getValue();
+		parent = params.get(PREVIEW_SURFACE_CONTAINER).getValue();
 		if (parent == null)
 			throw new MsControlException(
 					"Params must have VideoPlayerComponent.PREVIEW_SURFACE param");

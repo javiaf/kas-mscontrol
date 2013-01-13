@@ -24,12 +24,12 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.Log;
-import android.view.Surface;
-import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 
 import com.kurento.commons.config.Parameters;
 import com.kurento.kas.media.rx.RxPacket;
@@ -42,9 +42,9 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 	private static final String LOG_TAG = "VideoRecorderComponent";
 
-	private final SurfaceHolder mHolderReceive;
-	private final Surface mSurfaceReceive;
-	private final View videoSurfaceRx;
+	private final SurfaceView videoSurfaceRx;
+	private final SurfaceHolder surfaceHolder;
+	private final ViewGroup surfaceContainer;
 
 	private RecorderController controller;
 
@@ -53,7 +53,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	private int widthInfo = 0;
 	private int heightInfo = 0;
 	private SurfaceControl surfaceControl = null;
-	private final SurfaceHolder surfaceHolder;
 
 	private final BlockingQueue<VideoFeeder> feedersQueue;
 
@@ -89,17 +88,16 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
-		View surface = params.get(VIEW_SURFACE).getValue();
-		if (surface == null)
+		surfaceContainer = params.get(VIEW_SURFACE_CONTAINER)
+				.getValue();
+		if (surfaceContainer == null)
 			throw new MsControlException(
 					"Params must have VideoRecorderComponent.VIEW_SURFACE param");
-
-		this.videoSurfaceRx = surface;
-		surfaceHolder = ((SurfaceView) videoSurfaceRx).getHolder();
-
-		SurfaceView mVideoReceiveView = (SurfaceView) videoSurfaceRx;
-		mHolderReceive = mVideoReceiveView.getHolder();
-		mSurfaceReceive = mHolderReceive.getSurface();
+		this.videoSurfaceRx = new SurfaceView(surfaceContainer.getContext());
+		videoSurfaceRx.setLayoutParams(new LayoutParams(
+				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		surfaceContainer.addView(videoSurfaceRx);
+		surfaceHolder = videoSurfaceRx.getHolder();
 
 		this.packetsQueue = new LinkedBlockingQueue<RxPacket>();
 		this.feedersQueue = new LinkedBlockingQueue<VideoFeeder>();
@@ -162,7 +160,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 			Bitmap srcBitmap = null;
 
 			try {
-				if (mSurfaceReceive == null) {
+				if (surfaceHolder == null) {
 					Log.e(LOG_TAG, "mSurfaceReceive is null");
 					return;
 				}
@@ -214,9 +212,9 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 						continue;
 
 					try {
-						canvas = mSurfaceReceive.lockCanvas(null);
+						canvas = surfaceHolder.lockCanvas(null);
 						if (canvas == null) {
-							mSurfaceReceive.unlockCanvasAndPost(canvas);
+							surfaceHolder.unlockCanvasAndPost(canvas);
 							continue;
 						}
 
@@ -234,7 +232,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 									Log.w(LOG_TAG,
 											"Can not create bitmap. No such memory.");
 									Log.w(LOG_TAG, e);
-									mSurfaceReceive.unlockCanvasAndPost(canvas);
+									surfaceHolder.unlockCanvasAndPost(canvas);
 
 									VideoFeeder feeder = feedersQueue.poll();
 									if (feeder != null)
@@ -272,10 +270,8 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 									height);
 							canvas.drawBitmap(srcBitmap, null, dirty, null);
 						}
-						mSurfaceReceive.unlockCanvasAndPost(canvas);
+						surfaceHolder.unlockCanvasAndPost(canvas);
 					} catch (IllegalArgumentException e) {
-						Log.e(LOG_TAG, "Exception: " + e.toString(), e);
-					} catch (OutOfResourcesException e) {
 						Log.e(LOG_TAG, "Exception: " + e.toString(), e);
 					}
 
