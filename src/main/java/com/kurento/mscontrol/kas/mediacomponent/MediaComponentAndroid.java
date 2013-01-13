@@ -88,14 +88,20 @@ public interface MediaComponentAndroid extends MediaComponent {
 	/**
 	 * Parameter whose value must be an Integer value that indicate the display
 	 * width.
+	 * 
+	 * Deprecated, this parameter is ignored
 	 */
+	@Deprecated
 	public static final Parameter<Integer> DISPLAY_WIDTH = new Parameter<Integer>(
 			"DISPLAY_WIDTH");
 
 	/**
 	 * Parameter whose value must be an Integer value that indicate the display
 	 * height.
+	 * 
+	 * Deprecated, this parameter is ignored
 	 */
+	@Deprecated
 	public static final Parameter<Integer> DISPLAY_HEIGHT = new Parameter<Integer>(
 			"DISPLAY_HEIGHT");
 	

@@ -93,14 +93,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		if (surface == null)
 			throw new MsControlException(
 					"Params must have VideoRecorderComponent.VIEW_SURFACE param");
-		try {
-			screenWidth = params.get(DISPLAY_WIDTH).getValue();
-		} catch (Throwable t) {
-		}
-		try {
-			screenHeight = params.get(DISPLAY_HEIGHT).getValue();
-		} catch (Throwable t) {
-		}
 
 		this.videoSurfaceRx = surface;
 		surfaceHolder = ((SurfaceView) videoSurfaceRx).getHolder();
