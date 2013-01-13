@@ -138,6 +138,14 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	}
 
 	private void doStart() {
+		if (surfaceControl != null && surfaceControl.isInterrupted())
+			return;
+
+		if (screenHeight == null)
+			screenHeight = videoSurfaceRx.getHeight();
+		if (screenWidth == null)
+			screenWidth = videoSurfaceRx.getWidth();
+
 		surfaceControl = new SurfaceControl();
 		surfaceControl.start();
 		setRecording(true);
@@ -169,18 +177,13 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 				VideoFrame videoFrameProcessed;
 				int[] rgb;
-				int width, height, heighAux = 0, widthAux = 0;
+				int width, height, heightAux = 0, widthAux = 0;
 				int lastHeight = 0;
 				int lastWidth = 0;
 				double aux;
 
 				Canvas canvas = null;
 				Rect dirty = null;
-
-				// long tStart, tEnd;
-				// long i = 1;
-				// long t;
-				// long total = 0;
 
 				for (;;) {
 					if (!isRecording()) {
@@ -207,9 +210,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					}
 
 					videoFrameProcessed = (VideoFrame) packetsQueue.take();
-					// Log.d(LOG_TAG, "play frame "
-					// + calcPtsMillis(videoFrameProcessed));
-					// tStart = System.currentTimeMillis();
 
 					rgb = videoFrameProcessed.getDataFrame();
 					width = videoFrameProcessed.getWidth();
@@ -254,27 +254,24 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 								if (srcBitmap == null)
 									Log.w(LOG_TAG, "srcBitmap is null");
 							}
-							if (width > screenWidth || height > screenHeight) {
-								float aspectScreen = (float) screenWidth
-										/ (float) screenHeight;
-								float aspectFrame = (float) width
-										/ (float) height;
-								if (aspectFrame > aspectScreen) {
-									aux = (double) screenWidth / (double) width;
-									heighAux = (int) (aux * height);
-									widthAux = screenWidth;
-								} else {
-									aux = (double) screenHeight
-											/ (double) height;
-									heighAux = screenHeight;
-									widthAux = (int) (aux * width);
-								}
-							} else {
+
+							float aspectScreen = (float) screenWidth
+									/ (float) screenHeight;
+							float aspectFrame = (float) width / (float) height;
+							if (aspectFrame > aspectScreen) {
+								aux = (double) screenWidth / (double) width;
+								heightAux = (int) (aux * height);
 								widthAux = screenWidth;
-								heighAux = screenHeight;
+							} else {
+								aux = (double) screenHeight / (double) height;
+								heightAux = screenHeight;
+								widthAux = (int) (aux * width);
 							}
 
-							dirty = new Rect(0, 0, widthAux, heighAux);
+							int left = (videoSurfaceRx.getWidth() - widthAux) / 2;
+							int top = (videoSurfaceRx.getHeight() - heightAux) / 2;
+							dirty = new Rect(left, top, widthAux + left,
+									heightAux + top);
 
 							lastHeight = height;
 						}
@@ -290,15 +287,9 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 						Log.e(LOG_TAG, "Exception: " + e.toString(), e);
 					}
 
-					// tEnd = System.currentTimeMillis();
-					// t = tEnd - tStart;
-					// total += t;
-					// Log.d(LOG_TAG, "frame played in: " + t + " ms. Average: "
-					// + (total / i));
 					VideoFeeder feeder = feedersQueue.poll();
 					if (feeder != null)
 						feeder.freeVideoFrameRx(videoFrameProcessed);
-					// i++;
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "SurfaceControl stopped");
@@ -336,7 +327,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 			vf = (VideoFrame) packetsQueue.peek();
 		}
 	}
-	
+
 	@Override
 	public Object getInfo(AndroidInfo info) throws MsControlException {
 		if (AndroidInfo.FRAME_RX_WIDTH.equals(info)) {
@@ -356,10 +347,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		Log.d(LOG_TAG, "Surface created");
-		if (screenHeight == null)
-			screenHeight = videoSurfaceRx.getHeight();
-		if (screenWidth == null)
-			screenWidth = videoSurfaceRx.getWidth();
 
 		doStart();
 	}
