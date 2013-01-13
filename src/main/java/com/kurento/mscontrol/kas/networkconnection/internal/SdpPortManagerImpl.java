@@ -38,10 +38,10 @@ public class SdpPortManagerImpl implements SdpPortManager {
 
 	private static Log log = LogFactory.getLog(SdpPortManagerImpl.class);
 
-	private NetworkConnectionBase resource;
+	private final NetworkConnectionBase resource;
 	private SessionSpec userAgentSDP; // this is remote session spec
 
-	private Set<MediaEventListener<SdpPortManagerEvent>> mediaListenerList =
+	private final Set<MediaEventListener<SdpPortManagerEvent>> mediaListenerList =
 				new CopyOnWriteArraySet<MediaEventListener<SdpPortManagerEvent>>();
 
 	private SessionSpec localSpec;
@@ -147,7 +147,7 @@ public class SdpPortManagerImpl implements SdpPortManager {
 				}
 			}
 		} catch (MsControlException e) {
-			log.error(e.getMessage(), e);
+			log.error(e.getMessage());
 			event = new SdpPortManagerEventImpl(null, this, null,
 					SdpPortManagerEvent.RESOURCE_UNAVAILABLE);
 		} catch (Throwable t) {

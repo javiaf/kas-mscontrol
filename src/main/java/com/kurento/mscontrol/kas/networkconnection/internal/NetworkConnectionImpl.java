@@ -55,10 +55,10 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	public final static String LOG_TAG = "NW";
 
-	private MediaSessionConfig mediaSessionConfig;
+	private final MediaSessionConfig mediaSessionConfig;
 
-	private ArrayList<AudioProfile> audioProfiles;
-	private ArrayList<VideoProfile> videoProfiles;
+	private final ArrayList<AudioProfile> audioProfiles;
+	private final ArrayList<VideoProfile> videoProfiles;
 
 	private SessionSpec localSessionSpec;
 	private SessionSpec remoteSessionSpec;
@@ -73,9 +73,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	private VideoJoinableStreamImpl videoJoinableStreamImpl;
 	private AudioJoinableStreamImpl audioJoinableStreamImpl;
 
-	private int maxAudioBitrate;
+	private final int maxAudioBitrate;
 
-	private static boolean freePorts = true;
+	private static NetworkConnectionImpl portHandler = null;
 
 	@Override
 	public void setLocalSessionSpec(SessionSpec arg0) {
@@ -133,7 +133,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			audioJoinableStreamImpl.stop();
 
 		synchronized (NetworkConnectionImpl.class) {
-			freePorts = true;
+			if (this == portHandler)
+				portHandler = null;
 		}
 	}
 
@@ -164,9 +165,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	}
 
 	private class StunThread extends Thread {
-		private String stunHost;
-		private int stunPort;
-		private Exchanger<DiscoveryInfo> e;
+		private final String stunHost;
+		private final int stunPort;
+		private final Exchanger<DiscoveryInfo> e;
 
 		public StunThread(String stunHost, int stunPort,
 				Exchanger<DiscoveryInfo> e) {
@@ -215,7 +216,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	private void takeMediaResources() throws MsControlException {
 		synchronized (NetworkConnectionImpl.class) {
-			if (!freePorts)
+			if (portHandler != null)
 				throw new MsControlException(
 						"Can not take ports, they are in use.");
 
@@ -300,7 +301,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 			if (audioPort < 0 || videoPort < 0)
 				throw new MsControlException("Can not take ports.");
 
-			freePorts = false;
+			portHandler = this;
 		}
 	}
 
@@ -512,8 +513,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		Integer height = null;
 		if (mediaSessionConfig.getFrameWidth() != null
 				&& mediaSessionConfig.getFrameHeight() != null) {
-			width = Math.abs((int) mediaSessionConfig.getFrameWidth());
-			height = Math.abs((int) mediaSessionConfig.getFrameHeight());
+			width = Math.abs(mediaSessionConfig.getFrameWidth());
+			height = Math.abs(mediaSessionConfig.getFrameHeight());
 		}
 
 		for (VideoProfile vp : videoProfiles) {
