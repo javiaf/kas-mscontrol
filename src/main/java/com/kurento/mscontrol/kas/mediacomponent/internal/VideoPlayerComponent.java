@@ -220,6 +220,10 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 			height = sizes.get(sizeSelected).height;
 		}
 		parameters.setPreviewSize(width, height);
+
+		if (VERSION.SDK_INT >= 14)
+			parameters
+					.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
 		mCamera.setParameters(parameters);
 
 		String cad = "";
