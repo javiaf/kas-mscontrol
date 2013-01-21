@@ -221,12 +221,23 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		}
 		parameters.setPreviewSize(width, height);
 
-		// Only support to back camera (cameraFacing == 0)
-		if (VERSION.SDK_INT >= 14 && cameraFacing == 0) {
+		mCamera.setParameters(parameters);
+
+		if (VERSION.SDK_INT >= 14) {
+			String oldMode = parameters.getFocusMode();
 			parameters
 					.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+			try {
+				mCamera.setParameters(parameters);
+			} catch (Throwable t) {
+				Log.d(LOG_TAG,
+						"Error setting continuous autofocus: " + t.getMessage()
+								+ "\nChanging it back to: " + oldMode);
+				parameters.setFocusMode(oldMode);
+				mCamera.setParameters(parameters);
+			}
 		}
-		mCamera.setParameters(parameters);
+
 
 		String cad = "";
 		for (int i = 0; i < sizes.size(); i++)
