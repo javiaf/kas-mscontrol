@@ -383,6 +383,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		SurfaceView mSurfaceView;
 		SurfaceHolder mHolder;
 
+		@SuppressWarnings("deprecation")
 		Preview(Context context) {
 			super(context);
 
@@ -392,6 +393,9 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 			addView(mSurfaceView);
 
 			mHolder = mSurfaceView.getHolder();
+
+			if (VERSION.SDK_INT < 11)
+				mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		}
 
 		public SurfaceHolder getHolder() {
