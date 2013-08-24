@@ -130,8 +130,8 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 				AudioSamples audioSamplesProcessed;
 				for (;;) {
 					if (!isRecording()) {
-						synchronized (controll) {
-							controll.wait();
+						synchronized (control) {
+							control.wait();
 						}
 						continue;
 					}
@@ -145,8 +145,8 @@ public class AudioRecorderComponent extends RecorderComponentBase implements
 						long ptsMillis = calcPtsMillis(packetsQueue.peek());
 						if ((ptsMillis == -1)
 								|| (ptsMillis + getEstimatedStartTime() > (targetTime))) {
-							synchronized (controll) {
-								controll.wait();
+							synchronized (control) {
+								control.wait();
 							}
 							continue;
 						}

@@ -175,8 +175,8 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 			for (;;) {
 				try {
 					if (!isRecording()) {
-						synchronized (controll) {
-							controll.wait();
+						synchronized (control) {
+							control.wait();
 						}
 						continue;
 					}
@@ -190,8 +190,8 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 						long ptsMillis = calcPtsMillis(packetsQueue.peek());
 						if ((ptsMillis == -1)
 								|| (ptsMillis + getEstimatedStartTime() > targetTime)) {
-							synchronized (controll) {
-								controll.wait();
+							synchronized (control) {
+								control.wait();
 							}
 							continue;
 						}

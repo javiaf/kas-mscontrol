@@ -19,7 +19,7 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	private long n = 0;
 
 	private boolean isRecording = false;
-	protected final Object controll = new Object();
+	protected final Object control = new Object();
 
 	private int maxDelay;
 	private boolean syncMediaStreams;
@@ -119,8 +119,8 @@ public abstract class RecorderComponentBase extends MediaComponentBase
 	public void startRecord(long time) {
 		setTargetTime(time);
 		setRecording(true);
-		synchronized (controll) {
-			controll.notify();
+		synchronized (control) {
+			control.notify();
 		}
 	}
 
