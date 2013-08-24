@@ -156,14 +156,14 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 	private class SurfaceControl extends Thread {
 		@Override
 		public void run() {
-			Bitmap srcBitmap = null;
-			Canvas canvas = null;
-			Rect dirty = null;
-
 			if (surfaceHolder == null) {
 				Log.e(LOG_TAG, "mSurfaceReceive is null");
 				return;
 			}
+
+			Bitmap srcBitmap = null;
+			Canvas canvas = null;
+			Rect dirty = null;
 
 			VideoFrame videoFrameProcessed;
 			int[] rgb;
@@ -223,35 +223,32 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					continue;
 				}
 
-				if (height != lastHeight) {
-					if (width != lastWidth || srcBitmap == null) {
-						if (srcBitmap != null)
-							srcBitmap.recycle();
-						try {
-							Log.d(LOG_TAG, "create bitmap");
-							srcBitmap = Bitmap.createBitmap(width, height,
-									Bitmap.Config.ARGB_8888);
-							Log.d(LOG_TAG, "create bitmap OK");
-						} catch (OutOfMemoryError e) {
-							surfaceHolder.unlockCanvasAndPost(canvas);
-							e.printStackTrace();
-							Log.w(LOG_TAG,
-									"Can not create bitmap. No such memory.");
-							Log.w(LOG_TAG, e);
+				if (height != lastHeight || width != lastWidth
+						|| srcBitmap == null) {
+					if (srcBitmap != null) {
+						srcBitmap.recycle();
+					}
 
-							VideoFeeder feeder = feedersQueue.poll();
-							if (feeder != null) {
-								feeder.freeVideoFrameRx(videoFrameProcessed);
-							}
+					try {
+						Log.d(LOG_TAG, "create bitmap");
+						srcBitmap = Bitmap.createBitmap(width, height,
+								Bitmap.Config.ARGB_8888);
+						Log.d(LOG_TAG, "create bitmap OK");
+					} catch (OutOfMemoryError e) {
+						surfaceHolder.unlockCanvasAndPost(canvas);
+						Log.w(LOG_TAG,
+								"Can not create bitmap. No such memory.", e);
 
-							continue;
+						VideoFeeder feeder = feedersQueue.poll();
+						if (feeder != null) {
+							feeder.freeVideoFrameRx(videoFrameProcessed);
 						}
-						lastWidth = width;
-						if (srcBitmap == null)
-							Log.w(LOG_TAG, "srcBitmap is null");
+
+						continue;
 					}
 
 					dirty = calcDirtyRect(width, height);
+					lastWidth = width;
 					lastHeight = height;
 				}
 
