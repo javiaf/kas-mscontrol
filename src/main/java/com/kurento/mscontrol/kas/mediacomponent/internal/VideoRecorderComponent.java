@@ -210,76 +210,81 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					if (rgb == null || rgb.length == 0)
 						continue;
 
-					try {
-						canvas = surfaceHolder.lockCanvas(null);
-						if (canvas == null) {
-							surfaceHolder.unlockCanvasAndPost(canvas);
-							continue;
+					canvas = surfaceHolder.lockCanvas();
+					if (canvas == null) {
+						Log.e(LOG_TAG, "canvas is null");
+						VideoFeeder feeder = feedersQueue.poll();
+						if (feeder != null) {
+							feeder.freeVideoFrameRx(videoFrameProcessed);
 						}
 
-						if (height != lastHeight) {
-							if (width != lastWidth || srcBitmap == null) {
-								if (srcBitmap != null)
-									srcBitmap.recycle();
-								try {
-									Log.d(LOG_TAG, "create bitmap");
-									srcBitmap = Bitmap.createBitmap(width,
-											height, Bitmap.Config.ARGB_8888);
-									Log.d(LOG_TAG, "create bitmap OK");
-								} catch (OutOfMemoryError e) {
-									e.printStackTrace();
-									Log.w(LOG_TAG,
-											"Can not create bitmap. No such memory.");
-									Log.w(LOG_TAG, e);
-									surfaceHolder.unlockCanvasAndPost(canvas);
-
-									VideoFeeder feeder = feedersQueue.poll();
-									if (feeder != null)
-										feeder.freeVideoFrameRx(videoFrameProcessed);
-
-									continue;
-								}
-								lastWidth = width;
-								if (srcBitmap == null)
-									Log.w(LOG_TAG, "srcBitmap is null");
-							}
-
-							float aspectScreen = (float) screenWidth
-									/ (float) screenHeight;
-							float aspectFrame = (float) width / (float) height;
-							if (aspectFrame > aspectScreen) {
-								aux = (double) screenWidth / (double) width;
-								heightAux = (int) (aux * height);
-								widthAux = screenWidth;
-							} else {
-								aux = (double) screenHeight / (double) height;
-								heightAux = screenHeight;
-								widthAux = (int) (aux * width);
-							}
-
-							int left = (videoSurfaceRx.getWidth() - widthAux) / 2;
-							int top = (videoSurfaceRx.getHeight() - heightAux) / 2;
-							dirty = new Rect(left, top, widthAux + left,
-									heightAux + top);
-
-							lastHeight = height;
-						}
-						if (srcBitmap != null) {
-							srcBitmap.setPixels(rgb, 0, width, 0, 0, width,
-									height);
-							canvas.drawBitmap(srcBitmap, null, dirty, null);
-						}
-						surfaceHolder.unlockCanvasAndPost(canvas);
-					} catch (IllegalArgumentException e) {
-						Log.e(LOG_TAG, "Exception: " + e.toString(), e);
+						continue;
 					}
 
+					if (height != lastHeight) {
+						if (width != lastWidth || srcBitmap == null) {
+							if (srcBitmap != null)
+								srcBitmap.recycle();
+							try {
+								Log.d(LOG_TAG, "create bitmap");
+								srcBitmap = Bitmap.createBitmap(width, height,
+										Bitmap.Config.ARGB_8888);
+								Log.d(LOG_TAG, "create bitmap OK");
+							} catch (OutOfMemoryError e) {
+								surfaceHolder.unlockCanvasAndPost(canvas);
+								e.printStackTrace();
+								Log.w(LOG_TAG,
+										"Can not create bitmap. No such memory.");
+								Log.w(LOG_TAG, e);
+
+								VideoFeeder feeder = feedersQueue.poll();
+								if (feeder != null) {
+									feeder.freeVideoFrameRx(videoFrameProcessed);
+								}
+
+								continue;
+							}
+							lastWidth = width;
+							if (srcBitmap == null)
+								Log.w(LOG_TAG, "srcBitmap is null");
+						}
+
+						float aspectScreen = (float) screenWidth
+								/ (float) screenHeight;
+						float aspectFrame = (float) width / (float) height;
+						if (aspectFrame > aspectScreen) {
+							aux = (double) screenWidth / (double) width;
+							heightAux = (int) (aux * height);
+							widthAux = screenWidth;
+						} else {
+							aux = (double) screenHeight / (double) height;
+							heightAux = screenHeight;
+							widthAux = (int) (aux * width);
+						}
+
+						int left = (videoSurfaceRx.getWidth() - widthAux) / 2;
+						int top = (videoSurfaceRx.getHeight() - heightAux) / 2;
+						dirty = new Rect(left, top, widthAux + left, heightAux
+								+ top);
+
+						lastHeight = height;
+					}
+
+					if (srcBitmap != null) {
+						srcBitmap.setPixels(rgb, 0, width, 0, 0, width, height);
+						canvas.drawBitmap(srcBitmap, null, dirty, null);
+					}
+
+					surfaceHolder.unlockCanvasAndPost(canvas);
+
 					VideoFeeder feeder = feedersQueue.poll();
-					if (feeder != null)
+					if (feeder != null) {
 						feeder.freeVideoFrameRx(videoFrameProcessed);
+					}
 				}
 			} catch (InterruptedException e) {
 				Log.d(LOG_TAG, "SurfaceControl stopped");
+			} finally {
 				if (srcBitmap != null) {
 					srcBitmap.recycle();
 					srcBitmap = null;
@@ -335,7 +340,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
 			Log.d(LOG_TAG, "Surface created");
-
 			doStart();
 		}
 
