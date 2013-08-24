@@ -48,8 +48,8 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 	private RecorderController controller;
 
-	private Integer screenWidth;
-	private Integer screenHeight;
+	private int screenWidth = 0;
+	private int screenHeight = 0;
 	private int widthInfo = 0;
 	private int heightInfo = 0;
 	private SurfaceControl surfaceControl = null;
@@ -130,10 +130,8 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		if (surfaceControl != null && surfaceControl.isInterrupted())
 			return;
 
-		if (screenHeight == null)
-			screenHeight = videoSurfaceRx.getHeight();
-		if (screenWidth == null)
-			screenWidth = videoSurfaceRx.getWidth();
+		screenWidth = videoSurfaceRx.getWidth();
+		screenHeight = videoSurfaceRx.getHeight();
 
 		surfaceControl = new SurfaceControl();
 		surfaceControl.start();
