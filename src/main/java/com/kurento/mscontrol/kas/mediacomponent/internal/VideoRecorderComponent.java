@@ -95,7 +95,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		this.videoSurfaceRx = new SurfaceView(surfaceContainer.getContext());
 		videoSurfaceRx.setLayoutParams(new LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-		surfaceContainer.addView(videoSurfaceRx);
 		surfaceHolder = videoSurfaceRx.getHolder();
 
 		this.packetsQueue = new LinkedBlockingQueue<RxPacket>();
@@ -123,6 +122,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 			doStart();
 		}
 
+		surfaceContainer.addView(videoSurfaceRx);
 		surfaceHolder.addCallback(surfaceHolderCallback);
 	}
 
@@ -149,6 +149,8 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 			surfaceControl.interrupt();
 
 		flushAll();
+		surfaceHolder.removeCallback(surfaceHolderCallback);
+		surfaceContainer.removeView(videoSurfaceRx);
 	}
 
 	private class SurfaceControl extends Thread {
