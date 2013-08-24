@@ -157,24 +157,23 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		@Override
 		public void run() {
 			Bitmap srcBitmap = null;
+			Canvas canvas = null;
+			Rect dirty = null;
 
-			try {
-				if (surfaceHolder == null) {
-					Log.e(LOG_TAG, "mSurfaceReceive is null");
-					return;
-				}
+			if (surfaceHolder == null) {
+				Log.e(LOG_TAG, "mSurfaceReceive is null");
+				return;
+			}
 
-				VideoFrame videoFrameProcessed;
-				int[] rgb;
-				int width, height, heightAux = 0, widthAux = 0;
-				int lastHeight = 0;
-				int lastWidth = 0;
-				double aux;
+			VideoFrame videoFrameProcessed;
+			int[] rgb;
+			int width, height, heightAux = 0, widthAux = 0;
+			int lastHeight = 0;
+			int lastWidth = 0;
+			double aux;
 
-				Canvas canvas = null;
-				Rect dirty = null;
-
-				for (;;) {
+			for (;;) {
+				try {
 					if (!isRecording()) {
 						synchronized (controll) {
 							controll.wait();
@@ -199,98 +198,99 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 					}
 
 					videoFrameProcessed = (VideoFrame) packetsQueue.take();
+				} catch (InterruptedException e) {
+					Log.d(LOG_TAG, "SurfaceControl stopped");
+					break;
+				}
 
-					rgb = videoFrameProcessed.getDataFrame();
-					width = videoFrameProcessed.getWidth();
-					height = videoFrameProcessed.getHeight();
+				rgb = videoFrameProcessed.getDataFrame();
+				width = videoFrameProcessed.getWidth();
+				height = videoFrameProcessed.getHeight();
 
-					setWidthInfo(width);
-					setHeightInfo(height);
+				setWidthInfo(width);
+				setHeightInfo(height);
 
-					if (rgb == null || rgb.length == 0)
-						continue;
+				if (rgb == null || rgb.length == 0)
+					continue;
 
-					canvas = surfaceHolder.lockCanvas();
-					if (canvas == null) {
-						Log.e(LOG_TAG, "canvas is null");
-						VideoFeeder feeder = feedersQueue.poll();
-						if (feeder != null) {
-							feeder.freeVideoFrameRx(videoFrameProcessed);
-						}
-
-						continue;
-					}
-
-					if (height != lastHeight) {
-						if (width != lastWidth || srcBitmap == null) {
-							if (srcBitmap != null)
-								srcBitmap.recycle();
-							try {
-								Log.d(LOG_TAG, "create bitmap");
-								srcBitmap = Bitmap.createBitmap(width, height,
-										Bitmap.Config.ARGB_8888);
-								Log.d(LOG_TAG, "create bitmap OK");
-							} catch (OutOfMemoryError e) {
-								surfaceHolder.unlockCanvasAndPost(canvas);
-								e.printStackTrace();
-								Log.w(LOG_TAG,
-										"Can not create bitmap. No such memory.");
-								Log.w(LOG_TAG, e);
-
-								VideoFeeder feeder = feedersQueue.poll();
-								if (feeder != null) {
-									feeder.freeVideoFrameRx(videoFrameProcessed);
-								}
-
-								continue;
-							}
-							lastWidth = width;
-							if (srcBitmap == null)
-								Log.w(LOG_TAG, "srcBitmap is null");
-						}
-
-						float aspectScreen = (float) screenWidth
-								/ (float) screenHeight;
-						float aspectFrame = (float) width / (float) height;
-						if (aspectFrame > aspectScreen) {
-							aux = (double) screenWidth / (double) width;
-							heightAux = (int) (aux * height);
-							widthAux = screenWidth;
-						} else {
-							aux = (double) screenHeight / (double) height;
-							heightAux = screenHeight;
-							widthAux = (int) (aux * width);
-						}
-
-						int left = (videoSurfaceRx.getWidth() - widthAux) / 2;
-						int top = (videoSurfaceRx.getHeight() - heightAux) / 2;
-						dirty = new Rect(left, top, widthAux + left, heightAux
-								+ top);
-
-						lastHeight = height;
-					}
-
-					if (srcBitmap != null) {
-						srcBitmap.setPixels(rgb, 0, width, 0, 0, width, height);
-						canvas.drawBitmap(srcBitmap, null, dirty, null);
-					}
-
-					surfaceHolder.unlockCanvasAndPost(canvas);
-
+				canvas = surfaceHolder.lockCanvas();
+				if (canvas == null) {
+					Log.e(LOG_TAG, "canvas is null");
 					VideoFeeder feeder = feedersQueue.poll();
 					if (feeder != null) {
 						feeder.freeVideoFrameRx(videoFrameProcessed);
 					}
+
+					continue;
 				}
-			} catch (InterruptedException e) {
-				Log.d(LOG_TAG, "SurfaceControl stopped");
-			} finally {
+
+				if (height != lastHeight) {
+					if (width != lastWidth || srcBitmap == null) {
+						if (srcBitmap != null)
+							srcBitmap.recycle();
+						try {
+							Log.d(LOG_TAG, "create bitmap");
+							srcBitmap = Bitmap.createBitmap(width, height,
+									Bitmap.Config.ARGB_8888);
+							Log.d(LOG_TAG, "create bitmap OK");
+						} catch (OutOfMemoryError e) {
+							surfaceHolder.unlockCanvasAndPost(canvas);
+							e.printStackTrace();
+							Log.w(LOG_TAG,
+									"Can not create bitmap. No such memory.");
+							Log.w(LOG_TAG, e);
+
+							VideoFeeder feeder = feedersQueue.poll();
+							if (feeder != null) {
+								feeder.freeVideoFrameRx(videoFrameProcessed);
+							}
+
+							continue;
+						}
+						lastWidth = width;
+						if (srcBitmap == null)
+							Log.w(LOG_TAG, "srcBitmap is null");
+					}
+
+					float aspectScreen = (float) screenWidth
+							/ (float) screenHeight;
+					float aspectFrame = (float) width / (float) height;
+					if (aspectFrame > aspectScreen) {
+						aux = (double) screenWidth / (double) width;
+						heightAux = (int) (aux * height);
+						widthAux = screenWidth;
+					} else {
+						aux = (double) screenHeight / (double) height;
+						heightAux = screenHeight;
+						widthAux = (int) (aux * width);
+					}
+
+					int left = (videoSurfaceRx.getWidth() - widthAux) / 2;
+					int top = (videoSurfaceRx.getHeight() - heightAux) / 2;
+					dirty = new Rect(left, top, widthAux + left, heightAux
+							+ top);
+
+					lastHeight = height;
+				}
+
 				if (srcBitmap != null) {
-					srcBitmap.recycle();
-					srcBitmap = null;
+					srcBitmap.setPixels(rgb, 0, width, 0, 0, width, height);
+					canvas.drawBitmap(srcBitmap, null, dirty, null);
 				}
-				System.gc();
+
+				surfaceHolder.unlockCanvasAndPost(canvas);
+
+				VideoFeeder feeder = feedersQueue.poll();
+				if (feeder != null) {
+					feeder.freeVideoFrameRx(videoFrameProcessed);
+				}
 			}
+
+			if (srcBitmap != null) {
+				srcBitmap.recycle();
+				srcBitmap = null;
+			}
+			System.gc();
 		}
 	}
 
