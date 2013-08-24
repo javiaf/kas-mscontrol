@@ -167,10 +167,9 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 			VideoFrame videoFrameProcessed;
 			int[] rgb;
-			int width, height, heightAux = 0, widthAux = 0;
+			int width, height;
 			int lastHeight = 0;
 			int lastWidth = 0;
-			double aux;
 
 			for (;;) {
 				try {
@@ -252,24 +251,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 							Log.w(LOG_TAG, "srcBitmap is null");
 					}
 
-					float aspectScreen = (float) screenWidth
-							/ (float) screenHeight;
-					float aspectFrame = (float) width / (float) height;
-					if (aspectFrame > aspectScreen) {
-						aux = (double) screenWidth / (double) width;
-						heightAux = (int) (aux * height);
-						widthAux = screenWidth;
-					} else {
-						aux = (double) screenHeight / (double) height;
-						heightAux = screenHeight;
-						widthAux = (int) (aux * width);
-					}
-
-					int left = (videoSurfaceRx.getWidth() - widthAux) / 2;
-					int top = (videoSurfaceRx.getHeight() - heightAux) / 2;
-					dirty = new Rect(left, top, widthAux + left, heightAux
-							+ top);
-
+					dirty = calcDirtyRect(width, height);
 					lastHeight = height;
 				}
 
@@ -291,6 +273,29 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 				srcBitmap = null;
 			}
 			System.gc();
+		}
+
+		private Rect calcDirtyRect(int width, int height) {
+			int heightAux, widthAux;
+			double aux;
+
+			float aspectScreen = (float) screenWidth / (float) screenHeight;
+			float aspectFrame = (float) width / (float) height;
+
+			if (aspectFrame > aspectScreen) {
+				aux = (double) screenWidth / (double) width;
+				heightAux = (int) (aux * height);
+				widthAux = screenWidth;
+			} else {
+				aux = (double) screenHeight / (double) height;
+				heightAux = screenHeight;
+				widthAux = (int) (aux * width);
+			}
+
+			int left = (videoSurfaceRx.getWidth() - widthAux) / 2;
+			int top = (videoSurfaceRx.getHeight() - heightAux) / 2;
+
+			return new Rect(left, top, widthAux + left, heightAux + top);
 		}
 	}
 
