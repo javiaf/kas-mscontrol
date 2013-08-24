@@ -38,7 +38,7 @@ import com.kurento.mscontrol.commons.MsControlException;
 import com.kurento.mscontrol.kas.mediacomponent.AndroidInfo;
 
 public class VideoRecorderComponent extends RecorderComponentBase implements
-		Recorder, VideoRecorder, Callback {
+		Recorder, VideoRecorder {
 
 	private static final String LOG_TAG = "VideoRecorderComponent";
 
@@ -88,8 +88,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		if (params == null)
 			throw new MsControlException("Parameters are NULL");
 
-		surfaceContainer = params.get(VIEW_SURFACE_CONTAINER)
-				.getValue();
+		surfaceContainer = params.get(VIEW_SURFACE_CONTAINER).getValue();
 		if (surfaceContainer == null)
 			throw new MsControlException(
 					"Params must have VideoRecorderComponent.VIEW_SURFACE param");
@@ -124,7 +123,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 			doStart();
 		}
 
-		surfaceHolder.addCallback(this);
+		surfaceHolder.addCallback(surfaceHolderCallback);
 	}
 
 	private void doStart() {
@@ -326,23 +325,25 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 			return super.getInfo(info);
 	}
 
-	@Override
-	public void surfaceDestroyed(SurfaceHolder holder) {
-		Log.d(LOG_TAG, "Surface destroyed");
-		stop();
-	}
+	private final Callback surfaceHolderCallback = new Callback() {
+		@Override
+		public void surfaceDestroyed(SurfaceHolder holder) {
+			Log.d(LOG_TAG, "Surface destroyed");
+			stop();
+		}
 
-	@Override
-	public void surfaceCreated(SurfaceHolder holder) {
-		Log.d(LOG_TAG, "Surface created");
+		@Override
+		public void surfaceCreated(SurfaceHolder holder) {
+			Log.d(LOG_TAG, "Surface created");
 
-		doStart();
-	}
+			doStart();
+		}
 
-	@Override
-	public void surfaceChanged(SurfaceHolder holder, int format, int width,
-			int height) {
-		Log.d(LOG_TAG, "Surface changed");
-	}
+		@Override
+		public void surfaceChanged(SurfaceHolder holder, int format, int width,
+				int height) {
+			Log.d(LOG_TAG, "Surface changed");
+		}
+	};
 
 }
