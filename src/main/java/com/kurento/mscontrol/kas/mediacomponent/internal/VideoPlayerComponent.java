@@ -285,8 +285,8 @@ public class VideoPlayerComponent extends MediaComponentBase {
 			}
 		} else if (AndroidAction.CAMERA_TAKEPHOTO.equals(action)) {
 			if (mCamera != null) {
-				mCamera.takePicture(myShutterCallback, myPictureCallback_RAW,
-						myPictureCallback_JPG);
+				mCamera.takePicture(myShutterCallback, myPictureCallbackRAW,
+						myPictureCallbackJPG);
 			}
 		} else if (AndroidAction.CAMERA_FLASH_ON.equals(action)) {
 			try {
@@ -312,21 +312,21 @@ public class VideoPlayerComponent extends MediaComponentBase {
 			throw new MsControlException("Action not supported");
 	}
 
-	ShutterCallback myShutterCallback = new ShutterCallback() {
+	private final ShutterCallback myShutterCallback = new ShutterCallback() {
 		@Override
 		public void onShutter() {
 
 		}
 	};
 
-	PictureCallback myPictureCallback_RAW = new PictureCallback() {
+	private final PictureCallback myPictureCallbackRAW = new PictureCallback() {
 		@Override
 		public void onPictureTaken(byte[] arg0, Camera arg1) {
 
 		}
 	};
 
-	PictureCallback myPictureCallback_JPG = new PictureCallback() {
+	private final PictureCallback myPictureCallbackJPG = new PictureCallback() {
 		@Override
 		public void onPictureTaken(byte[] arg0, Camera arg1) {
 			Log.d(LOG_TAG, "onPictureTaken");
@@ -334,7 +334,7 @@ public class VideoPlayerComponent extends MediaComponentBase {
 		}
 	};
 
-	class Preview extends ViewGroup {
+	private final class Preview extends ViewGroup {
 		private final String TAG = "Preview";
 
 		SurfaceView mSurfaceView;
