@@ -56,8 +56,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 	private Camera mCamera;
 	private int cameraFacing = 0;
 
-	private final int screenOrientation;
-
 	private final Preview preview;
 	private final ViewGroup parent;
 	private boolean isReleased;
@@ -97,7 +95,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 				LayoutParams.MATCH_PARENT));
 		parent.addView(preview);
 
-		screenOrientation = params.get(DISPLAY_ORIENTATION).getValue() * 90;
 		isReleased = false;
 		try {
 			cameraFacing = params.get(CAMERA_FACING).getValue();
