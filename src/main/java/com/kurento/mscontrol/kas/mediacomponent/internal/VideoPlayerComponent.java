@@ -43,8 +43,7 @@ import com.kurento.mscontrol.kas.join.VideoJoinableStreamImpl;
 import com.kurento.mscontrol.kas.mediacomponent.AndroidAction;
 import com.kurento.mscontrol.kas.mediacomponent.AndroidInfo;
 
-public class VideoPlayerComponent extends MediaComponentBase implements
-		PreviewCallback {
+public class VideoPlayerComponent extends MediaComponentBase {
 
 	private static final String LOG_TAG = "VideoPlayer";
 
@@ -134,21 +133,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		}
 
 		return cam;
-	}
-
-	@Override
-	public void onPreviewFrame(byte[] data, Camera camera) {
-		if (data == null)
-			return;
-		long time = System.currentTimeMillis();
-		try {
-			for (Joinable j : getJoinees(Direction.SEND))
-				if (j instanceof VideoSink)
-					((VideoSink) j).putVideoFrame(data, width, height, time);
-		} catch (MsControlException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	@Override
@@ -250,7 +234,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		}
 		try {
 			mCamera.startPreview();
-			mCamera.setPreviewCallback(this);
+			mCamera.setPreviewCallback(previewCallback);
 			preview.requestLayout();
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -435,6 +419,23 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		public void surfaceChanged(SurfaceHolder holder, int format, int width,
 				int height) {
 			Log.d(LOG_TAG, "Surface changed");
+		}
+	};
+
+	private final PreviewCallback previewCallback = new PreviewCallback() {
+		@Override
+		public void onPreviewFrame(byte[] data, Camera camera) {
+			if (data == null)
+				return;
+			long time = System.currentTimeMillis();
+			try {
+				for (Joinable j : getJoinees(Direction.SEND))
+					if (j instanceof VideoSink)
+						((VideoSink) j)
+								.putVideoFrame(data, width, height, time);
+			} catch (MsControlException e) {
+				Log.w(LOG_TAG, "Error getting joinees", e);
+			}
 		}
 	};
 
