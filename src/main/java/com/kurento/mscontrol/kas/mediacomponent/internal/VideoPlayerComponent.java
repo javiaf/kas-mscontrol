@@ -57,7 +57,7 @@ public class VideoPlayerComponent extends MediaComponentBase {
 
 	private final Preview preview;
 	private final ViewGroup parent;
-	private boolean isReleased;
+	private boolean isReleased = false;
 
 	private synchronized int getWidthInfo() {
 		return widthInfo;
@@ -94,7 +94,6 @@ public class VideoPlayerComponent extends MediaComponentBase {
 				LayoutParams.MATCH_PARENT));
 		parent.addView(preview);
 
-		isReleased = false;
 		try {
 			cameraFacing = params.get(CAMERA_FACING).getValue();
 		} catch (Exception e) {
@@ -157,7 +156,7 @@ public class VideoPlayerComponent extends MediaComponentBase {
 		preview.getHolder().addCallback(surfaceHolderCallback);
 	}
 
-	private void startCamera(SurfaceHolder surfHold) {
+	private synchronized void startCamera(SurfaceHolder surfHold) {
 		Log.d(LOG_TAG, "start camera");
 		if (isReleased)
 			return;
@@ -243,7 +242,7 @@ public class VideoPlayerComponent extends MediaComponentBase {
 	}
 
 	@Override
-	public void stop() {
+	public synchronized void stop() {
 		if (mCamera != null) {
 			mCamera.setPreviewCallback(null);
 			mCamera.stopPreview();
@@ -253,7 +252,7 @@ public class VideoPlayerComponent extends MediaComponentBase {
 	}
 
 	@Override
-	public void release() {
+	public synchronized void release() {
 		stop();
 		isReleased = true;
 		if (preview.getHolder() != null)
