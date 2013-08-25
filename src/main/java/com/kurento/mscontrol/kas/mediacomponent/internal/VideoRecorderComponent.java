@@ -173,30 +173,10 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 
 			for (;;) {
 				try {
-					if (!isRecording()) {
-						synchronized (control) {
-							control.wait();
-						}
+					videoFrameProcessed = takeVideoFrame();
+					if (videoFrameProcessed == null) {
 						continue;
 					}
-
-					if (packetsQueue.isEmpty())
-						Log.v(LOG_TAG,
-								"Jitter buffer underflow: Video RX frames queue is empty");
-
-					long targetTime = getTargetTime();
-					if (targetTime != -1) {
-						long ptsMillis = calcPtsMillis(packetsQueue.peek());
-						if ((ptsMillis == -1)
-								|| (ptsMillis + getEstimatedStartTime() > targetTime)) {
-							synchronized (control) {
-								control.wait();
-							}
-							continue;
-						}
-					}
-
-					videoFrameProcessed = (VideoFrame) packetsQueue.take();
 				} catch (InterruptedException e) {
 					Log.d(LOG_TAG, "SurfaceControl stopped");
 					break;
@@ -270,6 +250,34 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 				srcBitmap = null;
 			}
 			System.gc();
+		}
+
+		private VideoFrame takeVideoFrame() throws InterruptedException {
+			if (!isRecording()) {
+				synchronized (control) {
+					control.wait();
+				}
+				return null;
+			}
+
+			if (packetsQueue.isEmpty()) {
+				Log.v(LOG_TAG,
+						"Jitter buffer underflow: Video RX frames queue is empty");
+			}
+
+			long targetTime = getTargetTime();
+			if (targetTime != -1) {
+				long ptsMillis = calcPtsMillis(packetsQueue.peek());
+				if ((ptsMillis == -1)
+						|| (ptsMillis + getEstimatedStartTime() > targetTime)) {
+					synchronized (control) {
+						control.wait();
+					}
+					return null;
+				}
+			}
+
+			return (VideoFrame) packetsQueue.take();
 		}
 
 		private Rect calcDirtyRect(int width, int height) {
