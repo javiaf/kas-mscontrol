@@ -44,7 +44,7 @@ import com.kurento.mscontrol.kas.mediacomponent.AndroidAction;
 import com.kurento.mscontrol.kas.mediacomponent.AndroidInfo;
 
 public class VideoPlayerComponent extends MediaComponentBase implements
-		SurfaceHolder.Callback, PreviewCallback {
+		PreviewCallback {
 
 	private static final String LOG_TAG = "VideoPlayer";
 
@@ -170,7 +170,7 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 			startCamera(preview.getHolder());
 		}
 
-		preview.getHolder().addCallback(this);
+		preview.getHolder().addCallback(surfaceHolderCallback);
 	}
 
 	private void startCamera(SurfaceHolder surfHold) {
@@ -235,7 +235,6 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 			}
 		}
 
-
 		String cad = "";
 		for (int i = 0; i < sizes.size(); i++)
 			cad += sizes.get(i).width + " x " + sizes.get(i).height + "\n";
@@ -274,32 +273,9 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 		stop();
 		isReleased = true;
 		if (preview.getHolder() != null)
-			preview.getHolder().removeCallback(this);
+			preview.getHolder().removeCallback(surfaceHolderCallback);
 
 		parent.removeView(preview);
-	}
-
-	@Override
-	public void surfaceDestroyed(SurfaceHolder holder) {
-		Log.d(LOG_TAG, "Surface destroyed");
-		if (mCamera != null) {
-			mCamera.setPreviewCallback(null);
-			mCamera.stopPreview();
-			mCamera.release();
-			mCamera = null;
-		}
-	}
-
-	@Override
-	public void surfaceCreated(SurfaceHolder holder) {
-		Log.d(LOG_TAG, "Surface created");
-		startCamera(preview.getHolder());
-	}
-
-	@Override
-	public void surfaceChanged(SurfaceHolder holder, int format, int width,
-			int height) {
-		Log.d(LOG_TAG, "Surface changed");
 	}
 
 	@Override
@@ -436,5 +412,30 @@ public class VideoPlayerComponent extends MediaComponentBase implements
 			}
 		}
 	}
+
+	private final SurfaceHolder.Callback surfaceHolderCallback = new SurfaceHolder.Callback() {
+		@Override
+		public void surfaceDestroyed(SurfaceHolder holder) {
+			Log.d(LOG_TAG, "Surface destroyed");
+			if (mCamera != null) {
+				mCamera.setPreviewCallback(null);
+				mCamera.stopPreview();
+				mCamera.release();
+				mCamera = null;
+			}
+		}
+
+		@Override
+		public void surfaceCreated(SurfaceHolder holder) {
+			Log.d(LOG_TAG, "Surface created");
+			startCamera(preview.getHolder());
+		}
+
+		@Override
+		public void surfaceChanged(SurfaceHolder holder, int format, int width,
+				int height) {
+			Log.d(LOG_TAG, "Surface changed");
+		}
+	};
 
 }
