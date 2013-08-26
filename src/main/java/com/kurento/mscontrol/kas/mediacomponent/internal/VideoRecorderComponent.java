@@ -89,10 +89,12 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 			throw new MsControlException("Parameters are NULL");
 
 		surfaceContainer = params.get(VIEW_SURFACE_CONTAINER).getValue();
-		if (surfaceContainer == null)
+		if (surfaceContainer == null) {
 			throw new MsControlException(
 					"Params must have VideoRecorderComponent.VIEW_SURFACE param");
-		this.videoSurfaceRx = new SurfaceView(surfaceContainer.getContext());
+		}
+
+		videoSurfaceRx = new SurfaceView(surfaceContainer.getContext());
 		videoSurfaceRx.setLayoutParams(new LayoutParams(
 				LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		surfaceHolder = videoSurfaceRx.getHolder();
