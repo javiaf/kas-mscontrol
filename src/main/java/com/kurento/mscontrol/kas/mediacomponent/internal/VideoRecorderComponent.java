@@ -346,7 +346,6 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		@Override
 		public void surfaceDestroyed(SurfaceHolder holder) {
 			Log.d(LOG_TAG, "Surface destroyed");
-			stop();
 		}
 
 		@Override
