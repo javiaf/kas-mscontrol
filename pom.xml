@@ -17,8 +17,8 @@
 		<maven.compiler.target>1.6</maven.compiler.target>
 
 		<!-- Dependency versions -->
-		<kc-mscontrol.version>2.0.2</kc-mscontrol.version>
-		<kas-media.version>1.2.2</kas-media.version>
+		<kc-mscontrol.version>2.0.3-SNAPSHOT</kc-mscontrol.version>
+		<kas-media.version>1.2.3-SNAPSHOT</kas-media.version>
 		<kc-mediaspec-conversor.version>1.0.2</kc-mediaspec-conversor.version>
 		<kc-stun.version>1.0.2</kc-stun.version>
 
