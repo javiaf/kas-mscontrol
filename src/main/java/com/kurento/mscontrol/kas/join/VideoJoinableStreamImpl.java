@@ -75,6 +75,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	private static final double MEMORY_TO_USE = 0.6;
 	private long maxMemory;
 	private long memoryUsed;
+	private boolean hwCodecs;
 
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
@@ -84,10 +85,11 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			StreamType type, ArrayList<VideoProfile> videoProfiles,
 			SessionSpec remoteSessionSpec, SessionSpec localSessionSpec,
 			MediaPort videoMediaPort, Integer maxDelayRx,
-			Integer framesQueueSize) {
+			Integer framesQueueSize, boolean hwCodecs) {
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
 		this.videoMediaPort = videoMediaPort;
+		this.hwCodecs = hwCodecs;
 
 		if (framesQueueSize != null && framesQueueSize > QUEUE_SIZE)
 			QUEUE_SIZE = framesQueueSize;
@@ -120,17 +122,28 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			if ((com.kurento.mediaspec.Direction.SENDRECV.equals(videoMode) || com.kurento.mediaspec.Direction.RECVONLY
 					.equals(videoMode)) && videoProfile != null) {
 				if (remoteRTPInfo.getVideoBandwidth() > 0)
-					videoProfile.setBitRate(remoteRTPInfo.getVideoBandwidth()*1000);
+					videoProfile
+							.setBitRate(remoteRTPInfo.getVideoBandwidth() * 1000);
 				VideoInfoTx videoInfo = new VideoInfoTx(videoProfile);
 				videoInfo.setOut(remoteRTPInfo.getVideoRTPDir());
 				videoInfo.setPayloadType(remoteRTPInfo.getVideoPayloadType());
-				int ret = MediaTx.initVideo(videoInfo, this.videoMediaPort);
+				int ret;
+				if (this.hwCodecs) {
+					ret = MediaTx.initVideoJava(videoInfo, this.videoMediaPort);
+				} else {
+					ret = MediaTx.initVideo(videoInfo, this.videoMediaPort);
+				}
 				if (ret < 0) {
 					Log.e(LOG_TAG, "Error in initVideo");
-					MediaTx.finishVideo();
+					if (this.hwCodecs) {
+						MediaTx.finishVideoJava();
+					} else {
+						MediaTx.finishVideo();
+					}
+
 				}
 				this.videoProfile = videoProfile;
-				this.videoTxThread = new VideoTxThread();
+				this.videoTxThread = new VideoTxThread(this.hwCodecs);
 				this.videoTxThread.start();
 			}
 
@@ -250,7 +263,11 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 		}
 
 		Log.d(LOG_TAG, "finishVideo");
-		MediaTx.finishVideo();
+		if (this.hwCodecs) {
+			MediaTx.finishVideoJava();
+		} else {
+			MediaTx.finishVideo();
+		}
 		Log.d(LOG_TAG, "stopVideoRx");
 		MediaRx.stopVideoRx();
 
@@ -259,14 +276,25 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 		System.gc();
 
-		Log.i(LOG_TAG, "freeMemory: " + Runtime.getRuntime().freeMemory()/1024
-				+ "KB maxMemory: " + Runtime.getRuntime().maxMemory()/1024
-				+ "KB totalMemory: " + Runtime.getRuntime().totalMemory()/1024 + "KB");
+		Log.i(LOG_TAG, "freeMemory: " + Runtime.getRuntime().freeMemory()
+				/ 1024 + "KB maxMemory: " + Runtime.getRuntime().maxMemory()
+				/ 1024 + "KB totalMemory: "
+				+ Runtime.getRuntime().totalMemory() / 1024 + "KB");
 	}
 
 	private class VideoTxThread extends Thread {
 		private static final int ALPHA = 7;
-//		private static final int BETA = 10;
+		private boolean hwCodecs;
+
+		public VideoTxThread(boolean hwCodecs) {
+			this.hwCodecs = hwCodecs;
+		}
+
+		public VideoTxThread() {
+			this.hwCodecs = false;
+		}
+
+		// private static final int BETA = 10;
 
 		private long caclFrameTime(long frameTime, long it, long lastFrameTime) {
 			long currentFrameTime;
@@ -280,7 +308,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 		@Override
 		public void run() {
-			int fr = videoProfile.getFrameRateNum() / videoProfile.getFrameRateDen();
+			int fr = videoProfile.getFrameRateNum()
+					/ videoProfile.getFrameRateDen();
 			int tr = 1000 / fr;
 			VideoFrameTx frameProcessed;
 
@@ -319,7 +348,12 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 					frameProcessed.setTime(timePts);
 
 					long t1 = System.currentTimeMillis();
-					int nBytes = MediaTx.putVideoFrame(frameProcessed);
+					int nBytes;
+					if (this.hwCodecs) {
+						nBytes = MediaTx.putVideoFrameJava(frameProcessed);
+					} else {
+						nBytes = MediaTx.putVideoFrame(frameProcessed);
+					}
 					tEncTotal += System.currentTimeMillis() - t1;
 					computeOutBytes(nBytes);
 					nBytesTotal += nBytes;

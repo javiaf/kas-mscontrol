@@ -69,6 +69,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	private static int audioPort = -1;
 	private static MediaPort videoMediaPort = null;
 	private static MediaPort audioMediaPort = null;
+	private boolean hwCodecs = false;
 
 	private VideoJoinableStreamImpl videoJoinableStreamImpl;
 	private AudioJoinableStreamImpl audioJoinableStreamImpl;
@@ -87,6 +88,14 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	public void setRemoteSessionSpec(SessionSpec arg0) {
 		this.remoteSessionSpec = arg0;
 		Log.d(LOG_TAG, "remoteSessionSpec:\n" + remoteSessionSpec);
+	}
+
+	public void useHwCodecs(boolean hwCodecs) {
+		this.hwCodecs = hwCodecs;
+		if (this.hwCodecs)
+			Log.d(LOG_TAG, "Hardware encoding enabled");
+		else
+			Log.d(LOG_TAG, "Hardware encoding disabled");
 	}
 
 	public NetworkConnectionImpl(MediaSessionConfig mediaSessionConfig)
@@ -121,7 +130,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				StreamType.video, this.videoProfiles, remoteSessionSpec,
 				localSessionSpec, videoMediaPort,
 				mediaSessionConfig.getMaxDelay(),
-				mediaSessionConfig.getFramesQueueSize());
+				mediaSessionConfig.getFramesQueueSize(), this.hwCodecs);
 		this.streams[1] = videoJoinableStreamImpl;
 	}
 
@@ -139,8 +148,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	}
 
 	private PayloadRtp addPayload(MediaSpec mediaSpec, int id,
-			String codecName,
-			int clockRate, int bitrate, Integer channels) {
+			String codecName, int clockRate, int bitrate, Integer channels) {
 		Log.d(LOG_TAG, "addPayload: " + codecName);
 
 		PayloadRtp payRtp = new PayloadRtp(id, codecName, clockRate);
@@ -159,8 +167,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	}
 
 	private PayloadRtp addPayload(MediaSpec mediaSpec, int id,
-			String codecName,
-			int clockRate, int bitrate) {
+			String codecName, int clockRate, int bitrate) {
 		return addPayload(mediaSpec, id, codecName, clockRate, bitrate, null);
 	}
 
@@ -396,8 +403,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 					addPayload(audioMedia, 14, "MPA", 90000, bitrate);
 				else if (AudioProfile.AMR.equals(ap)) {
 					PayloadRtp payRtp = addPayload(audioMedia, payloadId,
-							"AMR", 8000,
-							bitrate, 1);
+							"AMR", 8000, bitrate, 1);
 					payRtp.putToExtraParams("octet-align", "1");
 				} else if (AudioProfile.PCMU.equals(ap))
 					addPayload(audioMedia, 0, "PCMU", 8000, bitrate);
@@ -450,8 +456,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	private ArrayList<AudioProfile> getAudioProfiles(
 			MediaSessionConfig mediaSessionConfig) {
-		List<AudioCodecType> audioCodecs = mediaSessionConfig
-				.getAudioCodecs();
+		List<AudioCodecType> audioCodecs = mediaSessionConfig.getAudioCodecs();
 
 		ArrayList<AudioProfile> audioProfiles = new ArrayList<AudioProfile>(0);
 
@@ -476,8 +481,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 
 	private ArrayList<VideoProfile> getVideoProfiles(
 			MediaSessionConfig mediaSessionConfig, int maxAudioBitrate) {
-		List<VideoCodecType> videoCodecs = mediaSessionConfig
-				.getVideoCodecs();
+		List<VideoCodecType> videoCodecs = mediaSessionConfig.getVideoCodecs();
 		NetIF netIF = mediaSessionConfig.getNetIF();
 
 		ArrayList<VideoProfile> videoProfiles = new ArrayList<VideoProfile>(0);
@@ -539,8 +543,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	}
 
 	@Override
-	public long getBitrate(StreamType streamType,
-			Direction direction) {
+	public long getBitrate(StreamType streamType, Direction direction) {
 		if (StreamType.video.equals(streamType)
 				&& videoJoinableStreamImpl != null) {
 			if (Direction.SEND.equals(direction))
