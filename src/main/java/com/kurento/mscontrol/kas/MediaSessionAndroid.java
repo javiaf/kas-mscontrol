@@ -104,7 +104,12 @@ public interface MediaSessionAndroid extends MediaSession {
 	 */
 	public static final Parameter<List<VideoCodecType>> VIDEO_CODECS = new Parameter<List<VideoCodecType>>(
 			"VIDEO_CODECS");
-
+	
+	/**
+	 * Boolean to specify if hardware encoding is enabled (true) or not (false).
+	 */
+	public static final Parameter<Boolean> HARDWARE_CODECS = new Parameter<Boolean>(
+			"HARDWARE_CODECS");
 	/**
 	 * PortRange to indicate local port interval to select a video port.
 	 */

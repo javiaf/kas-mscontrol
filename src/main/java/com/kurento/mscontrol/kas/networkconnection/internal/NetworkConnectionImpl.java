@@ -112,6 +112,8 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		videoProfiles = getVideoProfiles(this.mediaSessionConfig,
 				maxAudioBitrate);
 		publicAddress = getLocalAddress();
+		if (this.mediaSessionConfig.getHwCodecs() != null)
+			useHwCodecs(this.mediaSessionConfig.getHwCodecs());
 	}
 
 	@Override

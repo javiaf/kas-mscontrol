@@ -149,6 +149,11 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		if (videoCodecsValue != null)
 			videoCodecs = videoCodecsValue.getValue();
 
+		Boolean hwCodecs = null;
+		Value<Boolean> hwCodecsValue = params.get(HARDWARE_CODECS);
+		if (hwCodecsValue != null)
+			hwCodecs = hwCodecsValue.getValue();
+
 		PortRange videoPortRange = null;
 		Value<PortRange> videoPortRangeValue = params
 				.get(VIDEO_LOCAL_PORT_RANGE);
@@ -189,7 +194,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		return new MediaSessionConfig(netIF, localAddress, maxBW, maxDelay,
 				mediaTypeModes, audioCodecs, audioPortRange, videoCodecs,
 				videoPortRange, frameWidth, frameHeight, maxFrameRate, gopSize,
-				framesQueueSize, syncMediaStreams, stunHost, stunPort);
+				framesQueueSize, syncMediaStreams, stunHost, stunPort, hwCodecs);
 	}
 
 	@Override
