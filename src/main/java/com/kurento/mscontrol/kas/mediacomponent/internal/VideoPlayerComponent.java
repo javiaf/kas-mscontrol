@@ -87,7 +87,7 @@ public class VideoPlayerComponent extends MediaComponentBase {
 		parent = params.get(PREVIEW_SURFACE_CONTAINER).getValue();
 		if (parent == null)
 			throw new MsControlException(
-					"Params must have VideoPlayerComponent.PREVIEW_SURFACE param");
+					"Params must have VideoPlayerComponent.PREVIEW_SURFACE_CONTAINER param");
 
 		preview = new Preview(parent.getContext());
 		preview.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,

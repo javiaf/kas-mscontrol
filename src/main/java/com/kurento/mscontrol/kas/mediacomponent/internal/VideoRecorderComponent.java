@@ -91,7 +91,7 @@ public class VideoRecorderComponent extends RecorderComponentBase implements
 		surfaceContainer = params.get(VIEW_SURFACE_CONTAINER).getValue();
 		if (surfaceContainer == null) {
 			throw new MsControlException(
-					"Params must have VideoRecorderComponent.VIEW_SURFACE param");
+					"Params must have VideoRecorderComponent.VIEW_SURFACE_CONTAINER param");
 		}
 
 		videoSurfaceRx = new SurfaceView(surfaceContainer.getContext());
