@@ -76,6 +76,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	private long maxMemory;
 	private long memoryUsed;
 	private boolean hwCodecs;
+	private boolean hwDecoder;
 
 	public VideoProfile getVideoProfile() {
 		return videoProfile;
@@ -85,11 +86,13 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			StreamType type, ArrayList<VideoProfile> videoProfiles,
 			SessionSpec remoteSessionSpec, SessionSpec localSessionSpec,
 			MediaPort videoMediaPort, Integer maxDelayRx,
-			Integer framesQueueSize, boolean hwCodecs) {
+			Integer framesQueueSize, boolean hwCodecs, boolean hwDecoder) {
+
 		super(container, type);
 		this.localSessionSpec = localSessionSpec;
 		this.videoMediaPort = videoMediaPort;
 		this.hwCodecs = hwCodecs;
+		this.hwDecoder = hwDecoder;
 
 		if (framesQueueSize != null && framesQueueSize > QUEUE_SIZE)
 			QUEUE_SIZE = framesQueueSize;
@@ -130,6 +133,7 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 				int ret;
 				if (this.hwCodecs) {
 					ret = MediaTx.initVideoJava(videoInfo, this.videoMediaPort);
+
 				} else {
 					ret = MediaTx.initVideo(videoInfo, this.videoMediaPort);
 				}
@@ -149,7 +153,8 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 
 			if ((com.kurento.mediaspec.Direction.SENDRECV.equals(videoMode) || com.kurento.mediaspec.Direction.SENDONLY
 					.equals(videoMode))) {
-				this.videoRxThread = new VideoRxThread(this, maxDelayRx);
+				this.videoRxThread = new VideoRxThread(this, maxDelayRx,
+						this.hwDecoder);
 				this.videoRxThread.start();
 			}
 		}
@@ -391,10 +396,12 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 	private class VideoRxThread extends Thread {
 		private VideoRx videoRx;
 		private int maxDelayRx;
+		private boolean hwDecoder;
 
-		public VideoRxThread(VideoRx videoRx, int maxDelayRx) {
+		public VideoRxThread(VideoRx videoRx, int maxDelayRx, boolean hwDecoder) {
 			this.videoRx = videoRx;
 			this.maxDelayRx = maxDelayRx;
+			this.hwDecoder = hwDecoder;
 		}
 
 		@Override
@@ -404,8 +411,13 @@ public class VideoJoinableStreamImpl extends JoinableStreamBase implements
 			if (!s.getMedias().isEmpty()) {
 				try {
 					String sdpVideo = SdpConversor.sessionSpec2Sdp(s);
-					MediaRx.startVideoRx(videoMediaPort, sdpVideo, maxDelayRx,
-							this.videoRx);
+					if (this.hwDecoder) {
+						MediaRx.startVideoRxJava(videoMediaPort, sdpVideo,
+								maxDelayRx, this.videoRx);
+					} else {
+						MediaRx.startVideoRx(videoMediaPort, sdpVideo,
+								maxDelayRx, this.videoRx);
+					}
 				} catch (SdpException e) {
 					Log.e(LOG_TAG, "Could not start video rx " + e.toString());
 				}

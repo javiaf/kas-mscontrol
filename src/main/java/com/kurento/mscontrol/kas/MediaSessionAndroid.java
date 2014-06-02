@@ -154,6 +154,8 @@ public interface MediaSessionAndroid extends MediaSession {
 	public static final Parameter<Boolean> SYNCHRONIZE_MEDIA_STREAMS = new Parameter<Boolean>(
 			"SYNCHRONIZE_MEDIA_STREAMS");
 
+	public static final Parameter<Boolean> HARDWARE_DECODER = new Parameter<Boolean>("HARDWARE_DECODER");
+
 	/**
 	 * Create a MediaComponentAndroid.
 	 * 

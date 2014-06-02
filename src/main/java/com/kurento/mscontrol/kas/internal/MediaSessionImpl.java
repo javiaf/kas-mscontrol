@@ -50,6 +50,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 	private MediaSessionConfig mediaSessionConfig;
 
 	public MediaSessionImpl(Parameters params) throws MsControlException {
+
 		this.mediaSessionConfig = getMediaSessionconfigFromParams(params);
 	}
 
@@ -62,6 +63,7 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 	@Override
 	public NetworkConnection createNetworkConnection()
 			throws MsControlException {
+
 		return new NetworkConnectionImpl(mediaSessionConfig);
 	}
 
@@ -153,7 +155,10 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		Value<Boolean> hwCodecsValue = params.get(HARDWARE_CODECS);
 		if (hwCodecsValue != null)
 			hwCodecs = hwCodecsValue.getValue();
-
+		Boolean hwDecoder = null;
+		Value<Boolean> hwDecoderValue = params.get(HARDWARE_DECODER);
+		if (hwDecoderValue != null)
+			hwDecoder = hwDecoderValue.getValue();
 		PortRange videoPortRange = null;
 		Value<PortRange> videoPortRangeValue = params
 				.get(VIDEO_LOCAL_PORT_RANGE);
@@ -194,7 +199,8 @@ public class MediaSessionImpl implements MediaSessionAndroid {
 		return new MediaSessionConfig(netIF, localAddress, maxBW, maxDelay,
 				mediaTypeModes, audioCodecs, audioPortRange, videoCodecs,
 				videoPortRange, frameWidth, frameHeight, maxFrameRate, gopSize,
-				framesQueueSize, syncMediaStreams, stunHost, stunPort, hwCodecs);
+				framesQueueSize, syncMediaStreams, stunHost, stunPort,
+				hwCodecs, hwDecoder);
 	}
 
 	@Override

@@ -70,14 +70,15 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 	private static MediaPort videoMediaPort = null;
 	private static MediaPort audioMediaPort = null;
 	private boolean hwCodecs = false;
-
+	private boolean hwDecoder = false;
 	private VideoJoinableStreamImpl videoJoinableStreamImpl;
 	private AudioJoinableStreamImpl audioJoinableStreamImpl;
 
 	private final int maxAudioBitrate;
 
-	private static NetworkConnectionImpl portHandler = null;
 
+
+	private static NetworkConnectionImpl portHandler = null;
 	@Override
 	public void setLocalSessionSpec(SessionSpec arg0) {
 		this.localSessionSpec = arg0;
@@ -97,6 +98,14 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		else
 			Log.d(LOG_TAG, "Hardware encoding disabled");
 	}
+	
+	public void useHwDecoder(boolean hwDecoder) {
+		this.hwDecoder = hwDecoder;
+		if (this.hwCodecs)
+			Log.d(LOG_TAG, "Hardware decoder enabled");
+		else
+			Log.d(LOG_TAG, "Hardware decoder disabled");
+	}
 
 	public NetworkConnectionImpl(MediaSessionConfig mediaSessionConfig)
 			throws MsControlException {
@@ -114,6 +123,9 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 		publicAddress = getLocalAddress();
 		if (this.mediaSessionConfig.getHwCodecs() != null)
 			useHwCodecs(this.mediaSessionConfig.getHwCodecs());
+		
+		if (this.mediaSessionConfig.getHwDecoder() != null)
+			useHwDecoder(this.mediaSessionConfig.getHwDecoder());
 	}
 
 	@Override
@@ -132,7 +144,7 @@ public class NetworkConnectionImpl extends NetworkConnectionBase {
 				StreamType.video, this.videoProfiles, remoteSessionSpec,
 				localSessionSpec, videoMediaPort,
 				mediaSessionConfig.getMaxDelay(),
-				mediaSessionConfig.getFramesQueueSize(), this.hwCodecs);
+				mediaSessionConfig.getFramesQueueSize(), this.hwCodecs, this.hwDecoder);
 		this.streams[1] = videoJoinableStreamImpl;
 	}
 

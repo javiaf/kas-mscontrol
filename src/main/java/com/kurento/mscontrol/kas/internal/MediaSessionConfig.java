@@ -54,6 +54,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 
 	private Boolean syncMediaStreams;
 	private Boolean hwCodecs;
+	private Boolean hwDecoder;
 
 	public String getStunHost() {
 		return stunHost;
@@ -127,6 +128,10 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 		return hwCodecs;
 	}	
 
+	public Boolean getHwDecoder() {
+		return hwDecoder;
+	}
+	
 	protected MediaSessionConfig(NetIF netIF, InetAddress localAddress,
 			Integer maxBW, Integer maxDelay,
 			Map<MediaType, Direction> mediaTypeModes,
@@ -134,7 +139,7 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 			List<VideoCodecType> videoCodecs, PortRange videoPortRange,
 			Integer frameWidth, Integer frameHeight, Integer maxFrameRate,
 			Integer gopSize, Integer framesQueueSize, Boolean syncMediaStreams,
-			String stunHost, Integer stunPort, Boolean hwCodecs) {
+			String stunHost, Integer stunPort, Boolean hwCodecs, Boolean hwDecoder) {
 
 		this.stunHost = stunHost;
 		this.stunPort = stunPort;
@@ -158,6 +163,9 @@ public class MediaSessionConfig implements Configuration<MediaSession> {
 
 		this.syncMediaStreams = syncMediaStreams;
 		this.hwCodecs = hwCodecs;
+		this.hwDecoder = hwDecoder;
 	}
+
+
 
 }
